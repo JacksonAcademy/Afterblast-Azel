@@ -133,13 +133,13 @@ public class PlayerManager : NetworkBehaviour
     }
     private IEnumerator RespawnCoroutine(Vector3 position)
     {
+        HideModel();
         print("REspawning player");
         transform.position = position;
-        Hide();
         GameObject effect = Instantiate(spawnEffect, transform.position, Quaternion.identity);
         Destroy(effect, 10);
         yield return new WaitForSeconds(spawnInDelay);
-        Show();
+        ShowModel();
     }
     public void Hide()
     {
@@ -157,7 +157,7 @@ public class PlayerManager : NetworkBehaviour
     public void ShowModel()
     {
         model.SetActive(true);
-        gameUI.SetActive(true);
+        gameUI.SetActive(!Owner.IsLocalClient);
         playerMovement.canMove = true;
         nameText.gameObject.SetActive(!Owner.IsLocalClient);
         playerShoot.enabled = true;

@@ -34,7 +34,7 @@ public enum MoveState
     Sliding = 128,
     Aiming = 256
 }
-public struct MoveData : IReplicateData
+public struct ReplicateData : IReplicateData
 {
     public MoveState moveStates;
     public float Horizontal;
@@ -42,8 +42,10 @@ public struct MoveData : IReplicateData
     public float XRotation;
     public float YRotation;
     public Vector3 Forward, Right;
-    public MoveData(float horizontal, float vertical, float xrotation, float yrotation, Vector3 right, Vector3 forward, MoveState eoveState)
+    public string PlayerName;
+    public ReplicateData(float horizontal, float vertical, float xrotation, float yrotation, Vector3 right, Vector3 forward, MoveState eoveState, string playerName)
     {
+        PlayerName = playerName;
         moveStates = eoveState;
         XRotation = xrotation;
         YRotation = yrotation;
@@ -132,6 +134,7 @@ public class PlayerMovement : NetworkBehaviour
     private float _verticalVelocity, _nextAllowedJumpTime, _nextAllowedSlideTime, slopeAngle;
 
     public PlayerAnimator playerAnimator;
+    public PlayerManager playerManager;
     private void Awake()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -154,6 +157,7 @@ public class PlayerMovement : NetworkBehaviour
         _crouching = false;
         if (!replaying)
         {
+            jumpParticles.Play();
             _jumpInput = false;
             _nextAllowedJumpTime = Time.time + _jumpReload;
 
@@ -200,7 +204,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         if (!canMove)
         {
-            _characterController.enabled = false;           
+            _characterController.enabled = false;
             return;
         }
         else
@@ -278,15 +282,15 @@ public class PlayerMovement : NetworkBehaviour
         if (!canMove)
             return;
 
-        Move(BuildMoveData());
+        RunInputs(BuildMoveData());
         CreateReconcile();
     }
     public override void CreateReconcile()
     {
         ReconcileData rd = new ReconcileData(transform.position, _verticalVelocity, _slideForce, _slideDirection, _sliding, _grounded);
-        Reconciliation(rd);
+        ReconcileState(rd);
     }
-    private MoveData BuildMoveData()
+    private ReplicateData BuildMoveData()
     {
         if (!base.IsOwner)
             return default;
@@ -311,7 +315,7 @@ public class PlayerMovement : NetworkBehaviour
 
         Vector3 right = _cameraPivot.right;
         Vector3 forward = transform.forward;
-        MoveData md = new MoveData(horizontal, vertical, mouseX,mouseY, right, forward, moveStates);
+        ReplicateData md = new ReplicateData(horizontal, vertical, mouseX,mouseY, right, forward, moveStates, playerManager.playerName);
         moveStates = MoveState.None;
         _jumpInput = false;
         _slidingInput = false;
@@ -359,8 +363,9 @@ public class PlayerMovement : NetworkBehaviour
 
         _slideForce = Mathf.Clamp(_slideForce, 0, 100);
     }
+
     [Replicate]
-    private void Move(MoveData md, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable)
+    private void RunInputs(ReplicateData md, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable)
     {
         Vector3 moveForces = Vector3.zero;
 
@@ -391,7 +396,6 @@ public class PlayerMovement : NetworkBehaviour
         if (jump)
         {
              Jump(state.IsReplayed());
-            jumpParticles.Play();
         }
 
         moveForces = md.Right * md.Horizontal + md.Forward * md.Vertical;
@@ -418,8 +422,8 @@ public class PlayerMovement : NetworkBehaviour
             _slideForce -= _slideAirFriction * delta;
             _slideForce = Mathf.Clamp(_slideForce, 0, 100);
         }
-
-        if (!IsOwner)
+        print("Running Input for: " + md.PlayerName);
+        if (/*!base.IsOwner*/!state.IsReplayed())
         {
            transform.eulerAngles = new Vector3(0, md.XRotation, 0);
            _cameraPivot.localEulerAngles = new Vector3(md.YRotation, 0, 0);
@@ -428,13 +432,13 @@ public class PlayerMovement : NetworkBehaviour
         if (_aiming)
             playerAnimator.ResetAim();
         if(_grounded && (Mathf.Abs(md.Vertical) > 0||Mathf.Abs(md.Horizontal)>0))
-        {
             runParticles.Play();
-        }
-        else
-        {
+
+        if(!_grounded)
             runParticles.Stop();
-        }
+
+        if (!_sliding)
+            slideParticles.Stop();
         moveForces += _slideDirection * _slideForce;
 
         _animator.UpdateAnimator(new Vector2(md.Horizontal, _sprinting ? 2 : md.Vertical), _verticalVelocity, _grounded, _aiming, _crouching, _sliding, delta);
@@ -443,7 +447,7 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     [Reconcile]
-    private void Reconciliation(ReconcileData rd, Channel channel = Channel.Unreliable)
+    private void ReconcileState(ReconcileData rd, Channel channel = Channel.Unreliable)
     {
         transform.position = rd.Position;
         _slideDirection = rd.SlideDirection;
