@@ -128,10 +128,10 @@ public class PlayerShoot : NetworkBehaviour
                     {
                         PopupManager.instance.SpawnDamagePopup(hitbox.transform.position + (Vector3.up * 2), damage);
                         // If the hit players health minus the dealt damage is less than zero
-                        if(hitbox.GetHealth(playerManager, -damage) <= 0)
+                        if(hitbox.GetHealth(playerManager) <= damage)
                         {
                             //Client eliminated the hit player
-                            playerManager.Elimination(hitbox.playerHealth.player);
+                            playerManager.Kill(hitbox.playerHealth.player);
                         }
                     }
 

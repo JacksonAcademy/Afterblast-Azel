@@ -68,14 +68,18 @@ public struct ReconcileData : IReconcileData
     public float SlideForce;
     public Vector3 SlideDirection;
     public bool Sliding;
+    public bool Sprinting;
+    public bool Crouching;
     public float VerticalVelocity;
     public bool Grounded;
-    public ReconcileData(Vector3 position, float verticalVelocity, float slideforce, Vector3 slideDirection, bool sliding, bool grounded)
+    public ReconcileData(Vector3 position, float verticalVelocity, float slideforce, Vector3 slideDirection, bool sliding, bool grounded, bool sprinting, bool crouching)
     {
         Position = position;
         SlideForce = slideforce;
         Sliding = sliding;
         Grounded = grounded;
+        Sprinting = sprinting;
+        Crouching = crouching;
         SlideDirection = slideDirection;
         VerticalVelocity = verticalVelocity;
         _tick = 0;
@@ -112,7 +116,6 @@ public class PlayerMovement : NetworkBehaviour
     public controllerScale slideScale;
     public float _airSlideVelocity, _initialSlideForce, _slideAirFriction, _slideGroundFriction, _minSlideForce = 3;
     private float _slideForce;
-    [HideInInspector] public bool _sliding;
     private Vector3 _slideDirection;
 
     public ParticleSystem runParticles, jumpParticles, slideParticles;
@@ -130,7 +133,7 @@ public class PlayerMovement : NetworkBehaviour
 
     private CharacterController _characterController;
     [HideInInspector] public bool _jumpInput, _sprintingInput, _crouchingInput, _aimingInput, _slidingInput, _slidePressed;
-    [HideInInspector] public bool _grounded, _ceiling, _crouching, _sprinting, _aiming;
+    [HideInInspector] public bool _grounded, _ceiling, _crouching, _sprinting, _aiming, _sliding;
     private float _verticalVelocity, _nextAllowedJumpTime, _nextAllowedSlideTime, slopeAngle;
 
     public PlayerAnimator playerAnimator;
@@ -287,7 +290,7 @@ public class PlayerMovement : NetworkBehaviour
     }
     public override void CreateReconcile()
     {
-        ReconcileData rd = new ReconcileData(transform.position, _verticalVelocity, _slideForce, _slideDirection, _sliding, _grounded);
+        ReconcileData rd = new ReconcileData(transform.position, _verticalVelocity, _slideForce, _slideDirection, _sliding, _grounded, _sprinting, _crouching);
         ReconcileState(rd);
     }
     private ReplicateData BuildMoveData()

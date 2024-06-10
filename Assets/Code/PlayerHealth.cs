@@ -33,25 +33,44 @@ public class PlayerHealth : NetworkBehaviour
         healthSlider.value = amount;
         healthSlider.maxValue = startingHealth;
     }
-    public void Death(PlayerManager playerDamaged)
+    public void Death(PlayerManager whoKilledMe)
+    {
+        Die();
+        CMDdie();
+        Respawn();
+        player.Die(whoKilledMe);
+
+    }
+    [ServerRpc]
+    public void CMDdie()
+    {
+        if (!base.IsOwner)
+            Die();
+        ObserversDie();
+    }
+    [ObserversRpc]
+    public void ObserversDie()
+    {
+        if (base.IsOwner || base.IsServerInitialized)
+            return;
+        Die();
+    }
+    public void Die()
     {
         GameObject effect = Instantiate(deathParticle, transform.position, Quaternion.identity);
         Destroy(effect, 10);
-        Respawn();
-        player.Eliminated(playerDamaged);
-
     }
     public void Respawn()
     {
         SetHealth(startingHealth);
     }
-    public void TakeDamage(int amount, PlayerManager playerDamaged)
+    public void TakeDamage(int amount, PlayerManager whoDamagedMe)
     {
         SetHealth(health - amount);
         if(health <= 0)
         {
-            playerDamaged.Elimination(player);
-            Death(playerDamaged);
+            whoDamagedMe.Kill(player);
+            Death(whoDamagedMe);
         }
     }
 }

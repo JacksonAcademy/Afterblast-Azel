@@ -28,15 +28,8 @@ public class PlayerHitbox : NetworkBehaviour
     {
         playerHealth.TakeDamage(amount, playerDamaged);
     }
-    public float GetHealth(PlayerManager whoRequested, float damage)
+    public float GetHealth(PlayerManager whoRequested)
     {
-        if(whoRequested)
-        {
-            return playerHealth.health + damage;
-        }
-        else
-        {
-            return 0;
-        }
+            return playerHealth.health;
     }
 }

@@ -43,19 +43,19 @@ public class PlayerManager : NetworkBehaviour
     {
         playerUI.SetActive(Owner.IsLocalClient);
     }
-    public void Eliminated(PlayerManager playerEliminated)
+    public void Die(PlayerManager whoKilledMe)
     {
-        StartCoroutine(EliminatedCoroutine(playerEliminated));
+        StartCoroutine(DieCoroutine(whoKilledMe));
     }
-    public void Elimination(PlayerManager playerElimination)
+    public void Kill(PlayerManager whoIKilled)
     {
-        StartCoroutine (EliminationCoroutine(playerElimination));
+        StartCoroutine (KillCoroutine(whoIKilled));
     }
-    private IEnumerator EliminatedCoroutine(PlayerManager playerEliminated)
+    private IEnumerator DieCoroutine(PlayerManager whoKilledMe)
     {
         eliminatedScreen.SetActive(true);
         Hide();
-        eliminatedByText.text = "Eliminated by " + playerEliminated.playerName;
+        eliminatedByText.text = "Eliminated by <size=150%><color=red> " + whoKilledMe.playerName;
         float seconds = 5;
         while(seconds >= 0)
         {
@@ -66,10 +66,10 @@ public class PlayerManager : NetworkBehaviour
         eliminatedScreen.SetActive(false);
         Respawn(GameManager.instance.spawnPositions[Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
     }
-    private IEnumerator EliminationCoroutine(PlayerManager playerElimination)
+    private IEnumerator KillCoroutine(PlayerManager whoIKilled)
     {
         eliminationScreen.SetActive(true);
-        eliminationText.text = "Eliminated" + playerElimination.playerName;
+        eliminationText.text = "Eliminated <size=150%><color=red>" + whoIKilled.playerName;
         yield return new WaitForSeconds(2);
         eliminationScreen.SetActive(false);
     }
