@@ -113,6 +113,8 @@ public class PlayerMovement : NetworkBehaviour
     [HideInInspector] public bool _sliding;
     private Vector3 _slideDirection;
 
+    public ParticleSystem runParticles, jumpParticles, slideParticles;
+
     [HideInInspector] MoveState moveStates;
     private Vector2 input;
 
@@ -164,7 +166,7 @@ public class PlayerMovement : NetworkBehaviour
         SetControllerScale(normalScale);
         _sliding = false;
         _slideDirection.y = 0;
-
+        slideParticles.Stop();
         if (removeVelocity)
             _slideForce = 0;
     }
@@ -369,7 +371,6 @@ public class PlayerMovement : NetworkBehaviour
 
         bool groundedChanged = false;
 
-
         SetIsGrounded(out groundedChanged);
         bool jump = md.moveStates.Contains(MoveState.Jump);
         bool ceilinged = md.moveStates.Contains(MoveState.Ceiling);
@@ -390,6 +391,7 @@ public class PlayerMovement : NetworkBehaviour
         if (jump)
         {
              Jump(state.IsReplayed());
+            jumpParticles.Play();
         }
 
         moveForces = md.Right * md.Horizontal + md.Forward * md.Vertical;
@@ -399,17 +401,13 @@ public class PlayerMovement : NetworkBehaviour
 
         if (sliding)
         {
-            print("Start Slide");
             _sliding = true;
             _slideDirection = moveForces;
             _slideForce = _initialSlideForce;
             SetControllerScale(slideScale);
-
+            slideParticles.Play();
             if (!state.IsReplayed())
-            {
                 _slidingInput = false;
-
-            }
         }
         if (_sliding)
             Slide(delta);
@@ -429,7 +427,14 @@ public class PlayerMovement : NetworkBehaviour
 
         if (_aiming)
             playerAnimator.ResetAim();
-
+        if(_grounded && (Mathf.Abs(md.Vertical) > 0||Mathf.Abs(md.Horizontal)>0))
+        {
+            runParticles.Play();
+        }
+        else
+        {
+            runParticles.Stop();
+        }
         moveForces += _slideDirection * _slideForce;
 
         _animator.UpdateAnimator(new Vector2(md.Horizontal, _sprinting ? 2 : md.Vertical), _verticalVelocity, _grounded, _aiming, _crouching, _sliding, delta);
