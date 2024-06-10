@@ -277,11 +277,13 @@ public class PlayerMovement : NetworkBehaviour
             return;
 
         Move(BuildMoveData());
- 
+        CreateReconcile();
+    }
+    public override void CreateReconcile()
+    {
         ReconcileData rd = new ReconcileData(transform.position, _verticalVelocity, _slideForce, _slideDirection, _sliding, _grounded);
         Reconciliation(rd);
     }
-
     private MoveData BuildMoveData()
     {
         if (!base.IsOwner)
