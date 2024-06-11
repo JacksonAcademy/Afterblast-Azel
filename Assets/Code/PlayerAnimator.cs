@@ -15,7 +15,8 @@ public class PlayerAnimator : NetworkBehaviour
 
     [SerializeField]
     private Animator _animator;
-    public Rig aimRig;
+    public Rig aimRig, idleRig;
+    public GameObject gun;
     private bool previousGrounded;
     private float aimTimer;
     public float aimDelay;
@@ -47,7 +48,7 @@ public class PlayerAnimator : NetworkBehaviour
     {
         aimTimer = aimDelay;
     }
-    public void UpdateAnimator(Vector2 velocity, float gravity, bool grounded, bool aim, bool crouching, bool sliding, float delta)
+    public void UpdateAnimator(Vector2 velocity, float gravity, bool grounded, bool aim, bool crouching, bool sliding, bool sprinting, float delta)
     {
         tickAnimationVelocity = velocity;
         _animator.SetBool("Grounded", grounded);
@@ -64,14 +65,27 @@ public class PlayerAnimator : NetworkBehaviour
         }
         if (!grounded)
             previousGrounded = false;
-        if (velocity.y > 1)
-            GunIdle();
+        if (!sprinting)
+        {
+            if (aimTimer > 0)
+                GunAim();
+            else
+                GunIdle();
+            idleRig.weight = 1;
+            gun.SetActive(true);
+        }
         aimTimer -= delta;
-        if (aimTimer > 0)
-            GunAim();
-        else
-            GunIdle();
+
         aimRig.weight = Mathf.Lerp(aimRig.weight, aimRigWeight, rigSmoothing * delta);
+        if (sprinting)
+        {
+            gun.SetActive(false);
+            idleRig.weight = 0;
+            aimTimer = 0;
+            aimRig.weight = 0;
+            GunIdle();
+        }
+
     }
     public void GunAim()
     {

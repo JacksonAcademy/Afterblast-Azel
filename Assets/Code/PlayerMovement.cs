@@ -444,7 +444,7 @@ public class PlayerMovement : NetworkBehaviour
             slideParticles.Stop();
         moveForces += _slideDirection * _slideForce;
 
-        _animator.UpdateAnimator(new Vector2(md.Horizontal, _sprinting ? 2 : md.Vertical), _verticalVelocity, _grounded, _aiming, _crouching, _sliding, delta);
+        _animator.UpdateAnimator(new Vector2(md.Horizontal, _sprinting ? 2 : md.Vertical), _verticalVelocity, _grounded, _aiming, _crouching, _sliding, _sprinting, delta);
 
         _characterController.Move(moveForces * delta);
     }

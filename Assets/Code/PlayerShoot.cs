@@ -29,6 +29,8 @@ public class PlayerShoot : NetworkBehaviour
     public PlayerAnimator playerAnimator;
     public PlayerMovement playerMovement;
     public PlayerManager playerManager;
+
+    public lookAt gunRecoil;
     private void Awake()
     {
         aimingFov = _camera.fieldOfView;
@@ -100,6 +102,8 @@ public class PlayerShoot : NetworkBehaviour
         GameObject muzzleFlash = Instantiate(muzzleEffect, shootPoint.position, shootPoint.rotation);
         Destroy(muzzleFlash, 1f);
         playerAnimator.ResetAim();
+
+        gunRecoil.Shoot();
         
         base.RollbackManager.Rollback(pt, RollbackPhysicsType.Physics, base.IsOwner);
         RaycastHit hit;

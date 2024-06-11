@@ -8,10 +8,19 @@ public class lookAt : MonoBehaviour
     public int maxRotate;
     public int minRotate;
 
+    public Vector3 shootOffset;
+    public AnimationCurve shootRecoil;
+    public float time;
     public void LateUpdate()
     {
         transform.LookAt(objectToLookAt);
-        transform.localEulerAngles = new Vector3(ClampAngle(transform.localEulerAngles.x, minRotate, maxRotate), 0, 0);
+        transform.localEulerAngles = new Vector3(ClampAngle(transform.localEulerAngles.x, minRotate, maxRotate), 0, 0) + shootOffset;
+        shootOffset = new Vector3(shootRecoil.Evaluate(time), 0, 0);
+        time += Time.deltaTime;
+    }
+    public void Shoot()
+    {
+        time = 0;
     }
     float ClampAngle(float angle, float from, float to)
     {

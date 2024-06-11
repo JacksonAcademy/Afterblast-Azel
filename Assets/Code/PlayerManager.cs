@@ -29,6 +29,7 @@ public class PlayerManager : NetworkBehaviour
     public Color playerColor;
 
     public TextMeshProUGUI nameText;
+    private bool isPaused = false;
     public override void OnStartNetwork()
     {
         Initialize();
@@ -42,6 +43,10 @@ public class PlayerManager : NetworkBehaviour
     public void Initialize()
     {
         playerUI.SetActive(Owner.IsLocalClient);
+        if(Owner.IsLocalClient)
+        {
+            playerUI.SetActive(true);
+        }
     }
     public void Die(PlayerManager whoKilledMe)
     {
@@ -82,6 +87,32 @@ public class PlayerManager : NetworkBehaviour
         {
             Respawn(GameManager.instance.spawnPositions[Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
         }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isPaused)
+                ResumeGame();
+            else
+                PauseGame();
+        }
+    }
+    public void PauseGame()
+    {
+        isPaused = true;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
+    public void ResumeGame()
+    {
+        isPaused = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+    public void QuitGame()
+    {
+
+        Application.Quit();
+
     }
     public void Respawn(Vector3 position)
     {
