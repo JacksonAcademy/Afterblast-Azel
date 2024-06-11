@@ -133,7 +133,7 @@ public class PlayerMovement : NetworkBehaviour
 
     private CharacterController _characterController;
     [HideInInspector] public bool _jumpInput, _sprintingInput, _crouchingInput, _aimingInput, _slidingInput, _slidePressed;
-    [HideInInspector] public bool _grounded, _ceiling, _crouching, _sprinting, _aiming, _sliding;
+    public bool _grounded, _ceiling, _crouching, _sprinting, _aiming, _sliding;
     private float _verticalVelocity, _nextAllowedJumpTime, _nextAllowedSlideTime, slopeAngle;
 
     public PlayerAnimator playerAnimator;
@@ -371,6 +371,7 @@ public class PlayerMovement : NetworkBehaviour
     private void RunInputs(ReplicateData md, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable)
     {
         Vector3 moveForces = Vector3.zero;
+        print(md.PlayerName + " X Rotation: " + md.XRotation + ". Y Rotation: " + md.YRotation);
 
         float moveRate = _sprinting ? _sprintSpeed : _walkSpeed;
         float delta = (float)base.TimeManager.TickDelta;
@@ -426,7 +427,7 @@ public class PlayerMovement : NetworkBehaviour
             _slideForce = Mathf.Clamp(_slideForce, 0, 100);
         }
         print("Running Input for: " + md.PlayerName);
-        if (/*!base.IsOwner*/!state.IsReplayed())
+        if (!base.IsOwner)
         {
            transform.eulerAngles = new Vector3(0, md.XRotation, 0);
            _cameraPivot.localEulerAngles = new Vector3(md.YRotation, 0, 0);

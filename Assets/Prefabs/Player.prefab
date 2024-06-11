@@ -214,7 +214,7 @@ MonoBehaviour:
   _networkTransform: {fileID: 0}
   _ownerInterpolation: 1
   _ownerSmoothedProperties: 5
-  _adaptiveInterpolation: 0
+  _adaptiveInterpolation: 3
   _spectatorSmoothedProperties: 5
   _spectatorInterpolation: 2
   _enableTeleport: 1
