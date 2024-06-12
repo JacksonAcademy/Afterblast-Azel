@@ -213,9 +213,9 @@ MonoBehaviour:
   _enableStateForwarding: 1
   _networkTransform: {fileID: 0}
   _ownerInterpolation: 1
-  _ownerSmoothedProperties: 5
+  _ownerSmoothedProperties: 255
   _adaptiveInterpolation: 3
-  _spectatorSmoothedProperties: 5
+  _spectatorSmoothedProperties: 255
   _spectatorInterpolation: 2
   _enableTeleport: 1
   _teleportThreshold: 3
@@ -272,6 +272,7 @@ MonoBehaviour:
   _gravityScale: 60
   _mouseSensivity: 2
   _slopeAngleMultiplier: 10
+  maxSlideAngle: 45
   _jumpReload: 0.5
   _slideReload: 0.4
   _cameraPivot: {fileID: 1465629433371861530}
@@ -309,6 +310,7 @@ MonoBehaviour:
   _sliding: 0
   playerAnimator: {fileID: 6198841281594916437}
   playerManager: {fileID: 2247663849957395728}
+  playerShoot: {fileID: 4691114520261158112}
 --- !u!114 &4691114520261158112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -356,6 +358,7 @@ MonoBehaviour:
   playerMovement: {fileID: 8357676141616578387}
   playerManager: {fileID: 2247663849957395728}
   gunRecoil: {fileID: 6673126082039803978}
+  canShoot: 0
 --- !u!114 &6198841281594916437
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -434,7 +437,7 @@ MonoBehaviour:
   playerName: Yessir
   playerKills: 15
   playerDeaths: 0
-  gameUI: {fileID: 5638950480966721720}
+  gameUI: {fileID: 2274745739847614395}
   renderers:
   - {fileID: 8935334152796554461}
   playerNumber: 0
@@ -5854,6 +5857,43 @@ MonoBehaviour:
       z: 1
     m_MaintainPositionOffset: 0
     m_MaintainRotationOffset: 0
+--- !u!1 &2274745739847614395
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 430309605678603051}
+  m_Layer: 0
+  m_Name: GameUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &430309605678603051
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2274745739847614395}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1394838152780953675}
+  - {fileID: 8080064054664181488}
+  m_Father: {fileID: 1089689415214863136}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2558583787978345326
 GameObject:
   m_ObjectHideFlags: 0
@@ -11593,7 +11633,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4857219881777791997}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -11601,11 +11641,11 @@ RectTransform:
   - {fileID: 6871050194634809505}
   - {fileID: 4048948658491339080}
   - {fileID: 8015276780670412695}
-  m_Father: {fileID: 1089689415214863136}
+  m_Father: {fileID: 430309605678603051}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 149, y: 116}
+  m_AnchoredPosition: {x: -761.00006, y: -374.33517}
   m_SizeDelta: {x: 412.4882, y: 58.3782}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &7367614897168919271
@@ -16840,8 +16880,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1394838152780953675}
-  - {fileID: 8080064054664181488}
+  - {fileID: 430309605678603051}
   - {fileID: 5534711561254417948}
   - {fileID: 6607739565085127164}
   m_Father: {fileID: 303449598114786577}
@@ -22760,7 +22799,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1089689415214863136}
+  m_Father: {fileID: 430309605678603051}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

@@ -31,6 +31,8 @@ public class PlayerShoot : NetworkBehaviour
     public PlayerManager playerManager;
 
     public lookAt gunRecoil;
+
+    [HideInInspector] public bool canShoot;
     private void Awake()
     {
         aimingFov = _camera.fieldOfView;
@@ -76,6 +78,8 @@ public class PlayerShoot : NetworkBehaviour
         if (Time.time < _nextFire)
             return;
         if (!Input.GetMouseButtonDown(0))
+            return;
+        if (!canShoot)
             return;
 
         Vector3 direction = GetDirection();
@@ -124,26 +128,31 @@ public class PlayerShoot : NetworkBehaviour
 
                 if (hit.transform.tag == "Player")
                 {
-                    PlayerHitbox hitbox = hit.transform.GetComponent<PlayerHitbox>();
-                    hitbox.playerHealth.animator.Hit();
+                    PlayerHitbox playerHit = hit.transform.GetComponent<PlayerHitbox>();
+                    playerHit.playerHealth.animator.Hit();
                     GameObject effect = Instantiate(playerHitEffect, hit.point, Quaternion.identity);
                     Destroy(effect, 2);
                     if(base.IsOwner)
                     {
-                        PopupManager.instance.SpawnDamagePopup(hitbox.transform.position + (Vector3.up * 2), damage);
+                        PopupManager.instance.SpawnDamagePopup(playerHit.transform.position + (Vector3.up * 2), damage);
                         // If the hit players health minus the dealt damage is less than zero
-                        if(hitbox.GetHealth(playerManager) <= damage)
-                        {
-                            //Client eliminated the hit player
-                            playerManager.Kill(hitbox.playerHealth.player);
-                        }
                     }
-
-
 
                     //If the server detects the shot was a hit
                     if (base.IsServerInitialized)
-                        hitbox.Damage(damage, playerManager);
+                    {                        
+                        //If the player who got shot has health minus the damage (that hasn't been sent yet) less than 0
+                        if (playerHit.GetHealth(playerManager) -damage <= 0)
+                        {
+                            //Send Elimination message to player to shot
+                            playerManager.Kill(playerManager.Owner, playerHit.playerHealth.player);
+                        }
+                        //Damage the player who got shot
+                        playerHit.Damage(playerHit.Owner, damage, playerManager);
+
+
+                    }
+
                 }
                 else if(hit.transform.tag == "Target")
                 {

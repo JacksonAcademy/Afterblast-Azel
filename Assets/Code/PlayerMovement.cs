@@ -97,7 +97,7 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField]
     private float _jumpForce = 15f;
     [SerializeField]
-    private float _walkSpeed, _sprintSpeed, _crouchSpeed, _gravityScale, _mouseSensivity, _slopeAngleMultiplier;
+    private float _walkSpeed, _sprintSpeed, _crouchSpeed, _gravityScale, _mouseSensivity, _slopeAngleMultiplier, maxSlideAngle = 45;
     [SerializeField]
     private float _jumpReload = 0.5f, _slideReload = 1;
     [SerializeField]
@@ -138,6 +138,7 @@ public class PlayerMovement : NetworkBehaviour
 
     public PlayerAnimator playerAnimator;
     public PlayerManager playerManager;
+    public PlayerShoot playerShoot;
     private void Awake()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -355,6 +356,7 @@ public class PlayerMovement : NetworkBehaviour
     public void Slide(float deltaTime)
     {
         _slideForce -= _slideGroundFriction * deltaTime;
+        _slideDirection.y = Mathf.Clamp(_slideDirection.y, -10, 10);
 
         if (_slideForce < _minSlideForce)
             StopSlide(true);
@@ -371,7 +373,6 @@ public class PlayerMovement : NetworkBehaviour
     private void RunInputs(ReplicateData md, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable)
     {
         Vector3 moveForces = Vector3.zero;
-        print(md.PlayerName + " X Rotation: " + md.XRotation + ". Y Rotation: " + md.YRotation);
 
         float moveRate = _sprinting ? _sprintSpeed : _walkSpeed;
         float delta = (float)base.TimeManager.TickDelta;
@@ -426,11 +427,18 @@ public class PlayerMovement : NetworkBehaviour
             _slideForce -= _slideAirFriction * delta;
             _slideForce = Mathf.Clamp(_slideForce, 0, 100);
         }
-        print("Running Input for: " + md.PlayerName);
-        if (!base.IsOwner)
+       if(_sprinting)
         {
-           transform.eulerAngles = new Vector3(0, md.XRotation, 0);
-           _cameraPivot.localEulerAngles = new Vector3(md.YRotation, 0, 0);
+            playerShoot.canShoot = false;
+        }
+        else
+        {
+            playerShoot.canShoot = true;
+        }
+        if (base.IsServerInitialized || !base.IsOwner)
+        {
+            transform.eulerAngles = new Vector3(0, md.XRotation, 0);
+            _cameraPivot.localEulerAngles = new Vector3(md.YRotation, 0, 0);
         }
 
         if (_aiming)
@@ -469,6 +477,7 @@ public class PlayerMovement : NetworkBehaviour
         RaycastHit groundHit;
         _grounded = Physics.Raycast(groundPosition.position, Vector3.down, out groundHit, 1, groundLayer);
         slopeAngle = Vector3.Dot(groundHit.normal, transform.forward);
+        slopeAngle = Mathf.Clamp(slopeAngle, -maxSlideAngle, maxSlideAngle);
         changed = (previousGrounded != _grounded);
     }
 

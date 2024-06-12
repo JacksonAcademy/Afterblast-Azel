@@ -69,8 +69,11 @@ public class PlayerHealth : NetworkBehaviour
         SetHealth(health - amount);
         if(health <= 0)
         {
-            whoDamagedMe.Kill(player);
             Death(whoDamagedMe);
+            if(base.IsOwner)
+            {
+                player.Die(whoDamagedMe);
+            }
         }
     }
 }

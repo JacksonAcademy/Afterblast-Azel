@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using FishNet.Connection;
 public class PlayerManager : NetworkBehaviour
 {
     public GameObject playerUI;
@@ -52,17 +53,14 @@ public class PlayerManager : NetworkBehaviour
     {
         StartCoroutine(DieCoroutine(whoKilledMe));
     }
-    public void Kill(PlayerManager whoIKilled)
-    {
-        StartCoroutine (KillCoroutine(whoIKilled));
-    }
     private IEnumerator DieCoroutine(PlayerManager whoKilledMe)
     {
         eliminatedScreen.SetActive(true);
         Hide();
+        print("You died to: " + whoKilledMe.playerName);
         eliminatedByText.text = "Eliminated by <size=150%><color=red> " + whoKilledMe.playerName;
         float seconds = 5;
-        while(seconds >= 0)
+        while (seconds >= 0)
         {
             seconds -= Time.deltaTime;
             secondsLeftText.text = "Respawning in " + Mathf.Round(seconds * 10.0f) * 0.1f;
@@ -71,8 +69,15 @@ public class PlayerManager : NetworkBehaviour
         eliminatedScreen.SetActive(false);
         Respawn(GameManager.instance.spawnPositions[Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
     }
+    [TargetRpc]
+    public void Kill(NetworkConnection conn, PlayerManager whoIKilled)
+    {
+        StartCoroutine (KillCoroutine(whoIKilled));
+    }
+
     private IEnumerator KillCoroutine(PlayerManager whoIKilled)
     {
+        print("You killed:" + whoIKilled.playerName);
         eliminationScreen.SetActive(true);
         eliminationText.text = "Eliminated <size=150%><color=red>" + whoIKilled.playerName;
         yield return new WaitForSeconds(2);
@@ -181,14 +186,16 @@ public class PlayerManager : NetworkBehaviour
     {
         playerMovement.canMove = false;
         playerShoot.enabled = false;
-        gameUI.SetActive(false);
+        if(base.IsOwner)
+            gameUI.SetActive(false);
         nameText.gameObject.SetActive(false);
         model.SetActive(false);
     }
     public void ShowModel()
     {
         model.SetActive(true);
-        gameUI.SetActive(!Owner.IsLocalClient);
+        if (base.IsOwner)
+            gameUI.SetActive(true);
         playerMovement.canMove = true;
         nameText.gameObject.SetActive(!Owner.IsLocalClient);
         playerShoot.enabled = true;

@@ -2,7 +2,7 @@ using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using FishNet.Connection;
 public class PlayerHitbox : NetworkBehaviour
 { 
     public PlayerHealth playerHealth;
@@ -24,9 +24,11 @@ public class PlayerHitbox : NetworkBehaviour
         //    col.enabled = true;
         //}
     }
-    public void Damage(int amount, PlayerManager playerDamaged)
+    [TargetRpc]
+    public void Damage(NetworkConnection conn, int amount, PlayerManager playerDamaged)
     {
         playerHealth.TakeDamage(amount, playerDamaged);
+        print ("Took damage by: " + playerDamaged.playerName) ;
     }
     public float GetHealth(PlayerManager whoRequested)
     {
