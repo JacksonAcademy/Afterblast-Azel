@@ -372,6 +372,7 @@ public class PlayerMovement : NetworkBehaviour
     [Replicate]
     private void RunInputs(ReplicateData md, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable)
     {
+        if (state.IsFuture()) return;
         Vector3 moveForces = Vector3.zero;
 
         float moveRate = _sprinting ? _sprintSpeed : _walkSpeed;

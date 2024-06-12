@@ -180,9 +180,9 @@ PlayerSettings:
   CreateWallpaper: 0
   APKExpansionFiles: 0
   keepLoadedShadersAlive: 0
-  StripUnusedMeshComponents: 0
+  StripUnusedMeshComponents: 1
   strictShaderVariantMatching: 0
-  VertexChannelCompressionMask: 4054
+  VertexChannelCompressionMask: 326
   iPhoneSdkVersion: 988
   iOSTargetOSVersionString: 12.0
   tvOSSdkVersion: 0
@@ -811,7 +811,7 @@ PlayerSettings:
     PS5: UNITY_POST_PROCESSING_STACK_V2
     QNX: UNITY_POST_PROCESSING_STACK_V2
     Stadia: UNITY_POST_PROCESSING_STACK_V2
-    Standalone: FISHNET;FISHNET_PRO;FISHNET_RELEASE_MODE;FISHNET_V4;UNITY_POST_PROCESSING_STACK_V2;FISHNET_STABLE_MODE
+    Standalone: FISHNET;FISHNET_PRO;FISHNET_RELEASE_MODE;FISHNET_V4;UNITY_POST_PROCESSING_STACK_V2;FISHNET_STABLE_MODE;THE_VEGETATION_ENGINE
     VisionOS: UNITY_POST_PROCESSING_STACK_V2
     WebGL: UNITY_POST_PROCESSING_STACK_V2
     XboxOne: UNITY_POST_PROCESSING_STACK_V2
