@@ -211,7 +211,10 @@ public class PlayerManager : NetworkBehaviour
         GameManager.instance.playerCount++;
         playerNumber = Owner.ClientId;
         playerColor = GameManager.instance.playerColors[playerNumber];
-        playerName = GameManager.instance.playerNames[playerNumber];
+        if (playerName != string.Empty)
+            playerName = "Player " + GameManager.instance.playerCount;
+        else
+            playerName = GameManager.instance.matchmaker._playerName.text;
 
 
         nameText.gameObject.SetActive(!Owner.IsLocalClient);

@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public List<PlayerManager> players;
     public int playerCount;
     public List<Color> playerColors;
-    public List<string> playerNames;
     public List<Transform> spawnPositions;
-
+    public RelayMatchmaker matchmaker;
     public static GameManager instance;
     void Awake()
     {

@@ -45,6 +45,4 @@ namespace FishNet.Example.ColliderRollbacks
             _characterController.Move((gravity + inputs) * _moveRate * Time.deltaTime);
         }
     }
-
-
 }
