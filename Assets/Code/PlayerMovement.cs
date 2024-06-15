@@ -42,10 +42,10 @@ public struct ReplicateData : IReplicateData
     public float XRotation;
     public float YRotation;
     public Vector3 Forward, Right;
-    public string PlayerName;
-    public ReplicateData(float horizontal, float vertical, float xrotation, float yrotation, Vector3 right, Vector3 forward, MoveState eoveState, string playerName)
+    public PlayerData PLAYERDATA;
+    public ReplicateData(float horizontal, float vertical, float xrotation, float yrotation, Vector3 right, Vector3 forward, MoveState eoveState, PlayerData playerData)
     {
-        PlayerName = playerName;
+        PLAYERDATA = playerData;
         moveStates = eoveState;
         XRotation = xrotation;
         YRotation = yrotation;
@@ -248,8 +248,6 @@ public class PlayerMovement : NetworkBehaviour
 
             if (Input.GetKeyDown(KeyCode.LeftControl) && input.x == 0 && input.y == 0)
                 _crouchingInput = !_crouchingInput;
-
-
         }
     }
     public void Look()
@@ -319,7 +317,7 @@ public class PlayerMovement : NetworkBehaviour
 
         Vector3 right = _cameraPivot.right;
         Vector3 forward = transform.forward;
-        ReplicateData md = new ReplicateData(horizontal, vertical, mouseX,mouseY, right, forward, moveStates, playerManager.playerName);
+        ReplicateData md = new ReplicateData(horizontal, vertical, mouseX,mouseY, right, forward, moveStates, playerManager.playerData);
         moveStates = MoveState.None;
         _jumpInput = false;
         _slidingInput = false;
@@ -440,6 +438,10 @@ public class PlayerMovement : NetworkBehaviour
         {
             transform.eulerAngles = new Vector3(0, md.XRotation, 0);
             _cameraPivot.localEulerAngles = new Vector3(md.YRotation, 0, 0);
+
+            //SEt Player Data for PlayerManager to other clients, ONLY if the playerclientID is not null
+            if (md.PLAYERDATA.playerName != string.Empty)
+                playerManager.playerData = md.PLAYERDATA;
         }
 
         if (_aiming)

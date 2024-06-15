@@ -1,3 +1,4 @@
+using DamageNumbersPro;
 using FishNet.Component.ColliderRollback;
 using FishNet.Managing.Timing;
 using FishNet.Object;
@@ -24,6 +25,8 @@ public class PlayerShoot : NetworkBehaviour
     public float timeBetweenShots;
     public GameObject hitEffect, muzzleEffect, playerHitEffect;
 
+    public DamageNumber damagePopup;
+
     [Header("UI")]
     public GameObject cantShootCrosshair;
     public PlayerAnimator playerAnimator;
@@ -31,7 +34,7 @@ public class PlayerShoot : NetworkBehaviour
     public PlayerManager playerManager;
 
     public lookAt gunRecoil;
-
+    private bool hitPlayer;
     [HideInInspector] public bool canShoot;
     private void Awake()
     {
@@ -84,10 +87,7 @@ public class PlayerShoot : NetworkBehaviour
 
         Vector3 direction = GetDirection();
 
-
-
         Shoot(default, shootPoint.position, direction);
-        CmdShoot(base.TimeManager.GetPreciseTick(base.TimeManager.LastPacketTick.Value()), shootPoint.position, direction);
     }
     [ServerRpc]
     public void CmdShoot(PreciseTick pt, Vector3 start, Vector3 direction)
@@ -123,43 +123,35 @@ public class PlayerShoot : NetworkBehaviour
         {
             if (base.IsClientInitialized)
             {
+
                 TrailRenderer trail = Instantiate(shootLine, shootPoint.position, Quaternion.identity);
                 StartCoroutine(SpawnTrail(trail, hit));
 
                 if (hit.transform.tag == "Player")
                 {
+                    hitPlayer = true;
+                    damagePopup.Spawn(hit.transform.position + Vector3.up, damage);
                     PlayerHitbox playerHit = hit.transform.GetComponent<PlayerHitbox>();
                     playerHit.playerHealth.animator.Hit();
                     GameObject effect = Instantiate(playerHitEffect, hit.point, Quaternion.identity);
                     Destroy(effect, 2);
-                    if(base.IsOwner)
-                    {
-                        PopupManager.instance.SpawnDamagePopup(playerHit.transform.position + (Vector3.up * 2), damage);
-                        // If the hit players health minus the dealt damage is less than zero
-                    }
-
+                    //Damage player who got shot
+                    playerHit.Damage(playerHit.Owner, damage, playerManager);
                     //If the server detects the shot was a hit
-                    if (base.IsServerInitialized)
-                    {                        
-                        //If the player who got shot has health minus the damage (that hasn't been sent yet) less than 0
-                        if (playerHit.GetHealth(playerManager) -damage <= 0)
-                        {
-                            //Send Elimination message to player to shot
-                            playerManager.Kill(playerManager.Owner, playerHit.playerHealth.player);
-                        }
-                        //Damage the player who got shot
-                        playerHit.Damage(playerHit.Owner, damage, playerManager);
-
-
+            
+                    //If the player who got shot has health minus the damage (that hasn't been sent yet) less than 0
+                    if (playerHit.GetHealth(playerManager) -damage <= 0)
+                    {
+                        //Send Elimination message to player to shot
+                        playerManager.Kill(playerManager.Owner, playerHit.playerHealth.player);
                     }
-
                 }
                 else if(hit.transform.tag == "Target")
                 {
-                    GameObject effect = Instantiate(playerHitEffect, hit.point + (Vector3.up * 2), Quaternion.identity);
+                    GameObject effect = Instantiate(playerHitEffect, hit.point, Quaternion.identity);
                     Destroy(effect, 2);
                     if (base.IsOwner)
-                        PopupManager.instance.SpawnDamagePopup(hit.point, damage);
+                        damagePopup.Spawn(hit.transform.position + Vector3.up, damage);
                 }
 
             }

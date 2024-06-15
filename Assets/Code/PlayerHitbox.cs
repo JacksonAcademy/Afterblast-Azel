@@ -28,7 +28,7 @@ public class PlayerHitbox : NetworkBehaviour
     public void Damage(NetworkConnection conn, int amount, PlayerManager playerDamaged)
     {
         playerHealth.TakeDamage(amount, playerDamaged);
-        print ("Took damage by: " + playerDamaged.playerName) ;
+        print ("Took damage by: " + playerDamaged.playerData.playerName) ;
     }
     public float GetHealth(PlayerManager whoRequested)
     {

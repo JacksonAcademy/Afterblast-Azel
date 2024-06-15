@@ -180,7 +180,7 @@ MonoBehaviour:
   - {fileID: 6198841281594916437}
   - {fileID: 1652094246498167029}
   - {fileID: 2247663849957395728}
-  - {fileID: 0}
+  - {fileID: 2422976147313800740}
   - {fileID: 316364084471927749}
   - {fileID: 1883986681397107073}
   - {fileID: 5616552532560438982}
@@ -353,6 +353,8 @@ MonoBehaviour:
   muzzleEffect: {fileID: 124018, guid: 1f389bb139e76154582cf3c5e4f9214b, type: 3}
   playerHitEffect: {fileID: 1339958753976054136, guid: a156865004223bd40ae7b040c598634b,
     type: 3}
+  damagePopup: {fileID: 4956398892003107058, guid: 88a55c1907261e64789f7a87c7b8d907,
+    type: 3}
   cantShootCrosshair: {fileID: 8242717314631369575}
   playerAnimator: {fileID: 6198841281594916437}
   playerMovement: {fileID: 8357676141616578387}
@@ -434,14 +436,16 @@ MonoBehaviour:
   playerShoot: {fileID: 4691114520261158112}
   respawnDelay: 5
   spawnInDelay: 0.5
-  playerName: Yessir
-  playerKills: 15
-  playerDeaths: 0
+  playerData:
+    playerName: 
+    playerKills: 0
+    playerDeaths: 0
+    playerClientID: 0
   gameUI: {fileID: 2274745739847614395}
   renderers:
   - {fileID: 8935334152796554461}
-  playerNumber: 0
   playerColor: {r: 0, g: 0, b: 0, a: 0}
+  mainCam: {fileID: 8169678471332194035}
   nameText: {fileID: 983950412464497458}
 --- !u!114 &2422976147313800740
 MonoBehaviour:
