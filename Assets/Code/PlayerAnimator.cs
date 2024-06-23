@@ -61,7 +61,7 @@ public class PlayerAnimator : NetworkBehaviour
         if(grounded && !previousGrounded)
         {
             previousGrounded = true;
-            _animator.SetTrigger("HitGround");
+           // _animator.SetTrigger("HitGround");
         }
         if (!grounded)
             previousGrounded = false;

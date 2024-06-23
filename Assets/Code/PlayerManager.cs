@@ -7,6 +7,8 @@ using UnityEngine;
 using FishNet.Connection;
 using Unity.VisualScripting;
 using FishNet.Serializing;
+using DamageNumbersPro;
+using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 public static class PlayerExtensions
 {
     public static void WritePlayerData(this Writer writer, PlayerData value)
@@ -33,10 +35,21 @@ public struct PlayerData
     public int playerKills;
     public int playerDeaths;
     public int playerClientID;
+    public static bool operator ==(PlayerData c1, PlayerData c2)
+    {
+        return c1.Equals(c2);
+    }
+
+    public static bool operator !=(PlayerData c1, PlayerData c2)
+    {
+        return !c1.Equals(c2);
+    }
+
 }
 
 public class PlayerManager : NetworkBehaviour
 {
+    private GameManager gameManager;
     public GameObject playerUI;
     public GameObject eliminatedScreen, eliminationScreen;
     public GameObject model;
@@ -58,17 +71,20 @@ public class PlayerManager : NetworkBehaviour
     public Color playerColor;
     public Camera mainCam;
 
+
+    public PlayerAnimator animator;
+    public PlayerHealth playerHealth;
+    public DamageNumber damagePopup;
+
     public TextMeshProUGUI nameText;
     private bool isPaused = false;
     private void Awake()
     {
-        Hide();
+        gameManager = GameManager.instance;
+        Hide(false);
     }
     private void Start()
     {
-        GameManager manager = GameManager.instance;
-        playerColor = manager.playerColors[manager.playerCount];
-
         nameText.gameObject.SetActive(!Owner.IsLocalClient);
         mainCam.gameObject.tag = (Owner.IsLocalClient ? "MainCamera" : "Untagged");
     }
@@ -80,42 +96,39 @@ public class PlayerManager : NetworkBehaviour
             gameObject.name = playerData.playerName.ToString();
         }
     }
-    public override void OnStartNetwork()
-    {
-        Initialize();
-        //Respawn();
-    }
-    public override void OnStopNetwork()
+    public override void OnStopClient()
     {
         //When player leaves game, unintentionally or intentioanlly
-        GameManager.instance.playerCount--;
+        gameManager.RemovePlayer(playerData);
     }
     public override void OnStartClient()
     {
         base.OnStartClient();
+        Initialize();
 
     }
     public void Initialize()
     {
-        GameManager manager = GameManager.instance;
-        if (Owner.IsLocalClient)
+        if (gameManager)
+            print("Found Game ManageR");
+        else
+            print("Didn't find GameManager");
+        if (base.IsOwner)
         {
-            manager.playerCount++;
-
             //Set Player Data
             playerData.playerClientID = Owner.ClientId;
             playerData.playerKills = 0;
             playerData.playerDeaths = 0;
             //If the player didn't input a name, choose a default name "player 1"
-            if (manager.matchmaker._playerName.text == string.Empty)
-                playerData.playerName = "Player " + manager.playerCount;
+            if (gameManager.matchmaker._playerName.text == string.Empty)
+                playerData.playerName = "Player " + gameManager.playerCount;
             else
-                playerData.playerName = manager.matchmaker._playerName.text;
+                playerData.playerName = gameManager.matchmaker._playerName.text;
 
             //SEnd Player Data to SErver
-            manager.AddPlayer(playerData);
+            gameManager.UpdatePlayer(playerData);
         }
-        playerColor = manager.playerColors[manager.playerCount];
+        playerColor = gameManager.playerColors[gameManager.playerCount];
         for (int i = 0; i < renderers.Count; i++)
         {
             renderers[i].material.color = playerColor;
@@ -131,8 +144,7 @@ public class PlayerManager : NetworkBehaviour
     private IEnumerator DieCoroutine(PlayerManager whoKilledMe)
     {
         eliminatedScreen.SetActive(true);
-        Hide();
-        print("You died to: " + whoKilledMe.playerData.playerName);
+        Hide(true);
         eliminatedByText.text = "Eliminated by <size=150%><color=red> " + whoKilledMe.playerData.playerName;
         float seconds = 5;
         while (seconds >= 0)
@@ -145,15 +157,18 @@ public class PlayerManager : NetworkBehaviour
         Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
     }
     [TargetRpc]
-    public void Kill(NetworkConnection conn, PlayerManager whoIKilled)
+    public void Kill(NetworkConnection conn, NetworkObject whoIKilled)
     {
+        PlayerManager playerWhoIKilled = whoIKilled.GetComponent<PlayerManager>();
+        playerData.playerKills++;
+        gameManager.UpdatePlayer(playerData);
+        gameManager.Elimination(playerData.playerName + " eliminated " + whoIKilled.playerData.playerName);
+        playerData.playerKills++;
         StartCoroutine (KillCoroutine(whoIKilled));
-        print("Killed player!");
     }
 
     private IEnumerator KillCoroutine(PlayerManager whoIKilled)
     {
-        print("You killed:" + whoIKilled.playerData.playerName);
         eliminationScreen.SetActive(true);
         eliminationText.text = "Eliminated <size=150%><color=red>" + whoIKilled.playerData.playerName;
         yield return new WaitForSeconds(2);
@@ -179,17 +194,17 @@ public class PlayerManager : NetworkBehaviour
     private IEnumerator RespawnCoroutine(Vector3 position)
     {
         HideModel();
-        print("REspawning player");
         transform.position = position;
         GameObject effect = Instantiate(spawnEffect, transform.position, Quaternion.identity);
         Destroy(effect, 10);
         yield return new WaitForSeconds(spawnInDelay);
         ShowModel();
     }
-    public void Hide()
+    public void Hide(bool serverHide)
     {
         HideModel();
-        CMDHideModel();
+        if(serverHide)
+            CMDHideModel();
     }
     public void HideModel()
     {
@@ -213,10 +228,6 @@ public class PlayerManager : NetworkBehaviour
     {
         ShowModel();
         CMDShowModel();
-    }
-    public override void OnStopClient()
-    {
-        base.OnStopClient();  
     }
     public void PauseGame()
     {
@@ -284,6 +295,10 @@ public class PlayerManager : NetworkBehaviour
         if (!base.IsOwner)
             ShowModel();
         ObserversShowModel();
+    }
+    public float GetHealth(PlayerManager whoRequested)
+    {
+        return playerHealth.health;
     }
 }
 public static class IntBitExtentions

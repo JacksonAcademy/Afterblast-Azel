@@ -19,7 +19,7 @@ using ParrelSync;
 using UnityEngine.UI;
 public class GameMatchmaker : MonoBehaviour
 {
-    [SerializeField] private GameObject _buttons, _lobby;
+    public GameObject _buttons, _lobby;
 
     private Lobby _connectedLobby;
     public TextMeshProUGUI _debugText;
@@ -28,8 +28,10 @@ public class GameMatchmaker : MonoBehaviour
     private const string JoinCodeKey = "k";
     public TMP_InputField _playerName;
     private string _playerId;
+    public static GameMatchmaker instance;
     private void Awake()
     {
+        instance = this;
         _lobby.SetActive(true);
         _buttons.SetActive(true);
         _transport = _networkManager.TransportManager.GetTransport<FishyUnityTransport>();

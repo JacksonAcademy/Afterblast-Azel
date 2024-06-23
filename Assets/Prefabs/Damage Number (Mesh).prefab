@@ -233,7 +233,7 @@ MonoBehaviour:
     closeDistance: 5
     farDistance: 50
     closeScale: 2
-    farScale: 0.5
+    farScale: 2
   cameraOverride: {fileID: 0}
   enableNumber: 1
   number: 150
@@ -495,7 +495,7 @@ MonoBehaviour:
   enableCombination: 1
   combinationSettings:
     method: 0
-    maxDistance: 10
+    maxDistance: 60
     spawnDelay: 0.2
     absorbDuration: 0.4
     scaleCurve:
@@ -623,7 +623,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  enableCollision: 0
+  enableCollision: 1
   collisionSettings:
     radius: 0.5
     pushFactor: 1
@@ -633,7 +633,7 @@ MonoBehaviour:
     radius: 3
     pushOffset: 1
   updateDelay: 0.0125
-  enablePooling: 0
+  enablePooling: 1
   poolSize: 50
   disableOnSceneLoad: 1
   editorLastFont: Basic-Shadow3D

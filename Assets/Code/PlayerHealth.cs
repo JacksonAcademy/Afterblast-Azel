@@ -38,42 +38,37 @@ public class PlayerHealth : NetworkBehaviour
         Die();
         CMDdie();
         Respawn();
-        player.Die(whoKilledMe);
+
 
     }
     [ServerRpc]
     public void CMDdie()
     {
-        if (!base.IsOwner)
-            Die();
         ObserversDie();
     }
     [ObserversRpc]
     public void ObserversDie()
     {
-        if (base.IsOwner || base.IsServerInitialized)
-            return;
         Die();
     }
-    public void Die()
+    public void Die(NetworkObject whoKilledMe)
     {
+        PlayerManager playerWhoKilledMe = whoKilledMe.GetComponent<PlayerManager>();
+        if(base.IsOwner)
+        {
+
+        }
+        player.Die(playerWhoKilledMe);
         GameObject effect = Instantiate(deathParticle, transform.position, Quaternion.identity);
         Destroy(effect, 10);
+
     }
     public void Respawn()
     {
         SetHealth(startingHealth);
     }
-    public void TakeDamage(int amount, PlayerManager whoDamagedMe)
+    public void TakeDamage(int amount)
     {
         SetHealth(health - amount);
-        if(health <= 0)
-        {
-            Death(whoDamagedMe);
-            if(base.IsOwner)
-            {
-                player.Die(whoDamagedMe);
-            }
-        }
     }
 }

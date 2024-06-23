@@ -42,10 +42,8 @@ public struct ReplicateData : IReplicateData
     public float XRotation;
     public float YRotation;
     public Vector3 Forward, Right;
-    public PlayerData PLAYERDATA;
-    public ReplicateData(float horizontal, float vertical, float xrotation, float yrotation, Vector3 right, Vector3 forward, MoveState eoveState, PlayerData playerData)
+    public ReplicateData(float horizontal, float vertical, float xrotation, float yrotation, Vector3 right, Vector3 forward, MoveState eoveState)
     {
-        PLAYERDATA = playerData;
         moveStates = eoveState;
         XRotation = xrotation;
         YRotation = yrotation;
@@ -144,10 +142,6 @@ public class PlayerMovement : NetworkBehaviour
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    private void Start()
-    {
-        PopupManager.instance._camera = _camera;
-    }
     private void Jump(bool replaying)
     {
         if(_sliding)
@@ -317,7 +311,7 @@ public class PlayerMovement : NetworkBehaviour
 
         Vector3 right = _cameraPivot.right;
         Vector3 forward = transform.forward;
-        ReplicateData md = new ReplicateData(horizontal, vertical, mouseX,mouseY, right, forward, moveStates, playerManager.playerData);
+        ReplicateData md = new ReplicateData(horizontal, vertical, mouseX,mouseY, right, forward, moveStates);
         moveStates = MoveState.None;
         _jumpInput = false;
         _slidingInput = false;
@@ -438,10 +432,6 @@ public class PlayerMovement : NetworkBehaviour
         {
             transform.eulerAngles = new Vector3(0, md.XRotation, 0);
             _cameraPivot.localEulerAngles = new Vector3(md.YRotation, 0, 0);
-
-            //SEt Player Data for PlayerManager to other clients, ONLY if the playerclientID is not null
-            if (md.PLAYERDATA.playerName != string.Empty)
-                playerManager.playerData = md.PLAYERDATA;
         }
 
         if (_aiming)
@@ -458,7 +448,7 @@ public class PlayerMovement : NetworkBehaviour
 
         _animator.UpdateAnimator(new Vector2(md.Horizontal, _sprinting ? 2 : md.Vertical), _verticalVelocity, _grounded, _aiming, _crouching, _sliding, _sprinting, delta);
 
-        _characterController.Move(moveForces * delta);
+            _characterController.Move(moveForces * delta);
     }
 
     [Reconcile]

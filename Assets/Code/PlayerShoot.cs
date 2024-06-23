@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
+using FishNet.Connection;
+using System.Security.Cryptography;
 
 public class PlayerShoot : NetworkBehaviour
 {
@@ -23,18 +25,21 @@ public class PlayerShoot : NetworkBehaviour
     public Vector3 bulletSpread;
     private float _nextFire;
     public float timeBetweenShots;
-    public GameObject hitEffect, muzzleEffect, playerHitEffect;
-
+    public GameObject groundHitEffect, muzzleEffect, shotBlank;
     public DamageNumber damagePopup;
-
     [Header("UI")]
     public GameObject cantShootCrosshair;
     public PlayerAnimator playerAnimator;
     public PlayerMovement playerMovement;
     public PlayerManager playerManager;
 
+
+    private DamageNumber spawnedDamageNumber;
+
     public lookAt gunRecoil;
-    private bool hitPlayer;
+    public RaycastHit hitPlayer;
+    public NetworkObject hitPlayerObject;
+    public Vector3 clientHitPoint, shootDirection;
     [HideInInspector] public bool canShoot;
     private void Awake()
     {
@@ -67,7 +72,7 @@ public class PlayerShoot : NetworkBehaviour
     private void CheckShot()
     {
         RaycastHit hit;
-        if (Physics.Linecast(_camera.transform.position, shootPoint.position, out hit, groundLayer))
+        if (Physics.Linecast(_camera.transform.position, shootPoint.position, out hit, groundLayer)) 
         {
             cantShootCrosshair.SetActive(true);
             cantShootCrosshair.transform.position = _camera.WorldToScreenPoint(hit.point);
@@ -86,89 +91,148 @@ public class PlayerShoot : NetworkBehaviour
             return;
 
         Vector3 direction = GetDirection();
-
-        Shoot(default, shootPoint.position, direction);
+        hitPlayerObject = null;
+        ShootClient(default, shootPoint.position, direction);
+        ServerShoot(base.TimeManager.GetPreciseTick(TickType.LastPacketTick), shootPoint.position, shootPoint.eulerAngles, shootDirection, clientHitPoint, hitPlayerObject, NetworkObject);
+    }
+    [TargetRpc]
+    public void ReconcileDamage(NetworkConnection conn)
+    {
+        print("Reconciling damage number");
+        spawnedDamageNumber.DestroyDNP();
     }
     [ServerRpc]
-    public void CmdShoot(PreciseTick pt, Vector3 start, Vector3 direction)
-    {
-        if(!base.IsOwner)
-        {
-            Shoot(pt, start, direction);
-        }
-        ObserversFire(start, direction);
-
-    }
-    public void Shoot(PreciseTick pt, Vector3 start, Vector3 direction)
+    public void ServerShoot(PreciseTick pt, Vector3 shootPoint, Vector3 shootPointRotation, Vector3 shootDirection, Vector3 clientHitPoint, NetworkObject whoGotShot, NetworkObject whoShot)
     {
         _nextFire = Time.time + timeBetweenShots;
 
-        GameObject muzzleFlash = Instantiate(muzzleEffect, shootPoint.position, shootPoint.rotation);
-        Destroy(muzzleFlash, 1f);
-        playerAnimator.ResetAim();
+        RaycastHit hit = new RaycastHit();
+       // base.RollbackManager.Rollback(pt, RollbackPhysicsType.Physics, base.IsOwner);
 
-        gunRecoil.Shoot();
-        
-        base.RollbackManager.Rollback(pt, RollbackPhysicsType.Physics, base.IsOwner);
-        RaycastHit hit;
-        Ray ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        //Create a direction ray
-        if(Physics.Raycast(ray, out hit))
+        //Shoot a linecast to see if the client shoot path is valid, if the client shot a player
+        if(whoGotShot != null)
         {
-            direction = Vector3.Normalize(hit.point - start);
-            Debug.DrawRay(start, direction * 1000, Color.red, 100);
-        }
-        //Shoot a real ray along the direction ray
-        if (Physics.Raycast(start, direction, out hit, Mathf.Infinity, shootLayer))
-        {
-            if (base.IsClientInitialized)
+            if (Physics.Linecast(shootPoint, whoGotShot.transform.position, out hit, shootLayer))
             {
-
-                TrailRenderer trail = Instantiate(shootLine, shootPoint.position, Quaternion.identity);
-                StartCoroutine(SpawnTrail(trail, hit));
-
                 if (hit.transform.tag == "Player")
                 {
-                    hitPlayer = true;
-                    damagePopup.Spawn(hit.transform.position + Vector3.up, damage);
-                    PlayerHitbox playerHit = hit.transform.GetComponent<PlayerHitbox>();
-                    playerHit.playerHealth.animator.Hit();
-                    GameObject effect = Instantiate(playerHitEffect, hit.point, Quaternion.identity);
-                    Destroy(effect, 2);
-                    //Damage player who got shot
-                    playerHit.Damage(playerHit.Owner, damage, playerManager);
-                    //If the server detects the shot was a hit
-            
-                    //If the player who got shot has health minus the damage (that hasn't been sent yet) less than 0
-                    if (playerHit.GetHealth(playerManager) -damage <= 0)
-                    {
-                        //Send Elimination message to player to shot
-                        playerManager.Kill(playerManager.Owner, playerHit.playerHealth.player);
-                    }
-                }
-                else if(hit.transform.tag == "Target")
-                {
-                    GameObject effect = Instantiate(playerHitEffect, hit.point, Quaternion.identity);
-                    Destroy(effect, 2);
-                    if (base.IsOwner)
-                        damagePopup.Spawn(hit.transform.position + Vector3.up, damage);
-                }
+                    PlayerManager playerShot = whoShot.GetComponent<PlayerManager>();
+                    PlayerManager playerWhoGotShot = whoGotShot.GetComponent<PlayerManager>();
 
+                    playerWhoGotShot.playerShoot.DamagePlayerObservers(whoGotShot); 
+
+                    //Damage hasn't been applied yet, so subtract the damage that will be applied from the base health
+                    if(playerShot.playerHealth.health-damage <= 0)
+                    {
+                        playerWhoGotShot.playerHealth.ObserversDie();
+                        playerShot.Kill()
+                    }
+
+                }
+                else if (hit.transform.tag == "Target")
+                    DamageTarget(hitPlayer);
             }
         }
-        base.RollbackManager.Return();
+        else
+        {
+            //If the client didn't shoot a player, but anything else, do a raycast
+            if (Physics.Raycast(shootPoint, shootDirection, out hit, Mathf.Infinity, shootLayer))
+            {
+            }
+        }
+        Debug.DrawRay(shootPoint, shootDirection * 2, Color.red, 10f);
+        ObserversFire(shootPoint, shootPointRotation, shootDirection, clientHitPoint, hit.normal, hit.transform!=null, whoGotShot);
+        //base.RollbackManager.Return();
+    }
+    public void CheckDamage(RaycastHit hit)
+    {
+        //Spawn blank effect, damage popup will spawn in DamagePlayer, sent by the server
+        GameObject effect = Instantiate(shotBlank, hit.point, Quaternion.identity);
+        spawnedDamageNumber = damagePopup.Spawn(hit.transform.position + Vector3.up, damage, hit.transform);
+        Destroy(effect, 2);
+        hit.transform.GetComponent<PlayerHitbox>().playerHealth.animator.Hit();
+    }
+    //This function runs on every client
+    [ObserversRpc]
+    public void DamagePlayerObservers(NetworkObject whoGotShot)
+    {
+        //Get Player Hitbox of player who got hit
+        PlayerManager playerHit = whoGotShot.GetComponent<PlayerManager>();
 
+        //Local client already spawned effects, only spawn them on non owner observers
+        if(!base.IsOwner)
+        {
+            //Spawn effects
+            playerHit.animator.Hit();
+        }
+
+
+        //Damage player who got shot
+        playerHit.playerHealth.TakeDamage(damage);
+
+        //If the player who got shot has no health
+        if (playerHit.playerHealth.health <= 0)
+        {
+            //SEnd elimination to the player who shot
+            playerManager.Kill(playerManager.Owner, playerHit.playerHealth.player);
+        }
+    }
+    public void ShootEffect(Vector3 shootPoint, Vector3 shootPointRotation, Vector3 direction, Vector3 hitPoint, Vector3 hitNormal, bool hitPlayer)
+    {
+        GameObject muzzleFlash = Instantiate(muzzleEffect, shootPoint, Quaternion.LookRotation(shootPointRotation));
+        Destroy(muzzleFlash, 1f);
+
+        playerAnimator.ResetAim();
+        gunRecoil.Shoot();
+
+        TrailRenderer trail = Instantiate(shootLine, shootPoint, Quaternion.identity);
+
+        StartCoroutine(SpawnTrail(trail, direction, hitPoint, hitNormal, hitPlayer));
+    }
+    public void ShootClient(PreciseTick pt, Vector3 start, Vector3 direction)
+    {
+        _nextFire = Time.time + timeBetweenShots;
+        Ray ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        hitPlayer = default(RaycastHit);
+        hitPlayerObject = null;
+        //Create a direction ray
+        if(Physics.Raycast(ray, out hitPlayer))
+            shootDirection = Vector3.Normalize(hitPlayer.point - start);
+        Debug.DrawRay(start, shootDirection * 100, Color.red, 10f);
+        //Shoot a real ray along the direction ray
+        if (Physics.Raycast(start, shootDirection, out hitPlayer, Mathf.Infinity, shootLayer))
+        {
+            print("Local client hit: " + hitPlayer.transform.name);
+            clientHitPoint = hitPlayer.point;
+            //If the client got hit, send Check the damage
+            if (hitPlayer.transform.tag == "Player")
+            {
+                hitPlayerObject = hitPlayer.transform.GetComponent<PlayerHitbox>().playerHealth.player.NetworkObject;
+                CheckDamage(hitPlayer);
+            }
+            else if(hitPlayer.transform.tag == "Target")
+                 DamageTarget(hitPlayer);
+        }
+        ShootEffect(start, shootPoint.localEulerAngles, shootDirection, hitPlayer.point, hitPlayer.normal, hitPlayer.transform!=null);
+    }
+    public void DamageTarget(RaycastHit hit)
+    {
+        GameObject effect = Instantiate(shotBlank, hit.point, Quaternion.identity);
+        Destroy(effect, 2);
+        if (base.IsOwner)
+            damagePopup.Spawn(hit.transform.position + Vector3.up, damage);
     }
     [ObserversRpc]
-    public void ObserversFire(Vector3 pos, Vector3 forward)
+    public void ObserversFire(Vector3 shootPoint, Vector3 shootPointRotation, Vector3 direction, Vector3 hitPoint, Vector3 hitNormal, bool hitPlayer, NetworkObject whoGotDamaged)
     {
-        if (base.IsOwner || base.IsServerInitialized)
+        if (base.IsOwner)
             return;
+        Debug.DrawLine(shootPoint, hitPoint, Color.red, 5);
+        if (whoGotDamaged != null)
+        {
 
-        RaycastHit hit;
-        Physics.Raycast(pos, forward, out hit, Mathf.Infinity, shootLayer);
-
-        Shoot(default, pos, forward);
+        }
+        ShootEffect(shootPoint, shootPointRotation, direction, hitPoint, hitNormal, hitPlayer);
     }
     public Vector3 GetDirection()
     {
@@ -179,24 +243,34 @@ public class PlayerShoot : NetworkBehaviour
         direction.Normalize();
         return direction;
     }
-    public IEnumerator SpawnTrail(TrailRenderer trail, RaycastHit hit)
+    public IEnumerator SpawnTrail(TrailRenderer trail, Vector3 direction, Vector3 hitPoint, Vector3 hitNormal, bool hitPlayer)
     {
         float time = 0;
         Vector3 startPos = trail.transform.position;
+        Ray ray = new Ray();
+        if(!hitPlayer)
+        {
+            ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        }
         while (time < bulletTravelTime)
         {
-            trail.transform.position = Vector3.Lerp(startPos, hit.point, time);
+            if (hitPlayer)
+                trail.transform.position = Vector3.Lerp(startPos, hitPoint, time);
+            else
+                trail.transform.position = Vector3.Lerp(startPos, ray.GetPoint(100), time);
             time += Time.deltaTime / bulletTravelTime;
             yield return null;
         }
-        if(hit.transform.tag != "Player")
+        if(hitPlayer)
         {
-            trail.transform.position = hit.point;
-            GameObject temp = Instantiate(hitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+            trail.transform.position = hitPoint;
+
+        }
+        else
+        {
+            GameObject temp = Instantiate(groundHitEffect, hitPoint, Quaternion.LookRotation(hitNormal));
             Destroy(temp, 2);
         }
-
-
         Destroy(trail.gameObject, trail.time);
     }
 
