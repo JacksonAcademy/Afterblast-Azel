@@ -15,12 +15,13 @@ public class PlayerAnimator : NetworkBehaviour
 
     [SerializeField]
     private Animator _animator;
-    public Rig aimRig, idleRig;
     public GameObject gun;
+    public PlayerManager playerManager;
     private bool previousGrounded;
     private float aimTimer;
     public float aimDelay;
     float aimRigWeight;
+    public GunManager gunManager;
 
     private Vector2 animationVelocity;
     private Vector2 tickAnimationVelocity;
@@ -56,8 +57,8 @@ public class PlayerAnimator : NetworkBehaviour
         _animator.SetBool("Aim", aim);
         _animator.SetBool("Crouch", crouching);
         _animator.SetBool("Sliding", sliding);
+        _animator.SetBool("Gun", playerManager.gunManager.equippedGun != null);
 
-        aimRigWeight = aim ? 1f : aimRig.weight;
         if(grounded && !previousGrounded)
         {
             previousGrounded = true;
@@ -65,36 +66,39 @@ public class PlayerAnimator : NetworkBehaviour
         }
         if (!grounded)
             previousGrounded = false;
-        if (!sprinting)
-        {
-            if (aimTimer > 0)
-                GunAim();
-            else
-                GunIdle();
-            idleRig.weight = 1;
-            gun.SetActive(true);
-        }
-        aimTimer -= delta;
-
-        aimRig.weight = Mathf.Lerp(aimRig.weight, aimRigWeight, rigSmoothing * delta);
         if (sprinting)
+            gunManager.NoGun();
+        if (gunManager.equippedGun != null)
         {
-            gun.SetActive(false);
-            idleRig.weight = 0;
-            aimTimer = 0;
-            aimRig.weight = 0;
-            GunIdle();
+            _animator.SetInteger("GunType", (int)gunManager.equippedGun.holdType);
+            //aimTimer -= delta;
+            if (!sprinting)
+            {
+                if (aimTimer > 0)
+                    GunAim();
+                else
+                    GunIdle();
+                gun.SetActive(true);
+            }
+            else
+            {
+                gun.SetActive(false);
+                aimTimer = 0;
+                GunIdle();
+            }
         }
+
+
 
     }
     public void GunAim()
     {
-        aimRigWeight = 1;
+        gunManager.aimWeight = 1;
         _animator.SetBool("Aim", true);
     }
     public void GunIdle()
     {
         _animator.SetBool("Aim", false);
-        aimRigWeight = 0;
+        gunManager.aimWeight = 0;
     }
 }

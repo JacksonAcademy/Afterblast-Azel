@@ -125,7 +125,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TopNormalMap:
-        m_Texture: {fileID: 2800000, guid: a9e90e87f8f10c04cad14926f16f51e5, type: 3}
+        m_Texture: {fileID: 2800000, guid: 5022d3a6d098d0c42a0ebeb9a1ba8cfc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TopNormalTex:
@@ -158,7 +158,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Blend: 16.8
+    - _Blend: 17.3
     - _BottomMetallic: 0.3
     - _BottomOcclusion: 1
     - _BottomSmoothness: 0.3
@@ -187,7 +187,7 @@ Material:
     - _SrcBlend: 1
     - _TopMetallic: 0
     - _TopOcclusion: 1
-    - _TopSkew: 21
+    - _TopSkew: 83
     - _TopSmoothness: 0.376
     - _UVSec: 0
     - _ZWrite: 1
@@ -205,7 +205,7 @@ Material:
     - _MainTiling: {r: 0.2, g: 0.2, b: 0, a: 0}
     - _TopColor: {r: 1, g: 1, b: 1, a: 1}
     - _TopOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _TopTiling: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _TopTiling: {r: 0.2, g: 0.2, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &1480605533216446482
 MonoBehaviour:

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - FxTemporaire
   - Target
+  - Gun
   layers:
   - Default
   - TransparentFX
@@ -15,7 +16,7 @@ TagManager:
   - UI
   - Ground
   - Player
-  - 
+  - Interactable
   - 
   - 
   - 

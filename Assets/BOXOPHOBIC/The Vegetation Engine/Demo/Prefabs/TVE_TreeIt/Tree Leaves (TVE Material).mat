@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Tree Leaves (TVE Material)
   m_Shader: {fileID: 4800000, guid: a933075b367f9b24981408633f72ff34, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - TVE_FEATURE_CLIP
   m_InvalidKeywords: []
@@ -25,6 +27,7 @@ Material:
   - TransparentBackfaceDebugDisplay
   - TransparentDepthPrepass
   - TransparentDepthPostpass
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -68,9 +71,22 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _AlphaClipValue: 0.5
+    - _AlphaCutoff: 0.5
     - _AlphaCutoffValue: 0.5
     - _AlphaFeatherValue: 0.5
     - _AlphaVariationValue: 1
@@ -103,10 +119,12 @@ Material:
     - _DetailCat: 0
     - _DetailCoordMode: 0
     - _DetailFadeMode: 1
+    - _DetailMaskIntensity: 1
     - _DetailMaskInvertMode: 0
     - _DetailMaskMode: 0
     - _DetailMeshInvertMode: 0
     - _DetailMeshMode: 0
+    - _DetailMeshValue: 1
     - _DetailMode: 0
     - _DetailNormalValue: 1
     - _DetailOpaqueMode: 0
@@ -116,6 +134,7 @@ Material:
     - _EmissiveIntensityMode: 0
     - _EmissiveIntensityValue: 1
     - _EmissivePhaseValue: 1
+    - _EnvironmentReflections: 1
     - _ExtrasPositionMode: 0
     - _FadeCameraValue: 1
     - _FadeConstantValue: 0
@@ -137,8 +156,10 @@ Material:
     - _InteractionAmplitude: 1
     - _InteractionMaskValue: 1
     - _IsCollected: 0
+    - _IsCoreShader: 1
     - _IsIdentifier: 950
     - _IsLeafShader: 1
+    - _IsPlantShader: 1
     - _IsShared: 0
     - _IsSubsurfaceShader: 1
     - _IsTVEShader: 1
@@ -178,6 +199,7 @@ Material:
     - _MotionNoisePositionValue: 0.5
     - _MotionNormalValue: 1
     - _MotionObjectVariation: 0
+    - _MotionPosition_10: 0.5
     - _MotionScale_10: 0
     - _MotionScale_20: 2
     - _MotionScale_32: 20
@@ -200,7 +222,13 @@ Material:
     - _OverlayMaskMinValue: 0.45
     - _OverlayProjectionValue: 0.6
     - _OverlayVariationValue: 1
+    - _PerspectiveAngleValue: 1
     - _PerspectiveCat: 0
+    - _PerspectiveNoiseValue: 0
+    - _PerspectivePushValue: 0
+    - _QueueControl: -1
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
     - _ReceiveSpace: 0
     - _RenderAmbient: 1
     - _RenderClip: 1
@@ -225,7 +253,9 @@ Material:
     - _SecondSmoothnessValue: 0
     - _SecondUVsMode: 0
     - _SizeFadeCat: 0
+    - _SizeFadeEndValue: 0
     - _SizeFadeMessage: 0
+    - _SizeFadeStartValue: 0
     - _SpaceGlobalExtras: 0
     - _SpaceGlobalLayers: 0
     - _SpaceGlobalLocals: 0
@@ -237,6 +267,7 @@ Material:
     - _SpaceRenderFade: 0
     - _SpaceRenderReceive: 0
     - _SpaceSubsurface: 0
+    - _SpecularHighlights: 1
     - _SubsurfaceAmbientValue: 0.2
     - _SubsurfaceAngleValue: 8
     - _SubsurfaceCat: 1
@@ -250,9 +281,11 @@ Material:
     - _SubsurfaceValue: 1
     - _TransAmbient: 0.2
     - _TransDirect: 1
+    - _TransNormal: 0
     - _TransNormalDistortion: 0
     - _TransScattering: 8
     - _TransShadow: 1
+    - _TransStrength: 2
     - _Translucency: 2
     - _TranslucencyAmbientValue: 0.2
     - _TranslucencyDirectValue: 1
@@ -286,6 +319,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorsMaskRemap: {r: 0, g: 0, b: 0, a: 0}
     - _DetailBlendRemap: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 0}
     - _EmissiveIntensityParams: {r: 1, g: 1, b: 1, a: 0}
     - _EmissiveUVs: {r: 1, g: 1, b: 0, a: 0}
@@ -297,6 +331,7 @@ Material:
     - _MainMaskRemap: {r: 0, g: 0, b: 0, a: 0}
     - _MainUVs: {r: 1, g: 1, b: 0, a: 0}
     - _MaxBoundsInfo: {r: 2.344353, g: 4.07822, b: 4.07822, a: 0}
+    - _MotionHighlightColor: {r: 0, g: 0, b: 0, a: 0}
     - _NoiseColorOne: {r: 1, g: 1, b: 1, a: 1}
     - _NoiseColorTwo: {r: 1, g: 1, b: 1, a: 1}
     - _NoiseMaskRemap: {r: 0, g: 0, b: 0, a: 0}
@@ -306,8 +341,10 @@ Material:
     - _SecondMaskRemap: {r: 0, g: 0, b: 0, a: 0}
     - _SecondUVs: {r: 1, g: 1, b: 0, a: 0}
     - _SubsurfaceColor: {r: 0.4, g: 0.4, b: 0.1, a: 1}
-    - _SubsurfaceDiffusion_Asset: {r: 2.2888926e+38, g: 1.2389358e-26, b: 7.69327e-37, a: 0.00018220427}
-    - _SubsurfaceDiffusion_asset: {r: 2.2888926e+38, g: 1.2389358e-26, b: 7.69327e-37, a: 0.00018220427}
+    - _SubsurfaceDiffusion_Asset: {r: 2.2888926e+38, g: 1.2389358e-26, b: 7.69327e-37,
+        a: 0.00018220427}
+    - _SubsurfaceDiffusion_asset: {r: 2.2888926e+38, g: 1.2389358e-26, b: 7.69327e-37,
+        a: 0.00018220427}
     - _SubsurfaceMaskRemap: {r: 0, g: 0, b: 0, a: 0}
     - _VertexOcclusionColor: {r: 1, g: 1, b: 1, a: 1}
     - _VertexOcclusionRemap: {r: 0, g: 0, b: 0, a: 0}

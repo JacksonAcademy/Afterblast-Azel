@@ -74,6 +74,8 @@ public class PlayerManager : NetworkBehaviour
 
     public PlayerAnimator animator;
     public PlayerHealth playerHealth;
+    public GunManager gunManager;
+
     public DamageNumber damagePopup;
 
     public TextMeshProUGUI nameText;
@@ -88,31 +90,33 @@ public class PlayerManager : NetworkBehaviour
         nameText.gameObject.SetActive(!Owner.IsLocalClient);
         mainCam.gameObject.tag = (Owner.IsLocalClient ? "MainCamera" : "Untagged");
     }
-    private void FixedUpdate()
+    public void SetPlayerName(PlayerData player, Color playerColore)
     {
-        if(playerData.playerName!= string.Empty)
+        //SEt the player data for other clients
+        playerData = player;
+        nameText.text = player.playerName.ToString();
+        gameObject.name = player.playerName.ToString();
+
+
+        playerColor = playerColore;
+        for (int i = 0; i < renderers.Count; i++)
         {
-            nameText.text = playerData.playerName.ToString();
-            gameObject.name = playerData.playerName.ToString();
+            renderers[i].material.color = playerColor;
         }
+
     }
     public override void OnStopClient()
     {
         //When player leaves game, unintentionally or intentioanlly
-        gameManager.RemovePlayer(playerData);
+        gameManager.RemovePlayer(Time.time, playerData, NetworkObject);
     }
     public override void OnStartClient()
     {
         base.OnStartClient();
         Initialize();
-
     }
     public void Initialize()
     {
-        if (gameManager)
-            print("Found Game ManageR");
-        else
-            print("Didn't find GameManager");
         if (base.IsOwner)
         {
             //Set Player Data
@@ -126,25 +130,32 @@ public class PlayerManager : NetworkBehaviour
                 playerData.playerName = gameManager.matchmaker._playerName.text;
 
             //SEnd Player Data to SErver
-            gameManager.UpdatePlayer(playerData);
+            gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
         }
-        playerColor = gameManager.playerColors[gameManager.playerCount];
-        for (int i = 0; i < renderers.Count; i++)
-        {
-            renderers[i].material.color = playerColor;
-        }
-
         playerUI.SetActive(Owner.IsLocalClient);
         Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
     }
-    public void Die(PlayerManager whoKilledMe)
+
+    //This function runs on every client
+    [ObserversRpc]
+    public void DamagePlayerObservers(int damage, NetworkObject whoGotShot)
     {
-        StartCoroutine(DieCoroutine(whoKilledMe));
+        //Get Player Hitbox of player who got hit
+        PlayerManager playerHit = whoGotShot.GetComponent<PlayerManager>();
+        //Spawn effects
+        if (base.IsOwner)
+            playerHit.animator.Hit();
+
+        //Damage player who got shot
+        playerHit.playerHealth.TakeDamage(damage);
     }
-    private IEnumerator DieCoroutine(PlayerManager whoKilledMe)
+    public void DieScreen(PlayerManager whoKilledMe)
+    {
+        StartCoroutine(DieScreenCoroutine(whoKilledMe));
+    }
+    private IEnumerator DieScreenCoroutine(PlayerManager whoKilledMe)
     {
         eliminatedScreen.SetActive(true);
-        Hide(true);
         eliminatedByText.text = "Eliminated by <size=150%><color=red> " + whoKilledMe.playerData.playerName;
         float seconds = 5;
         while (seconds >= 0)
@@ -154,17 +165,20 @@ public class PlayerManager : NetworkBehaviour
             yield return null;
         }
         eliminatedScreen.SetActive(false);
+        Show(true);
         Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
     }
     [TargetRpc]
     public void Kill(NetworkConnection conn, NetworkObject whoIKilled)
     {
+
         PlayerManager playerWhoIKilled = whoIKilled.GetComponent<PlayerManager>();
-        playerData.playerKills++;
-        gameManager.UpdatePlayer(playerData);
-        gameManager.Elimination(playerData.playerName + " eliminated " + whoIKilled.playerData.playerName);
-        playerData.playerKills++;
-        StartCoroutine (KillCoroutine(whoIKilled));
+        print("Eliminated + " + playerWhoIKilled.playerData.playerName);
+
+playerData.playerKills++;
+        gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
+        gameManager.Elimination(playerData.playerName + " eliminated " + playerWhoIKilled.playerData.playerName);
+        StartCoroutine (KillCoroutine(playerWhoIKilled));
     }
 
     private IEnumerator KillCoroutine(PlayerManager whoIKilled)
@@ -224,10 +238,11 @@ public class PlayerManager : NetworkBehaviour
         nameText.gameObject.SetActive(!Owner.IsLocalClient);
         playerShoot.enabled = true;
     }
-    public void Show()
+    public void Show(bool serverShow)
     {
         ShowModel();
-        CMDShowModel();
+        if(serverShow)
+            CMDShowModel();
     }
     public void PauseGame()
     {

@@ -448,6 +448,7 @@ public class PlayerMovement : NetworkBehaviour
 
         _animator.UpdateAnimator(new Vector2(md.Horizontal, _sprinting ? 2 : md.Vertical), _verticalVelocity, _grounded, _aiming, _crouching, _sliding, _sprinting, delta);
 
+        if(_characterController.enabled)
             _characterController.Move(moveForces * delta);
     }
 

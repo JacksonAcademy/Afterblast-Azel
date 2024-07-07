@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Pine_Leaves (TVE Material)
   m_Shader: {fileID: 4800000, guid: a933075b367f9b24981408633f72ff34, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - TVE_FEATURE_CLIP
   m_InvalidKeywords: []
@@ -26,6 +28,7 @@ Material:
   - TransparentBackfaceDebugDisplay
   - TransparentDepthPrepass
   - TransparentDepthPostpass
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -141,10 +144,23 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _AdvancedCat: 0
     - _AlphaClipValue: 0.5
+    - _AlphaCutoff: 0.5
     - _AlphaCutoffValue: 0.6
     - _AlphaFeatherValue: 0.5
     - _AlphaVariationValue: 1
@@ -191,10 +207,12 @@ Material:
     - _DetailFadeMode: 1
     - _DetailMapsMode: 0
     - _DetailMaskContrast: 0
+    - _DetailMaskIntensity: 1
     - _DetailMaskInvertMode: 0
     - _DetailMaskMode: 0
     - _DetailMeshInvertMode: 0
     - _DetailMeshMode: 0
+    - _DetailMeshValue: 1
     - _DetailMode: 0
     - _DetailNormalMapScale: 1
     - _DetailNormalValue: 1
@@ -207,6 +225,7 @@ Material:
     - _EmissiveIntensityMode: 0
     - _EmissiveIntensityValue: 1
     - _EmissivePhaseValue: 1
+    - _EnvironmentReflections: 1
     - _ExtrasPositionMode: 0
     - _FadeCameraValue: 1
     - _FadeCat: 0
@@ -248,6 +267,7 @@ Material:
     - _InteractionVariation: 0
     - _IsBalancedShader: 1
     - _IsCollected: 0
+    - _IsCoreShader: 1
     - _IsForwardPathShader: 1
     - _IsHDPipeline: 1
     - _IsIdentifier: 77
@@ -318,6 +338,7 @@ Material:
     - _MotionNormalValue: 1
     - _MotionNormal_32: 1
     - _MotionObjectVariation: 0
+    - _MotionPosition_10: 0.5
     - _MotionScale_10: 0
     - _MotionScale_20: 2
     - _MotionScale_30: 10
@@ -365,6 +386,9 @@ Material:
     - _PerspectiveNoiseValue: 0
     - _PerspectivePushValue: 0
     - _PivotsMessage: 0
+    - _QueueControl: -1
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
     - _ReceiveSpace: 0
     - _RenderAmbient: 1
     - _RenderBlend: 0
@@ -432,9 +456,11 @@ Material:
     - _SurfaceMessage: 0
     - _TransAmbient: 0.2
     - _TransDirect: 1
+    - _TransNormal: 0
     - _TransNormalDistortion: 0
     - _TransScattering: 2
     - _TransShadow: 0.8
+    - _TransStrength: 2
     - _Translucency: 2
     - _TranslucencyAmbientValue: 0.2
     - _TranslucencyDirectValue: 1
@@ -500,6 +526,7 @@ Material:
     - _MainMaskRemap: {r: 0, g: 0.3, b: 0, a: 0}
     - _MainUVs: {r: 1, g: 1, b: 0, a: 0}
     - _MaxBoundsInfo: {r: 5.3272505, g: 21.573168, b: 21.573168, a: 0}
+    - _MotionHighlightColor: {r: 0, g: 0, b: 0, a: 0}
     - _NoiseColorOne: {r: 1, g: 1, b: 1, a: 1}
     - _NoiseColorTwo: {r: 1, g: 1, b: 1, a: 1}
     - _NoiseMaskRemap: {r: 0, g: 0, b: 0, a: 0}
@@ -511,8 +538,10 @@ Material:
     - _SecondMaskRemap: {r: 0, g: 0, b: 0, a: 0}
     - _SecondUVs: {r: 1, g: 1, b: 0, a: 0}
     - _SubsurfaceColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SubsurfaceDiffusion_Asset: {r: 2.2888926e+38, g: 1.2389358e-26, b: 7.69327e-37, a: 0.00018220427}
-    - _SubsurfaceDiffusion_asset: {r: 2.2888926e+38, g: 1.2389358e-26, b: 7.69327e-37, a: 0.00018220427}
+    - _SubsurfaceDiffusion_Asset: {r: 2.2888926e+38, g: 1.2389358e-26, b: 7.69327e-37,
+        a: 0.00018220427}
+    - _SubsurfaceDiffusion_asset: {r: 2.2888926e+38, g: 1.2389358e-26, b: 7.69327e-37,
+        a: 0.00018220427}
     - _SubsurfaceMaskRemap: {r: 0, g: 0.4152174, b: 0, a: 0}
     - _VertexOcclusionColor: {r: 1, g: 1, b: 1, a: 1}
     - _VertexOcclusionRemap: {r: 0, g: 1, b: 0, a: 0}

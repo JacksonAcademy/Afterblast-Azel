@@ -27,11 +27,7 @@ public class PlayerHitbox : NetworkBehaviour
     [TargetRpc]
     public void Damage(NetworkConnection conn, int amount, PlayerManager playerDamaged)
     {
-        playerHealth.TakeDamage(amount, playerDamaged);
+        playerHealth.TakeDamage(amount);
         print ("Took damage by: " + playerDamaged.playerData.playerName) ;
-    }
-    public float GetHealth(PlayerManager whoRequested)
-    {
-            return playerHealth.health;
     }
 }

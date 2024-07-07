@@ -16,7 +16,6 @@ public class PlayerShoot : NetworkBehaviour
     public LayerMask shootLayer, groundLayer;
     public TrailRenderer shootLine;
     public Transform shootPoint;
-    public int damage;
     [Header("Aiming")]
     public Vector3 normalPosition, aimingPosition, crouchingPosition, crouchingAimingPosition, slidingPosition;
     public float normalFov, aimingFov, aimLerp, slidingFOV;
@@ -71,6 +70,7 @@ public class PlayerShoot : NetworkBehaviour
     }
     private void CheckShot()
     {
+        GunManager gun = playerManager.gunManager;
         RaycastHit hit;
         if (Physics.Linecast(_camera.transform.position, shootPoint.position, out hit, groundLayer)) 
         {
@@ -87,13 +87,17 @@ public class PlayerShoot : NetworkBehaviour
             return;
         if (!Input.GetMouseButtonDown(0))
             return;
+        if (gun.equippedGun == null)
+            return;
         if (!canShoot)
             return;
 
         Vector3 direction = GetDirection();
         hitPlayerObject = null;
-        ShootClient(default, shootPoint.position, direction);
-        ServerShoot(base.TimeManager.GetPreciseTick(TickType.LastPacketTick), shootPoint.position, shootPoint.eulerAngles, shootDirection, clientHitPoint, hitPlayerObject, NetworkObject);
+        int damage = (int)gun.equippedGun.damage;
+        float nextFire = Time.time + gun.equippedGun.timeBetweenShots;
+        ShootClient(default, shootPoint.position, direction, damage, nextFire);
+        ServerShoot(base.TimeManager.GetPreciseTick(TickType.LastPacketTick), shootPoint.position, shootPoint.eulerAngles, shootDirection, damage, nextFire, clientHitPoint, hitPlayerObject, NetworkObject);
     }
     [TargetRpc]
     public void ReconcileDamage(NetworkConnection conn)
@@ -102,10 +106,9 @@ public class PlayerShoot : NetworkBehaviour
         spawnedDamageNumber.DestroyDNP();
     }
     [ServerRpc]
-    public void ServerShoot(PreciseTick pt, Vector3 shootPoint, Vector3 shootPointRotation, Vector3 shootDirection, Vector3 clientHitPoint, NetworkObject whoGotShot, NetworkObject whoShot)
+    public void ServerShoot(PreciseTick pt, Vector3 shootPoint, Vector3 shootPointRotation, Vector3 shootDirection, int damage, float nextFire, Vector3 clientHitPoint, NetworkObject whoGotShot, NetworkObject whoShot)
     {
-        _nextFire = Time.time + timeBetweenShots;
-
+        _nextFire = nextFire;
         RaycastHit hit = new RaycastHit();
        // base.RollbackManager.Rollback(pt, RollbackPhysicsType.Physics, base.IsOwner);
 
@@ -119,18 +122,18 @@ public class PlayerShoot : NetworkBehaviour
                     PlayerManager playerShot = whoShot.GetComponent<PlayerManager>();
                     PlayerManager playerWhoGotShot = whoGotShot.GetComponent<PlayerManager>();
 
-                    playerWhoGotShot.playerShoot.DamagePlayerObservers(whoGotShot); 
+                    playerWhoGotShot.DamagePlayerObservers(damage, whoGotShot); 
 
-                    //Damage hasn't been applied yet, so subtract the damage that will be applied from the base health
-                    if(playerShot.playerHealth.health-damage <= 0)
+                    ////Damage hasn't been applied yet, so subtract the damage that will be applied from the base health
+                    if(playerWhoGotShot.playerHealth.health-damage <= 0)
                     {
-                        playerWhoGotShot.playerHealth.ObserversDie();
-                        playerShot.Kill()
+                        playerWhoGotShot.playerHealth.ObserversDieEffects(whoShot);
+                        playerShot.Kill(whoShot.Owner, whoGotShot);
                     }
 
                 }
                 else if (hit.transform.tag == "Target")
-                    DamageTarget(hitPlayer);
+                    DamageTarget(damage, hitPlayer);
             }
         }
         else
@@ -141,42 +144,19 @@ public class PlayerShoot : NetworkBehaviour
             }
         }
         Debug.DrawRay(shootPoint, shootDirection * 2, Color.red, 10f);
-        ObserversFire(shootPoint, shootPointRotation, shootDirection, clientHitPoint, hit.normal, hit.transform!=null, whoGotShot);
+        ObserversFire(shootPoint, shootPointRotation, shootDirection, clientHitPoint, hit.normal, whoGotShot!=null, whoGotShot);
         //base.RollbackManager.Return();
     }
-    public void CheckDamage(RaycastHit hit)
+    public void CheckDamage(int damage, RaycastHit hit)
     {
         //Spawn blank effect, damage popup will spawn in DamagePlayer, sent by the server
         GameObject effect = Instantiate(shotBlank, hit.point, Quaternion.identity);
-        spawnedDamageNumber = damagePopup.Spawn(hit.transform.position + Vector3.up, damage, hit.transform);
         Destroy(effect, 2);
+        spawnedDamageNumber = damagePopup.Spawn(hit.transform.position + Vector3.up, damage, hit.transform);
+
         hit.transform.GetComponent<PlayerHitbox>().playerHealth.animator.Hit();
     }
-    //This function runs on every client
-    [ObserversRpc]
-    public void DamagePlayerObservers(NetworkObject whoGotShot)
-    {
-        //Get Player Hitbox of player who got hit
-        PlayerManager playerHit = whoGotShot.GetComponent<PlayerManager>();
 
-        //Local client already spawned effects, only spawn them on non owner observers
-        if(!base.IsOwner)
-        {
-            //Spawn effects
-            playerHit.animator.Hit();
-        }
-
-
-        //Damage player who got shot
-        playerHit.playerHealth.TakeDamage(damage);
-
-        //If the player who got shot has no health
-        if (playerHit.playerHealth.health <= 0)
-        {
-            //SEnd elimination to the player who shot
-            playerManager.Kill(playerManager.Owner, playerHit.playerHealth.player);
-        }
-    }
     public void ShootEffect(Vector3 shootPoint, Vector3 shootPointRotation, Vector3 direction, Vector3 hitPoint, Vector3 hitNormal, bool hitPlayer)
     {
         GameObject muzzleFlash = Instantiate(muzzleEffect, shootPoint, Quaternion.LookRotation(shootPointRotation));
@@ -189,9 +169,9 @@ public class PlayerShoot : NetworkBehaviour
 
         StartCoroutine(SpawnTrail(trail, direction, hitPoint, hitNormal, hitPlayer));
     }
-    public void ShootClient(PreciseTick pt, Vector3 start, Vector3 direction)
+    public void ShootClient(PreciseTick pt, Vector3 start, Vector3 direction, int damage, float nextFire)
     {
-        _nextFire = Time.time + timeBetweenShots;
+        _nextFire = nextFire;
         Ray ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         hitPlayer = default(RaycastHit);
         hitPlayerObject = null;
@@ -202,20 +182,19 @@ public class PlayerShoot : NetworkBehaviour
         //Shoot a real ray along the direction ray
         if (Physics.Raycast(start, shootDirection, out hitPlayer, Mathf.Infinity, shootLayer))
         {
-            print("Local client hit: " + hitPlayer.transform.name);
             clientHitPoint = hitPlayer.point;
             //If the client got hit, send Check the damage
             if (hitPlayer.transform.tag == "Player")
             {
                 hitPlayerObject = hitPlayer.transform.GetComponent<PlayerHitbox>().playerHealth.player.NetworkObject;
-                CheckDamage(hitPlayer);
+                CheckDamage(damage, hitPlayer);
             }
             else if(hitPlayer.transform.tag == "Target")
-                 DamageTarget(hitPlayer);
+                 DamageTarget(damage, hitPlayer);
         }
-        ShootEffect(start, shootPoint.localEulerAngles, shootDirection, hitPlayer.point, hitPlayer.normal, hitPlayer.transform!=null);
+        ShootEffect(start, shootPoint.localEulerAngles, shootDirection, hitPlayer.point, hitPlayer.normal, hitPlayerObject != null);
     }
-    public void DamageTarget(RaycastHit hit)
+    public void DamageTarget(int damage, RaycastHit hit)
     {
         GameObject effect = Instantiate(shotBlank, hit.point, Quaternion.identity);
         Destroy(effect, 2);
@@ -264,7 +243,8 @@ public class PlayerShoot : NetworkBehaviour
         if(hitPlayer)
         {
             trail.transform.position = hitPoint;
-
+            GameObject effect = Instantiate(shotBlank, hitPoint, Quaternion.identity);
+            Destroy(effect, 2);
         }
         else
         {

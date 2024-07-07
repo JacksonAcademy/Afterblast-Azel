@@ -33,32 +33,33 @@ public class GameManager : NetworkBehaviour
         killfeedManager = KillfeedManager.instance;
     }
     [ServerRpc(RequireOwnership = false)]
-    public void UpdatePlayer(PlayerData playerToUpdate)
+    public void UpdatePlayer(float timeSent, PlayerData playerToUpdate, NetworkObject player)
     {
-        UpdateObserverPlayers(playerToUpdate);
+        UpdateObserverPlayers(timeSent, playerToUpdate, player);
     }
-    [ObserversRpc]
-    public void UpdateObserverPlayers(PlayerData player)
+    [ObserversRpc(BufferLast = true)]
+    public void UpdateObserverPlayers(float timeSent, PlayerData playerData, NetworkObject player)
     {
-        if (players.Contains(player))
-        {
-            for (int i = 0; i < players.Count; i++)
-            {
-                if (players[i].playerClientID == player.playerClientID)
-                {
-                    //Updated Player stats
-                    players[i] = player;
+        float currentTime = Time.time;
+        float killfeedDelay = 2;
 
-                }
+        bool containsPlayerAlready = false;
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (players[i].playerClientID == playerData.playerClientID)
+            {
+                containsPlayerAlready = true;
+                players[i] = playerData;
             }
         }
-        else
+        if(!containsPlayerAlready)
         {
             //Player joined teh game
-            print("Player joined teh game!");
-            players.Add(player);
-            killfeedManager.AddItem(player.playerName + " joined the game!");
+            players.Add(playerData);
+            if (currentTime - killfeedDelay < timeSent)
+                killfeedManager.AddItem(playerData.playerName + " joined the game!");
         }
+        player.GetComponent<PlayerManager>().SetPlayerName(playerData, playerColors[players.Count]);
     }
     [ServerRpc(RequireOwnership=false)]
     public void Elimination(string elimination)
@@ -71,15 +72,21 @@ public class GameManager : NetworkBehaviour
         killfeedManager.AddItem(elimination);
     }
     [ServerRpc(RequireOwnership = false)]
-    public void RemovePlayer(PlayerData playerToRemove)
+    public void RemovePlayer(float timeSent, PlayerData playerToRemove, NetworkObject player)
     {
-        UpdateObserverPlayers(playerToRemove);
+        UpdateObserverPlayers(timeSent, playerToRemove, player);
     }
-    [ObserversRpc]
-    public void RemovePlayerObserver(PlayerData playerToRemove)
+    [ObserversRpc(BufferLast = true)]
+    public void RemovePlayerObserver(float timeSent, PlayerData playerToRemove, NetworkObject player)
     {
+        //We don't want players adding things to the killfeed a certain time after the RPC has been sent, or else it'll clog up
+        float currentTime = Time.time;
+        float killfeedDelay = 2;
+        if(currentTime - killfeedDelay < timeSent)
+            killfeedManager.AddItem(playerToRemove.playerName + " left the game!");
+
         players.Remove(playerToRemove);
-        killfeedManager.AddItem(playerToRemove.playerName + " left the game!");
+
     }
     public override void OnStopNetwork()
     {
