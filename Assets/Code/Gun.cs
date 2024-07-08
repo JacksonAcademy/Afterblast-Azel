@@ -13,7 +13,7 @@ public class Gun : MonoBehaviour
     public string gunName;
     public GameObject model;
 
-    public Transform rightHandPoint, leftHandPoint;
+    public Transform rightHandPoint, leftHandPoint, shootPoint;
 
     [Header("Gun Properties")]
     public GameObject muzzleFlash;
@@ -45,7 +45,7 @@ public class Gun : MonoBehaviour
     {
         transform.SetParent(holder, false);
         transform.localPosition = Vector3.zero;
-        model.transform.localScale = Vector3.one * gunHoldSize;
+        transform.localScale = Vector3.one * gunHoldSize;
         transform.localRotation = Quaternion.Euler(gunHoldRotation);
         gunIdleEffect.SetActive(false);
     }
@@ -53,7 +53,7 @@ public class Gun : MonoBehaviour
     {
         gunIdleEffect.SetActive(true);
         transform.SetParent(null);
-        model.transform.localScale = Vector3.one * gunDropSize;
+        transform.localScale = Vector3.one * gunDropSize;
         transform.localRotation = Quaternion.Euler(gunDropRotation);
     }
 }

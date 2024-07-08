@@ -16,12 +16,12 @@ public class InteractionManager : MonoBehaviour
         instance = this;
     }
 
-    public void AddInteract(string itemName, string itemRarity, int itemAmount, Transform interactObject)
+    public void AddInteract(string itemName, string itemRarity, int itemAmount, Transform interactObject, Transform trueCenter)
     {
         InteractionItem instantiatedItem = Instantiate(interactionItem, transform);
         instantiatedItem.SetText(itemRarity, itemName, itemAmount);
         instantiatedItem.interactObject = interactObject;
-        instantiatedItem.SetCam(camera);
+        instantiatedItem.SetCam(camera, trueCenter);
         Interactable interact = interactObject.GetComponent<Interactable>();
         interactions.Add(instantiatedItem);
     }
@@ -41,7 +41,7 @@ public class InteractionManager : MonoBehaviour
     {
         for(int i =0; i < interactions.Count; ++i)
         {
-            interactions[i].SetPosition(camera.WorldToScreenPoint(interactions[i].interactObject.position) + interactOffset);
+            interactions[i].SetPosition(camera.WorldToScreenPoint(interactions[i].trueCenter.position + interactOffset));
         }
     }
 }

@@ -24,7 +24,7 @@ public class ItemInteract : MonoBehaviour
 
                 previousInteracted = hit;
                 hoveredInteractable = hit.transform.GetComponent<Interactable>();
-                InteractionManager.instance.AddInteract(hoveredInteractable.itemName, hoveredInteractable.rarity, hoveredInteractable.amount, hit.transform);
+                InteractionManager.instance.AddInteract(hoveredInteractable.itemName, hoveredInteractable.rarity, hoveredInteractable.amount, hit.transform, hoveredInteractable.trueCenter);
                 hoveredGun = hoveredInteractable.GetComponent<Gun>();
             }
 

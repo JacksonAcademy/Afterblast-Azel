@@ -15,6 +15,7 @@ public class GunManager : MonoBehaviour
     private Interactable equippedGunInteract;
 
     public float aimWeight;
+    public bool sprinting;
     private void Awake()
     {
         instance = this;
@@ -44,7 +45,7 @@ public class GunManager : MonoBehaviour
             for (int i = 0; i < pistolRigs.Count; i++)
                 pistolRigs[i].weight = 0;
         }
-        else
+        else if(!sprinting)
         {
 
             if (equippedGun.holdType == gunType.rifle)

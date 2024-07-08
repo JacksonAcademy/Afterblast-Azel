@@ -7,11 +7,13 @@ public class InteractionItem : MonoBehaviour
 {
     public TextMeshProUGUI rarityText, itemNameText, amountText;
     public Transform interactObject;
+    public Transform trueCenter;
 
     private Camera cam;
-    public void SetCam(Camera camera)
+    public void SetCam(Camera camera, Transform trueCenterObject)
     {
         cam = camera;
+        trueCenter = trueCenterObject;
     }
     public void SetText(string rarity, string itemname, int amount)
     {

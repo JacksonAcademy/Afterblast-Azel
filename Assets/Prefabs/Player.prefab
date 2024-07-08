@@ -336,7 +336,6 @@ MonoBehaviour:
     m_Bits: 64
   shootLine: {fileID: 4676785389269035985, guid: 53e0feb8cbd64684cbb2a81e8a0e4c49,
     type: 3}
-  shootPoint: {fileID: 315962904713893046}
   normalPosition: {x: 0.45, y: 0.68, z: -1.44}
   aimingPosition: {x: 0.45, y: 0.68, z: -0.8}
   crouchingPosition: {x: 0.45, y: 0.26, z: -1.44}
@@ -348,7 +347,6 @@ MonoBehaviour:
   slidingFOV: 90
   _camera: {fileID: 8169678471332194035}
   bulletSpread: {x: 0.001, y: 0.001, z: 0.001}
-  timeBetweenShots: 0.1
   groundHitEffect: {fileID: 151174, guid: e3c9439885f011549a6460a1f4da82dc, type: 3}
   muzzleEffect: {fileID: 124018, guid: 1f389bb139e76154582cf3c5e4f9214b, type: 3}
   shotBlank: {fileID: 5171472931461619673, guid: 08231fc302f60f54eb203aaa5febfe3d,
@@ -508,6 +506,7 @@ MonoBehaviour:
   gunHolder: {fileID: 4314224123629061479}
   equippedGun: {fileID: 0}
   aimWeight: 0
+  sprinting: 0
 --- !u!114 &2909107949853408257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12426,7 +12425,7 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: -0.07, y: -0.28, z: 0.15}
+    m_Offset: {x: 0.28, y: -0.04, z: 0.15}
     m_ConstrainedAxes:
       x: 1
       y: 1
@@ -24390,7 +24389,7 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: 0.12, y: -0.06, z: 0.3}
+    m_Offset: {x: 0.03, y: -0.06, z: 0.12}
     m_ConstrainedAxes:
       x: 1
       y: 1
@@ -24798,7 +24797,7 @@ MonoBehaviour:
   interactionItem: {fileID: 3498837547682101485, guid: ae8484fa323d87f4ca0c4ce9b3b749af,
     type: 3}
   interactions: []
-  interactOffset: {x: 200, y: 0, z: 0}
+  interactOffset: {x: 0, y: 1, z: 0}
   camera: {fileID: 8169678471332194035}
 --- !u!1 &8238166881259779732
 GameObject:
@@ -25484,13 +25483,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8820885348365863932}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.04790976, y: -0, z: -0, w: 0.9988517}
-  m_LocalPosition: {x: 0.45, y: 0.68, z: -1.44}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.45, y: 0.453, z: -1.44}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1465629433371861530}
-  m_LocalEulerAnglesHint: {x: 5.492, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &8169678471332194035
 Camera:
   m_ObjectHideFlags: 0

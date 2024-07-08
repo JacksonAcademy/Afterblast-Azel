@@ -66,26 +66,26 @@ public class PlayerAnimator : NetworkBehaviour
         }
         if (!grounded)
             previousGrounded = false;
-        if (sprinting)
-            gunManager.NoGun();
-        if (gunManager.equippedGun != null)
+
+        if (gunManager.equippedGun != null && !sprinting)
         {
             _animator.SetInteger("GunType", (int)gunManager.equippedGun.holdType);
             //aimTimer -= delta;
-            if (!sprinting)
-            {
-                if (aimTimer > 0)
-                    GunAim();
-                else
-                    GunIdle();
-                gun.SetActive(true);
-            }
+            if (aimTimer > 0)
+                GunAim();
             else
-            {
-                gun.SetActive(false);
-                aimTimer = 0;
                 GunIdle();
-            }
+            gun.SetActive(true);
+            gunManager.sprinting = false;
+        }
+        if (sprinting)
+        {
+            gun.SetActive(false);
+            gunManager.NoGun();
+            gunManager.sprinting = true;
+            aimTimer = 0;
+            _animator.SetBool("Aim", false);
+            GunIdle();
         }
 
 

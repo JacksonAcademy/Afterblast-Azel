@@ -137,6 +137,8 @@ public class PlayerMovement : NetworkBehaviour
     public PlayerAnimator playerAnimator;
     public PlayerManager playerManager;
     public PlayerShoot playerShoot;
+
+    public Transform lookAtTransform;
     private void Awake()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -238,7 +240,7 @@ public class PlayerMovement : NetworkBehaviour
 
             Look();
 
- 
+            Debug.DrawLine(_camera.transform.position, lookAtTransform.position, Color.cyan);
 
             if (Input.GetKeyDown(KeyCode.LeftControl) && input.x == 0 && input.y == 0)
                 _crouchingInput = !_crouchingInput;

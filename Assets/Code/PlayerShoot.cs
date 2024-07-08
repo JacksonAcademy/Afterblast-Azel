@@ -15,7 +15,6 @@ public class PlayerShoot : NetworkBehaviour
     public float bulletTravelTime;
     public LayerMask shootLayer, groundLayer;
     public TrailRenderer shootLine;
-    public Transform shootPoint;
     [Header("Aiming")]
     public Vector3 normalPosition, aimingPosition, crouchingPosition, crouchingAimingPosition, slidingPosition;
     public float normalFov, aimingFov, aimLerp, slidingFOV;
@@ -23,7 +22,6 @@ public class PlayerShoot : NetworkBehaviour
     public Camera _camera;
     public Vector3 bulletSpread;
     private float _nextFire;
-    public float timeBetweenShots;
     public GameObject groundHitEffect, muzzleEffect, shotBlank;
     public DamageNumber damagePopup;
     [Header("UI")]
@@ -72,7 +70,9 @@ public class PlayerShoot : NetworkBehaviour
     {
         GunManager gun = playerManager.gunManager;
         RaycastHit hit;
-        if (Physics.Linecast(_camera.transform.position, shootPoint.position, out hit, groundLayer)) 
+        Vector3 shootPoint = GunManager.instance.equippedGun.shootPoint.position;
+        Quaternion shootRot = GunManager.instance.equippedGun.shootPoint.rotation;
+        if (Physics.Linecast(_camera.transform.position, shootPoint, out hit, groundLayer)) 
         {
             cantShootCrosshair.SetActive(true);
             cantShootCrosshair.transform.position = _camera.WorldToScreenPoint(hit.point);
@@ -96,8 +96,9 @@ public class PlayerShoot : NetworkBehaviour
         hitPlayerObject = null;
         int damage = (int)gun.equippedGun.damage;
         float nextFire = Time.time + gun.equippedGun.timeBetweenShots;
-        ShootClient(default, shootPoint.position, direction, damage, nextFire);
-        ServerShoot(base.TimeManager.GetPreciseTick(TickType.LastPacketTick), shootPoint.position, shootPoint.eulerAngles, shootDirection, damage, nextFire, clientHitPoint, hitPlayerObject, NetworkObject);
+
+        ShootClient(default, shootPoint, direction, damage, nextFire);
+        ServerShoot(base.TimeManager.GetPreciseTick(TickType.LastPacketTick), shootPoint, shootRot.eulerAngles, shootDirection, damage, nextFire, clientHitPoint, hitPlayerObject, NetworkObject);
     }
     [TargetRpc]
     public void ReconcileDamage(NetworkConnection conn)
@@ -192,7 +193,7 @@ public class PlayerShoot : NetworkBehaviour
             else if(hitPlayer.transform.tag == "Target")
                  DamageTarget(damage, hitPlayer);
         }
-        ShootEffect(start, shootPoint.localEulerAngles, shootDirection, hitPlayer.point, hitPlayer.normal, hitPlayerObject != null);
+        ShootEffect(start, GunManager.instance.equippedGun.shootPoint.localEulerAngles, shootDirection, hitPlayer.point, hitPlayer.normal, hitPlayerObject != null);
     }
     public void DamageTarget(int damage, RaycastHit hit)
     {
