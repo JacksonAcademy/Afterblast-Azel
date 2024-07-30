@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66b28e233a91cbf4bab6df864369dc6d, type: 3}
+  m_Name: Sniper Fire
+  m_EditorClassIdentifier: 
+  soundName: Rifle Fire
+  soundClips:
+  - {fileID: 8300000, guid: a2d2844c4f1c98b4db4b29bc264fe4fd, type: 3}
+  - {fileID: 8300000, guid: 43e571fbd7a071646a69b15f58630772, type: 3}
+  - {fileID: 8300000, guid: c6495588e2de6454ba4370cc7321e2da, type: 3}
+  group: {fileID: 0}
+  volume: 1
+  spatialBlend: 1
+  minDistance: 8

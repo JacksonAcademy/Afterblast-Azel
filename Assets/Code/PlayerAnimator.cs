@@ -1,4 +1,4 @@
-using FishNet.Example.ColliderRollbacks;
+
 using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,9 +18,9 @@ public class PlayerAnimator : NetworkBehaviour
     public GameObject gun;
     public PlayerManager playerManager;
     private bool previousGrounded;
-    private float aimTimer;
+    public float aimTimer;
     public float aimDelay;
-    float aimRigWeight;
+
     public GunManager gunManager;
 
     private Vector2 animationVelocity;
@@ -49,7 +49,7 @@ public class PlayerAnimator : NetworkBehaviour
     {
         aimTimer = aimDelay;
     }
-    public void UpdateAnimator(Vector2 velocity, float gravity, bool grounded, bool aim, bool crouching, bool sliding, bool sprinting, float delta)
+    public void UpdateAnimator(Vector2 velocity, float gravity, bool grounded, bool aim, bool crouching, bool sliding, bool sprinting, float delta, int gunType)
     {
         tickAnimationVelocity = velocity;
         _animator.SetBool("Grounded", grounded);
@@ -57,9 +57,11 @@ public class PlayerAnimator : NetworkBehaviour
         _animator.SetBool("Aim", aim);
         _animator.SetBool("Crouch", crouching);
         _animator.SetBool("Sliding", sliding);
-        _animator.SetBool("Gun", playerManager.gunManager.equippedGun != null);
+        _animator.SetBool("Gun", gunType == 0);
 
-        if(grounded && !previousGrounded)
+        gunManager.sprinting = sprinting;
+
+        if (grounded && !previousGrounded)
         {
             previousGrounded = true;
            // _animator.SetTrigger("HitGround");
@@ -67,24 +69,19 @@ public class PlayerAnimator : NetworkBehaviour
         if (!grounded)
             previousGrounded = false;
 
-        if (gunManager.equippedGun != null && !sprinting)
+        if (!sprinting)
         {
-            _animator.SetInteger("GunType", (int)gunManager.equippedGun.holdType);
-            //aimTimer -= delta;
+            _animator.SetInteger("GunType", gunType);
+            aimTimer -= delta;
             if (aimTimer > 0)
                 GunAim();
             else
                 GunIdle();
-            gun.SetActive(true);
-            gunManager.sprinting = false;
         }
-        if (sprinting)
+        else
         {
-            gun.SetActive(false);
             gunManager.NoGun();
-            gunManager.sprinting = true;
             aimTimer = 0;
-            _animator.SetBool("Aim", false);
             GunIdle();
         }
 

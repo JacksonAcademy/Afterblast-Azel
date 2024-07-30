@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.VisualScripting;
 using System;
-using FishNet.Example.ColliderRollbacks;
 
 [System.Serializable]
 public class controllerScale 
@@ -41,8 +40,9 @@ public struct ReplicateData : IReplicateData
     public float Vertical;
     public float XRotation;
     public float YRotation;
+    public int EquippedGun;
     public Vector3 Forward, Right;
-    public ReplicateData(float horizontal, float vertical, float xrotation, float yrotation, Vector3 right, Vector3 forward, MoveState eoveState)
+    public ReplicateData(float horizontal, float vertical, float xrotation, float yrotation, int equppedGun, Vector3 right, Vector3 forward, MoveState eoveState)
     {
         moveStates = eoveState;
         XRotation = xrotation;
@@ -51,6 +51,7 @@ public struct ReplicateData : IReplicateData
         Vertical = vertical;
         Forward = forward;
         Right = right;
+        EquippedGun = equppedGun;
         _tick = 0;
     }
 
@@ -69,14 +70,16 @@ public struct ReconcileData : IReconcileData
     public bool Sprinting;
     public bool Crouching;
     public float VerticalVelocity;
+    public float SlopeAngle;
     public bool Grounded;
-    public ReconcileData(Vector3 position, float verticalVelocity, float slideforce, Vector3 slideDirection, bool sliding, bool grounded, bool sprinting, bool crouching)
+    public ReconcileData(Vector3 position, float verticalVelocity, float slideforce, float slopeAngle, Vector3 slideDirection, bool sliding, bool grounded, bool sprinting, bool crouching)
     {
         Position = position;
         SlideForce = slideforce;
         Sliding = sliding;
         Grounded = grounded;
         Sprinting = sprinting;
+        SlopeAngle = slopeAngle;
         Crouching = crouching;
         SlideDirection = slideDirection;
         VerticalVelocity = verticalVelocity;
@@ -110,6 +113,7 @@ public class PlayerMovement : NetworkBehaviour
 
     [SerializeField] private Transform groundPosition, ceilingPosition;
 
+    public sound jump, land, footstep, slide;
     [Header("Sliding")]
     public controllerScale slideScale;
     public float _airSlideVelocity, _initialSlideForce, _slideAirFriction, _slideGroundFriction, _minSlideForce = 3;
@@ -132,13 +136,14 @@ public class PlayerMovement : NetworkBehaviour
     private CharacterController _characterController;
     [HideInInspector] public bool _jumpInput, _sprintingInput, _crouchingInput, _aimingInput, _slidingInput, _slidePressed;
     public bool _grounded, _ceiling, _crouching, _sprinting, _aiming, _sliding;
-    private float _verticalVelocity, _nextAllowedJumpTime, _nextAllowedSlideTime, slopeAngle;
+    private float _verticalVelocity, _nextAllowedJumpTime, _nextAllowedLandTime, _nextAllowedSlideTime, slopeAngle;
+
+    private bool previousGrounded;
 
     public PlayerAnimator playerAnimator;
     public PlayerManager playerManager;
     public PlayerShoot playerShoot;
-
-    public Transform lookAtTransform;
+    public GunManager gunManager;
     private void Awake()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -157,6 +162,8 @@ public class PlayerMovement : NetworkBehaviour
         _crouching = false;
         if (!replaying)
         {
+            print("play jumping sound");
+            jump.Play(transform.position);
             jumpParticles.Play();
             _jumpInput = false;
             _nextAllowedJumpTime = Time.time + _jumpReload;
@@ -240,8 +247,6 @@ public class PlayerMovement : NetworkBehaviour
 
             Look();
 
-            Debug.DrawLine(_camera.transform.position, lookAtTransform.position, Color.cyan);
-
             if (Input.GetKeyDown(KeyCode.LeftControl) && input.x == 0 && input.y == 0)
                 _crouchingInput = !_crouchingInput;
         }
@@ -285,7 +290,7 @@ public class PlayerMovement : NetworkBehaviour
     }
     public override void CreateReconcile()
     {
-        ReconcileData rd = new ReconcileData(transform.position, _verticalVelocity, _slideForce, _slideDirection, _sliding, _grounded, _sprinting, _crouching);
+        ReconcileData rd = new ReconcileData(transform.position, _verticalVelocity, _slideForce, slopeAngle, _slideDirection, _sliding, _grounded, _sprinting, _crouching);
         ReconcileState(rd);
     }
     private ReplicateData BuildMoveData()
@@ -313,7 +318,11 @@ public class PlayerMovement : NetworkBehaviour
 
         Vector3 right = _cameraPivot.right;
         Vector3 forward = transform.forward;
-        ReplicateData md = new ReplicateData(horizontal, vertical, mouseX,mouseY, right, forward, moveStates);
+        int gunType = 0;
+        if (gunManager.equippedGun)
+            gunType = (int)gunManager.equippedGun.holdType+1;
+
+        ReplicateData md = new ReplicateData(horizontal, vertical, mouseX,mouseY, gunType, right, forward, moveStates);
         moveStates = MoveState.None;
         _jumpInput = false;
         _slidingInput = false;
@@ -377,6 +386,7 @@ public class PlayerMovement : NetworkBehaviour
         bool groundedChanged = false;
 
         SetIsGrounded(out groundedChanged);
+
         bool jump = md.moveStates.Contains(MoveState.Jump);
         bool ceilinged = md.moveStates.Contains(MoveState.Ceiling);
         bool sliding = md.moveStates.Contains(MoveState.Sliding);
@@ -395,8 +405,17 @@ public class PlayerMovement : NetworkBehaviour
 
         if (jump)
         {
+            previousGrounded = false;
              Jump(state.IsReplayed());
         }
+        if (_grounded && !previousGrounded && Time.time > _nextAllowedLandTime && !state.IsReplayed())
+        {
+            _nextAllowedLandTime = Time.time + .2f;
+            print("Playing landing sound at vertical velocity: " + _verticalVelocity);
+            land.Play(transform.position);
+            previousGrounded = true;
+        }
+
 
         moveForces = md.Right * md.Horizontal + md.Forward * md.Vertical;
         moveForces.Normalize();
@@ -408,6 +427,7 @@ public class PlayerMovement : NetworkBehaviour
             _sliding = true;
             _slideDirection = moveForces;
             _slideForce = _initialSlideForce;
+            slide.Play(transform.position, 1, transform);
             SetControllerScale(slideScale);
             slideParticles.Play();
             if (!state.IsReplayed())
@@ -416,11 +436,16 @@ public class PlayerMovement : NetworkBehaviour
         if (_sliding)
             Slide(delta);
         else if(!sliding && _grounded && _verticalVelocity < 1)
-           _slideForce = 0;
+        {
+            _slideForce = 0;
+            slide.Stop();
+        }
+
         if(!_sliding && !_grounded)
         {
             _slideForce -= _slideAirFriction * delta;
             _slideForce = Mathf.Clamp(_slideForce, 0, 100);
+            slide.Stop();
         }
        if(_sprinting)
         {
@@ -438,6 +463,7 @@ public class PlayerMovement : NetworkBehaviour
 
         if (_aiming)
             playerAnimator.ResetAim();
+
         if(_grounded && (Mathf.Abs(md.Vertical) > 0||Mathf.Abs(md.Horizontal)>0))
             runParticles.Play();
 
@@ -448,8 +474,9 @@ public class PlayerMovement : NetworkBehaviour
             slideParticles.Stop();
         moveForces += _slideDirection * _slideForce;
 
-        _animator.UpdateAnimator(new Vector2(md.Horizontal, _sprinting ? 2 : md.Vertical), _verticalVelocity, _grounded, _aiming, _crouching, _sliding, _sprinting, delta);
+        _animator.UpdateAnimator(new Vector2(md.Horizontal, _sprinting ? 2 : md.Vertical), _verticalVelocity, _grounded, _aiming, _crouching, _sliding, _sprinting, delta, md.EquippedGun);
 
+        gunManager.equippedGunType = md.EquippedGun;
         if(_characterController.enabled)
             _characterController.Move(moveForces * delta);
     }
@@ -463,6 +490,7 @@ public class PlayerMovement : NetworkBehaviour
         _sliding = rd.Sliding;
         _grounded = rd.Grounded;
         _verticalVelocity = rd.VerticalVelocity;
+        slopeAngle = rd.SlopeAngle;
     }
 
 

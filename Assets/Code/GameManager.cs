@@ -10,7 +10,6 @@ using FishNet.CodeGenerating;
 using FishNet.Managing.Object;
 using FishNet.Managing.Server;
 using Unity.Services.Lobbies.Models;
-using FishNet.Demo.AdditiveScenes;
 
 public class GameManager : NetworkBehaviour
 {
@@ -35,10 +34,15 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void UpdatePlayer(float timeSent, PlayerData playerToUpdate, NetworkObject player)
     {
+        UpdatePlayerLocal(timeSent, playerToUpdate, player);
         UpdateObserverPlayers(timeSent, playerToUpdate, player);
     }
     [ObserversRpc(BufferLast = true)]
     public void UpdateObserverPlayers(float timeSent, PlayerData playerData, NetworkObject player)
+    {
+        UpdatePlayerLocal(timeSent, playerData, player);
+    }
+    public void UpdatePlayerLocal(float timeSent, PlayerData playerData, NetworkObject player)
     {
         float currentTime = Time.time;
         float killfeedDelay = 2;
@@ -52,14 +56,16 @@ public class GameManager : NetworkBehaviour
                 players[i] = playerData;
             }
         }
-        if(!containsPlayerAlready)
+        if (!containsPlayerAlready)
         {
             //Player joined teh game
             players.Add(playerData);
             if (currentTime - killfeedDelay < timeSent)
                 killfeedManager.AddItem(playerData.playerName + " joined the game!");
         }
-        player.GetComponent<PlayerManager>().SetPlayerName(playerData, playerColors[players.Count]);
+        PlayerManager playerManager = player.GetComponent   <PlayerManager>();
+        playerManager.SetPlayerName(playerData, playerColors[players.Count]);
+        playerManager.leaderboardManager.UpdatePlayer(playerData);
     }
     [ServerRpc(RequireOwnership=false)]
     public void Elimination(string elimination)

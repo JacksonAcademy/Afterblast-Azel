@@ -9,12 +9,12 @@ using Unity.VisualScripting;
 using UnityEngine;
 using FishNet.Connection;
 using System.Security.Cryptography;
+using Andtech.ProTracer;
 
 public class PlayerShoot : NetworkBehaviour
 {
     public float bulletTravelTime;
     public LayerMask shootLayer, groundLayer;
-    public TrailRenderer shootLine;
     [Header("Aiming")]
     public Vector3 normalPosition, aimingPosition, crouchingPosition, crouchingAimingPosition, slidingPosition;
     public float normalFov, aimingFov, aimLerp, slidingFOV;
@@ -30,14 +30,18 @@ public class PlayerShoot : NetworkBehaviour
     public PlayerMovement playerMovement;
     public PlayerManager playerManager;
 
+    public Bullet bulletPrefab = default;
+    public SmokeTrail smokeTrailPrefab = default;
 
     private DamageNumber spawnedDamageNumber;
 
     public lookAt gunRecoil;
-    public RaycastHit hitPlayer;
-    public NetworkObject hitPlayerObject;
-    public Vector3 clientHitPoint, shootDirection;
+    [HideInInspector] public RaycastHit hitPlayer;
+    [HideInInspector] public NetworkObject hitPlayerObject;
+    [HideInInspector] public Vector3 clientHitPoint, shootDirection;
     [HideInInspector] public bool canShoot;
+    public GunManager gunManager;
+    public sound damageSound;
     private void Awake()
     {
         aimingFov = _camera.fieldOfView;
@@ -47,6 +51,9 @@ public class PlayerShoot : NetworkBehaviour
     {
         if(base.IsOwner)
         {
+            if (!GunManager.instance.equippedGun)
+                return;
+
             CheckShot();
             float fov = playerMovement._aiming ? aimingFov : normalFov;
             Vector3 camPos = Vector3.zero;
@@ -118,7 +125,8 @@ public class PlayerShoot : NetworkBehaviour
         {
             if (Physics.Linecast(shootPoint, whoGotShot.transform.position, out hit, shootLayer))
             {
-                if (hit.transform.tag == "Player")
+                print("SErver hit: " + hit.transform.name);
+                if (hit.transform.tag == "PlayerHitbox")
                 {
                     PlayerManager playerShot = whoShot.GetComponent<PlayerManager>();
                     PlayerManager playerWhoGotShot = whoGotShot.GetComponent<PlayerManager>();
@@ -157,7 +165,15 @@ public class PlayerShoot : NetworkBehaviour
 
         hit.transform.GetComponent<PlayerHitbox>().playerHealth.animator.Hit();
     }
+    private void OnCompleted(object sender, System.EventArgs e)
+    {
+        // Handle complete event here
+        if (sender is TracerObject tracerObject)
+        {
+            Destroy(tracerObject.gameObject);
 
+        }
+    }
     public void ShootEffect(Vector3 shootPoint, Vector3 shootPointRotation, Vector3 direction, Vector3 hitPoint, Vector3 hitNormal, bool hitPlayer)
     {
         GameObject muzzleFlash = Instantiate(muzzleEffect, shootPoint, Quaternion.LookRotation(shootPointRotation));
@@ -166,9 +182,36 @@ public class PlayerShoot : NetworkBehaviour
         playerAnimator.ResetAim();
         gunRecoil.Shoot();
 
-        TrailRenderer trail = Instantiate(shootLine, shootPoint, Quaternion.identity);
+        gunManager.equippedGun.Shoot(shootPoint);
+        Bullet bullet = Instantiate(bulletPrefab);
+        SmokeTrail smokeTrail = Instantiate(smokeTrailPrefab);
 
-        StartCoroutine(SpawnTrail(trail, direction, hitPoint, hitNormal, hitPlayer));
+        
+        bullet.Arrived += OnImpact;
+
+        void OnImpact(object sender, System.EventArgs e)
+        {
+            gunManager.equippedGun.bulletWhiz.Play(hitPoint);
+            if (hitPlayer)
+            {
+                GameObject effect = Instantiate(shotBlank, hitPoint, Quaternion.identity);
+                Destroy(effect, 2);
+                damageSound.Play(hitPoint);
+            }
+            else
+            {
+                GameObject temp = Instantiate(groundHitEffect, hitPoint, Quaternion.LookRotation(hitNormal));
+                Destroy(temp, 2);
+            }
+        }
+        bullet.Completed += OnCompleted;
+        smokeTrail.Completed += OnCompleted;
+        float offset = 0;
+
+        bullet.DrawLine(shootPoint, hitPoint, bulletTravelTime, offset);
+        smokeTrail.DrawLine(shootPoint, hitPoint, bulletTravelTime, offset);
+
+       //StartCoroutine(SpawnTrail(trail, direction, hitPoint, hitNormal, hitPlayer));
     }
     public void ShootClient(PreciseTick pt, Vector3 start, Vector3 direction, int damage, float nextFire)
     {
@@ -185,7 +228,7 @@ public class PlayerShoot : NetworkBehaviour
         {
             clientHitPoint = hitPlayer.point;
             //If the client got hit, send Check the damage
-            if (hitPlayer.transform.tag == "Player")
+            if (hitPlayer.transform.tag == "PlayerHitbox")
             {
                 hitPlayerObject = hitPlayer.transform.GetComponent<PlayerHitbox>().playerHealth.player.NetworkObject;
                 CheckDamage(damage, hitPlayer);

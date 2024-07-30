@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class ItemInteract : MonoBehaviour
+using FishNet;
+using FishNet.Object;
+public class ItemInteract : NetworkBehaviour
 {
     public Transform camera;
     public float interactLength;
@@ -11,15 +12,19 @@ public class ItemInteract : MonoBehaviour
     public RaycastHit previousInteracted;
     public GunManager gunManager;
     public Gun hoveredGun;
+    public PlayerManager playerManager;
     public Interactable hoveredInteractable;
     public void Update()
     {
+        if (!base.IsOwner)
+            return;
+
         RaycastHit hit;
         Debug.DrawRay(camera.position, camera.forward * interactLength, Color.yellow);
 
         if (Physics.Raycast(camera.position, camera.forward, out hit, interactLength, interactLayer))
         {
-            if (previousInteracted.transform == null)
+            if (previousInteracted.transform == null && gunManager.equippedGun == null) 
             {
 
                 previousInteracted = hit;

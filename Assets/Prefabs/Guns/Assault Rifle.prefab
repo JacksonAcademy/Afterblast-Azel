@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5039082400858876854}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Shoot Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 1761830105180260641}
   - component: {fileID: 7471528134165504119}
   - component: {fileID: 4190832408197453866}
+  - component: {fileID: 6369409117924588696}
   m_Layer: 8
   m_Name: Assault Rifle
   m_TagString: Gun
@@ -63,6 +64,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1114589711480008274}
   - {fileID: 3429692005095174310}
   - {fileID: 4947593219081693604}
   - {fileID: 438557126934126078}
@@ -80,6 +82,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a48e3f7edfd1a549ad5941db34c2f7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 6369409117924588696}
+  _networkObjectCache: {fileID: 6369409117924588696}
   gunName: Combat Assault Rifle
   model: {fileID: 4208244558364972629}
   rightHandPoint: {fileID: 228630554135450378}
@@ -136,8 +141,54 @@ MonoBehaviour:
   rarity: Uncommon
   amount: 1
   interactLayer: 8
-  defaultLayer: 1
+  defaultLayer: 0
   trueCenter: {fileID: 4947593219081693604}
+--- !u!114 &6369409117924588696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3422964238113032274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <IsNested>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  _networkBehaviours:
+  - {fileID: 1761830105180260641}
+  <SerializedRootNetworkBehaviour>k__BackingField: {fileID: 0}
+  <NestedRootNetworkBehaviours>k__BackingField: []
+  SerializedTransformProperties:
+    Position: {x: 18.197205, y: 17.8223, z: -19.435707}
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    LocalScale: {x: 1, y: 1, z: 1}
+  _isNetworked: 1
+  _isSpawnable: 0
+  _isGlobal: 0
+  _initializeOrder: 0
+  _defaultDespawnType: 0
+  NetworkObserver: {fileID: 0}
+  _enablePrediction: 0
+  _predictionType: 0
+  _graphicalObject: {fileID: 0}
+  _detachGraphicalObject: 0
+  _enableStateForwarding: 1
+  _networkTransform: {fileID: 0}
+  _ownerInterpolation: 1
+  _ownerSmoothedProperties: 255
+  _adaptiveInterpolation: 3
+  _spectatorSmoothedProperties: 255
+  _spectatorInterpolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  <PrefabId>k__BackingField: 9
+  <SpawnableCollectionId>k__BackingField: 0
+  <SceneId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 10028881944238054353
 --- !u!1 &3439970221572633717
 GameObject:
   m_ObjectHideFlags: 0
@@ -147,7 +198,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3971447615161171066}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Left Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -162,13 +213,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3439970221572633717}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.2762104, y: -0.7226777, z: -0.13134985, w: 0.6198323}
-  m_LocalPosition: {x: -0.089, y: 0.042, z: 0.936}
+  m_LocalRotation: {x: -0.6288609, y: -0.58319914, z: -0.28361776, w: -0.42892176}
+  m_LocalPosition: {x: -0.112, y: 0.039, z: 0.864}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3429692005095174310}
-  m_LocalEulerAnglesHint: {x: -32.158, y: -103.464, z: 16.214}
+  m_LocalEulerAnglesHint: {x: 12.043, y: -241.198, z: 87.176}
 --- !u!1 &4208244558364972629
 GameObject:
   m_ObjectHideFlags: 0
@@ -178,7 +229,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3429692005095174310}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -198,7 +249,6 @@ Transform:
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1114589711480008274}
   - {fileID: 380169293254886051}
   - {fileID: 228630554135450378}
   - {fileID: 3971447615161171066}
@@ -244,7 +294,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 228630554135450378}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Right Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -380,6 +430,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: assault2
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 6bea03a7115c5d748b18a7573d0d4d2b,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -401,8 +456,13 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 3429692005095174310}
+    m_TransformParent: {fileID: 2656973888761942184}
     m_Modifications:
+    - target: {fileID: 91273973035156732, guid: f6fd568b816c64943a44efc3add3a881,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 1034700375001605414, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
       propertyPath: m_Range
@@ -411,17 +471,17 @@ PrefabInstance:
     - target: {fileID: 1034700375001605414, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.26737964
+      value: 0.30540124
       objectReference: {fileID: 0}
     - target: {fileID: 1034700375001605414, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.76470584
+      value: 0.5321147
       objectReference: {fileID: 0}
     - target: {fileID: 1034700375001605414, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
       propertyPath: m_Intensity
-      value: 0
+      value: 2.5931447
       objectReference: {fileID: 0}
     - target: {fileID: 1464211568921416440, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
@@ -448,20 +508,25 @@ PrefabInstance:
       propertyPath: m_Name
       value: CFXR4 Bouncing Glows Bubble (Blue Purple)
       objectReference: {fileID: 0}
+    - target: {fileID: 5824670795371433373, guid: f6fd568b816c64943a44efc3add3a881,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 5824670795371433374, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 3.3333333
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5824670795371433374, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 3.3333333
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5824670795371433374, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 3.3333333
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5824670795371433374, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
@@ -471,12 +536,12 @@ PrefabInstance:
     - target: {fileID: 5824670795371433374, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.085
       objectReference: {fileID: 0}
     - target: {fileID: 5824670795371433374, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.507
       objectReference: {fileID: 0}
     - target: {fileID: 5824670795371433374, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}
@@ -517,6 +582,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7708729512989566163, guid: f6fd568b816c64943a44efc3add3a881,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7708729512989566163, guid: f6fd568b816c64943a44efc3add3a881,
         type: 3}

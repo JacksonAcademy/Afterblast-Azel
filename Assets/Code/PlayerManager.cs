@@ -9,6 +9,7 @@ using Unity.VisualScripting;
 using FishNet.Serializing;
 using DamageNumbersPro;
 using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
+using FishNet;
 public static class PlayerExtensions
 {
     public static void WritePlayerData(this Writer writer, PlayerData value)
@@ -58,6 +59,8 @@ public class PlayerManager : NetworkBehaviour
     public TextMeshProUGUI eliminatedByText;
     [Header("Elimination Screen")]
     public TextMeshProUGUI eliminationText;
+    public TextMeshProUGUI serverPlayerCountText;
+    public TextMeshProUGUI eliminationsText;
 
     public GameObject spawnEffect;
     public PlayerMovement playerMovement;
@@ -75,10 +78,13 @@ public class PlayerManager : NetworkBehaviour
     public PlayerAnimator animator;
     public PlayerHealth playerHealth;
     public GunManager gunManager;
+    public LeaderboardManager leaderboardManager;
+    public sound respawn, death, elimination;
 
     public DamageNumber damagePopup;
 
     public TextMeshProUGUI nameText;
+    public NetworkObject playerObject;
     private bool isPaused = false;
     private void Awake()
     {
@@ -88,6 +94,7 @@ public class PlayerManager : NetworkBehaviour
     private void Start()
     {
         nameText.gameObject.SetActive(!Owner.IsLocalClient);
+        gameUI.gameObject.SetActive(Owner.IsLocalClient);
         mainCam.gameObject.tag = (Owner.IsLocalClient ? "MainCamera" : "Untagged");
     }
     public void SetPlayerName(PlayerData player, Color playerColore)
@@ -103,17 +110,26 @@ public class PlayerManager : NetworkBehaviour
         {
             renderers[i].material.color = playerColor;
         }
-
     }
     public override void OnStopClient()
     {
         //When player leaves game, unintentionally or intentioanlly
         gameManager.RemovePlayer(Time.time, playerData, NetworkObject);
+        DropWeapons();
     }
     public override void OnStartClient()
     {
         base.OnStartClient();
         Initialize();
+    }
+    public override void OnStartNetwork()
+    {
+        base.OnStartNetwork();
+        //Initialize();
+    }
+    public override void OnStopNetwork()
+    {
+        base.OnStopNetwork();
     }
     public void Initialize()
     {
@@ -125,7 +141,7 @@ public class PlayerManager : NetworkBehaviour
             playerData.playerDeaths = 0;
             //If the player didn't input a name, choose a default name "player 1"
             if (gameManager.matchmaker._playerName.text == string.Empty)
-                playerData.playerName = "Player " + gameManager.playerCount;
+                playerData.playerName = "Player " + (gameManager.playerCount+1);
             else
                 playerData.playerName = gameManager.matchmaker._playerName.text;
 
@@ -134,6 +150,18 @@ public class PlayerManager : NetworkBehaviour
         }
         playerUI.SetActive(Owner.IsLocalClient);
         Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
+        respawn.Play(transform.position);
+    }
+    public void Die()
+    {
+        DropWeapons();
+        death.Play(transform.position);
+    }
+    public void DropWeapons()
+    {
+        print("DRopped Weapons for player: " + playerData.playerName);
+        if(gunManager.equippedGun)
+            gunManager.Drop(gunManager.equippedGun, mainCam.transform.forward * 10);
     }
 
     //This function runs on every client
@@ -184,6 +212,7 @@ playerData.playerKills++;
     private IEnumerator KillCoroutine(PlayerManager whoIKilled)
     {
         eliminationScreen.SetActive(true);
+        elimination.Play(transform.position);
         eliminationText.text = "Eliminated <size=150%><color=red>" + whoIKilled.playerData.playerName;
         yield return new WaitForSeconds(2);
         eliminationScreen.SetActive(false);
@@ -204,6 +233,8 @@ playerData.playerKills++;
             else
                 PauseGame();
         }
+        eliminationsText.text = playerData.playerKills.ToString();
+        serverPlayerCountText.text = gameManager.playerCount.ToString();
     }
     private IEnumerator RespawnCoroutine(Vector3 position)
     {
@@ -268,7 +299,7 @@ playerData.playerKills++;
         StartCoroutine(RespawnCoroutine(position));
         CMDRespawn(position);
     }
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void CMDRespawn(Vector3 position)
     {
         if (!base.IsOwner)
@@ -280,7 +311,6 @@ playerData.playerKills++;
     {
         if (base.IsOwner || base.IsServerInitialized)
             return;
-
         StartCoroutine(RespawnCoroutine(position));
     }
     [ObserversRpc]

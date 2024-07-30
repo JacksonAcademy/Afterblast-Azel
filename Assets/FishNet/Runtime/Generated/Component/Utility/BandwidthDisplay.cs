@@ -133,7 +133,7 @@ namespace FishNet.Component.Utility
         private void OnGUI()
         {
             _style.normal.textColor = _color;
-            _style.fontSize = 15;
+            _style.fontSize = 10;
 
             float width = 100f;
             float height = 0f;

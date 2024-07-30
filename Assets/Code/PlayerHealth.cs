@@ -41,6 +41,7 @@ public class PlayerHealth : NetworkBehaviour
             player.DieScreen(whoKilledMe.GetComponent<PlayerManager>());
         SetHealth(startingHealth);
         DieEffects(whoKilledMe);
+        player.Die();
     }
     public void DieEffects(NetworkObject whoKilledMe)
     {
