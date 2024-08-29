@@ -85,8 +85,9 @@ MonoBehaviour:
   m_negate: 0
   m_updateMode: 0
   m_utilizeLocalStartOffsetToParent: 0
-  m_resetToLocalStartPositionWhenDisabled: 0
-  m_resetToLocalStartPositionWhenFootIkIsDisabled: 0
+  m_resetToLocalStartPositionWhenDisabled: 1
+  m_resetToLocalStartPositionWhenFootIkIsDisabled: 1
+  m_offsetMethod: 0
 --- !u!1 &224568814735964271
 GameObject:
   m_ObjectHideFlags: 0
@@ -222,6 +223,8 @@ GameObject:
   - component: {fileID: 2422976147313800740}
   - component: {fileID: 5582656176581098749}
   - component: {fileID: 2909107949853408257}
+  - component: {fileID: 8250206916408852631}
+  - component: {fileID: 5461035053176044610}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -261,7 +264,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <IsNested>k__BackingField: 0
   <ComponentIndex>k__BackingField: 0
-  <PredictedSpawn>k__BackingField: {fileID: 0}
+  <PredictedSpawn>k__BackingField: {fileID: 5461035053176044610}
   _networkBehaviours:
   - {fileID: 8357676141616578387}
   - {fileID: 4691114520261158112}
@@ -271,6 +274,7 @@ MonoBehaviour:
   - {fileID: 2422976147313800740}
   - {fileID: 5582656176581098749}
   - {fileID: 2909107949853408257}
+  - {fileID: 5461035053176044610}
   - {fileID: 316364084471927749}
   - {fileID: 1883986681397107073}
   - {fileID: 5616552532560438982}
@@ -389,7 +393,7 @@ MonoBehaviour:
   jumpParticles: {fileID: 9026656292753696482}
   slideParticles: {fileID: 702347561300112291}
   slideKey: 306
-  _listener: {fileID: 170588313228812857}
+  _characterController: {fileID: 4148834954576211901}
   _jumpInput: 0
   _sprintingInput: 0
   _crouchingInput: 0
@@ -532,17 +536,18 @@ MonoBehaviour:
   eliminationText: {fileID: 9183412327117537728}
   serverPlayerCountText: {fileID: 520783082250606695}
   eliminationsText: {fileID: 8253776468230744805}
-  spawnEffect: {fileID: 1639294911062136114, guid: 8e2eeaf2cc39c2c4bb4cb56e03208812,
+  spawnEffect: {fileID: 764057726837793369, guid: e31dd20ae9a494c4eb45764ea74a3155,
     type: 3}
   playerMovement: {fileID: 8357676141616578387}
   playerShoot: {fileID: 4691114520261158112}
   respawnDelay: 5
   spawnInDelay: 0.5
   playerData:
-    playerName: Yes
-    playerKills: 0
+    playerName: Ack
+    playerKills: 1
     playerDeaths: 0
     playerClientID: 1
+  listener: {fileID: 170588313228812857}
   gameUI: {fileID: 2274745739847614395}
   renderers:
   - {fileID: 8935334152796554461}
@@ -551,7 +556,7 @@ MonoBehaviour:
   animator: {fileID: 6198841281594916437}
   playerHealth: {fileID: 1652094246498167029}
   gunManager: {fileID: 5582656176581098749}
-  leaderboardManager: {fileID: 1815498987379601439}
+  leaderboardManager: {fileID: 8250206916408852631}
   respawn: {fileID: 11400000, guid: 9eacfd583bb7ca84db01383e5434dd50, type: 2}
   death: {fileID: 11400000, guid: 18be87cb30be63d4d87ae6545fcb953f, type: 2}
   elimination: {fileID: 11400000, guid: 993ed07e236fe4742969002f86aff22d, type: 2}
@@ -646,6 +651,38 @@ MonoBehaviour:
   hoveredGun: {fileID: 0}
   playerManager: {fileID: 2247663849957395728}
   hoveredInteractable: {fileID: 0}
+--- !u!114 &8250206916408852631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 303449598114786579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 947704ed402ee8f4691d051356270bde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  item: {fileID: 4382256881881677071, guid: ea09c6e4454c5664fbf1e8ba5e6c8103, type: 3}
+  spawnTransform: {fileID: 4290179155976824037}
+  items: []
+--- !u!114 &5461035053176044610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 303449598114786579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2b597e1828355a4d994a69cbb11ef85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 8
+  _addedNetworkObject: {fileID: 201277550}
+  _networkObjectCache: {fileID: 201277550}
+  _allowSpawning: 1
+  _allowDespawning: 1
 --- !u!1 &477866457027893802
 GameObject:
   m_ObjectHideFlags: 0
@@ -5995,8 +6032,9 @@ MonoBehaviour:
   m_negate: 1
   m_updateMode: 0
   m_utilizeLocalStartOffsetToParent: 0
-  m_resetToLocalStartPositionWhenDisabled: 0
-  m_resetToLocalStartPositionWhenFootIkIsDisabled: 0
+  m_resetToLocalStartPositionWhenDisabled: 1
+  m_resetToLocalStartPositionWhenFootIkIsDisabled: 1
+  m_offsetMethod: 0
 --- !u!1 &784993778885264623
 GameObject:
   m_ObjectHideFlags: 0
@@ -6899,8 +6937,9 @@ MonoBehaviour:
   m_negate: 1
   m_updateMode: 0
   m_utilizeLocalStartOffsetToParent: 0
-  m_resetToLocalStartPositionWhenDisabled: 0
-  m_resetToLocalStartPositionWhenFootIkIsDisabled: 0
+  m_resetToLocalStartPositionWhenDisabled: 1
+  m_resetToLocalStartPositionWhenFootIkIsDisabled: 1
+  m_offsetMethod: 0
 --- !u!1 &2835535754389355969
 GameObject:
   m_ObjectHideFlags: 0
@@ -12383,7 +12422,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Yes
+  m_text: Ack
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f008cddc558bc504ca14041c601313e7, type: 2}
   m_sharedMaterial: {fileID: -8708559337652861391, guid: f008cddc558bc504ca14041c601313e7,
@@ -25855,8 +25894,9 @@ MonoBehaviour:
   m_negate: 1
   m_updateMode: 0
   m_utilizeLocalStartOffsetToParent: 0
-  m_resetToLocalStartPositionWhenDisabled: 0
-  m_resetToLocalStartPositionWhenFootIkIsDisabled: 0
+  m_resetToLocalStartPositionWhenDisabled: 1
+  m_resetToLocalStartPositionWhenFootIkIsDisabled: 1
+  m_offsetMethod: 0
 --- !u!1 &7975984973047223825
 GameObject:
   m_ObjectHideFlags: 0
@@ -25868,7 +25908,6 @@ GameObject:
   - component: {fileID: 3816249555645442388}
   - component: {fileID: 1080945223582049243}
   - component: {fileID: 3271808200145069896}
-  - component: {fileID: 1815498987379601439}
   m_Layer: 7
   m_Name: Leaderboard
   m_TagString: Untagged
@@ -25935,21 +25974,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &1815498987379601439
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7975984973047223825}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 947704ed402ee8f4691d051356270bde, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 4382256881881677071, guid: ea09c6e4454c5664fbf1e8ba5e6c8103, type: 3}
-  spawnTransform: {fileID: 4290179155976824037}
-  items: []
 --- !u!1 &8169691957476290173
 GameObject:
   m_ObjectHideFlags: 0
@@ -29672,7 +29696,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 9
+  _componentIndexCache: 10
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -29717,7 +29741,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 11
+  _componentIndexCache: 12
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -29840,7 +29864,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 19
+  _componentIndexCache: 20
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -29991,7 +30015,7 @@ MonoBehaviour:
   m_animatorIkPassLayerIndex: 0
   m_collisionLayerMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1
   m_triggerCollisionInteraction: 1
   m_resetToDefaultValuesSpeed: 1
   m_activateCrouchSpecificBehaviour: 0
@@ -29999,7 +30023,7 @@ MonoBehaviour:
   m_forceActivateCrouchingBehaviour: []
   m_forceInvalidOnAnimatorStates: []
   m_globalCharacterYOffset: 0
-  m_applyGlobalCharacterYOffsetToOtherIKsToo: 0
+  m_applyGlobalCharacterYOffsetToOtherIKsToo: 1
   m_ikPlacementWeight: 1
   m_ikPlacementStiffness: 8
   m_ikRotationStiffness: 8
@@ -30040,13 +30064,17 @@ MonoBehaviour:
   m_slopeBendingTransitionStiffness: 10
   m_averageSlopeLeaningFixedQueueCount: 20
   m_maxAbsoluteSlopeSpineBending: 90
-  m_slopeLeaningType: 2
+  m_slopeLeaningType: 1
   m_shouldersCounteractSpineBending: 1
   m_ignoreVelocityDependency: 0
   m_relativeSpineRotationAxisAffectedBySlopeLeaning: 0
-  m_moveLeaningStrength: 0
+  m_moveLeaningStrength: 1
   m_moveLeaningKneelFactor: 0
-  m_moveLeaningStiffness: 6.3
+  m_moveSpineLeaningStrength: 0
+  m_moveLeaningStiffness: 12
+  m_moveLeaningIsStartStopPercentage: 0
+  m_moveLeaningIsStartStopStartDurationStrength: 20
+  m_moveLeaningIsStartStopStopDurationStrength: 15
   m_moveLeanWhenGrounded: 1
   m_moveLeanWhenNotGrounded: 1
   m_flipRightMoveLean: 1
@@ -30133,7 +30161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 8
+  _componentIndexCache: 9
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -30196,7 +30224,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 18
+  _componentIndexCache: 19
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -30323,7 +30351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 14
+  _componentIndexCache: 15
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -30380,7 +30408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 17
+  _componentIndexCache: 18
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -30443,7 +30471,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 20
+  _componentIndexCache: 21
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -30488,7 +30516,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 16
+  _componentIndexCache: 17
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -30533,7 +30561,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 13
+  _componentIndexCache: 14
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -30618,7 +30646,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 15
+  _componentIndexCache: 16
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -30693,7 +30721,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 12
+  _componentIndexCache: 13
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}
@@ -30822,7 +30850,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfd7dbb7bac122a489eea1ea04115470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 10
+  _componentIndexCache: 11
   _addedNetworkObject: {fileID: 201277550}
   _networkObjectCache: {fileID: 201277550}
   playerHealth: {fileID: 1652094246498167029}

@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class LeaderboardManager : MonoBehaviour
 {
@@ -11,32 +9,62 @@ public class LeaderboardManager : MonoBehaviour
     public static LeaderboardManager instance;
 
     public List<LeaderboardItem> items;
+
+    private GameManager gameManager;
+    private int previousCount;
+    private float lastChange;
+    
     public void Awake()
     {
         instance = this;
     }
-    public void UpdatePlayer(PlayerData playerData)
+    private void Start()
     {
-        print("updating leaderboard player: " + playerData.playerName);
-        LeaderboardItem leaderboardItem = null;
-        if(items.Count > 0)
+        gameManager = GameManager.instance;
+    }
+
+    private void Update()
+    {
+        if(gameManager.players.Count !=  previousCount)
         {
-            for (int i = 0; i < items.Count; i++)
+            UpdateLeaderboard();
+            previousCount = items.Count;
+        }
+        else
+        { //UPdate leaderboard every second
+            if (Time.time > lastChange)
             {
-                if (items[i].playerData == playerData)
-                {
-                    leaderboardItem = items[i];
-                    break;
-                }
+                lastChange = Time.time + 1;
+                UpdateLeaderboard();
             }
         }
-        else if(items.Count == 0)
-        {
-            leaderboardItem = Instantiate(item, spawnTransform);
-            items.Add(item);
-        }
+
+    }
+    public void UpdatePlayer(PlayerData playerData)
+    {
+        LeaderboardItem leaderboardItem = null;
+        leaderboardItem = Instantiate(item.gameObject, spawnTransform).GetComponent<LeaderboardItem>();
         leaderboardItem.playerData = playerData;
         leaderboardItem.text.text = playerData.playerName.ToString() + " - " + playerData.playerKills.ToString();
-
+        items.Add(leaderboardItem);
+    }
+    public void DeleteLeaderboards()
+    {
+        LeaderboardItem temp = null;
+        int count = items.Count;
+        for(int i= 0; i < count; i++)
+        {
+            temp = items[0];
+            items.Remove(items[0]);
+            Destroy(temp.gameObject);
+        }
+    }
+    public void UpdateLeaderboard()
+    {
+        DeleteLeaderboards();
+        for(int i = 0; i < gameManager.players.Count; i++)
+        {
+            UpdatePlayer(gameManager.players[i]);
+        }
     }
 }

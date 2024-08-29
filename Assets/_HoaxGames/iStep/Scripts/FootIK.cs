@@ -19,9 +19,9 @@ namespace HoaxGames
         [SerializeField, Tooltip("Please activate the animator IK pass on a specific layer - typically it is most likely best to activate it for the base layer. This is an requirement for getting OnAnimatorIK called on this script (otherwise the script is not going to work). This variable defines the index of the specific layer where the IK pass is activated and will be used by the script.")]
         protected int m_animatorIkPassLayerIndex = 0; public int animatorIkPassLayerIndex { get { return m_animatorIkPassLayerIndex; } }
         [SerializeField, Tooltip("The Collision-Layer for foot and body placement detection.")]
-        LayerMask m_collisionLayerMask = 1 << 0; public LayerMask collisionLayerMask { get { return m_collisionLayerMask; } }
+        protected LayerMask m_collisionLayerMask = 1 << 0; public LayerMask collisionLayerMask { get { return m_collisionLayerMask; } set { m_collisionLayerMask = value; } }
         [SerializeField, Tooltip("The collision-setting for trigger-interactions for foot and body placement detection. Default setting is 'Ignore'.")]
-        QueryTriggerInteraction m_triggerCollisionInteraction = QueryTriggerInteraction.Ignore; public QueryTriggerInteraction triggerCollisionInteraction { get { return m_triggerCollisionInteraction; } set { m_triggerCollisionInteraction = value; } }
+        protected QueryTriggerInteraction m_triggerCollisionInteraction = QueryTriggerInteraction.Ignore; public QueryTriggerInteraction triggerCollisionInteraction { get { return m_triggerCollisionInteraction; } set { m_triggerCollisionInteraction = value; } }
         [SerializeField, Range(0.1f, 10.0f), Tooltip("The speed at which the positions and rotations interpolate to the respective default values inbetween valid / grounded and invalid / not grounded state changes.")]
         protected float m_resetToDefaultValuesSpeed = 1.0f;
         [SerializeField, Tooltip("This is a special behaviour that takes into consideration that the character controller is crouching. This behaviour adapts both feet and body placement accordingly to this condition.")]
@@ -138,8 +138,16 @@ namespace HoaxGames
         protected float m_moveLeaningStrength = 0.0f;
         [SerializeField, Range(0, 2), Tooltip("Using leaning is not fully supported when used with Animation Rigging! This parameter defines how much the characters body should kneel when leaning towards the moving direction when moving. This effect is only applied if MoveLeaningStrength is bigger 0.01 and the character simultaneously moves.")]
         protected float m_moveLeaningKneelFactor = 0.0f;
+        [SerializeField, Range(0, 40), Tooltip("Using leaning is not fully supported when used with Animation Rigging! This parameter defines how much the characters spine should lean towards the moving direction when moving and is always applied when the character moves.")]
+        protected float m_moveSpineLeaningStrength = 0.0f;
         [SerializeField, Range(1, 100), Tooltip("This value is used to smoothly lerp move-leaning transitions. The higher the value, the stiffer the transition. The smaller the value, the smoother the transition.")]
         protected float m_moveLeaningStiffness = 12.0f;
+        [SerializeField, Range(0, 1), Tooltip("With this value you can change how much the leaning is applied as start-stop behaviour instead of a continued leaning.")]
+        protected float m_moveLeaningIsStartStopPercentage = 0.0f;
+        [SerializeField, Range(1, 100), Tooltip("The higher the value the longer the Start leaning will be.")]
+        protected float m_moveLeaningIsStartStopStartDurationStrength = 20.0f;
+        [SerializeField, Range(1, 100), Tooltip("The higher the value the longer the Stop leaning transition will take until it finishs.")]
+        protected float m_moveLeaningIsStartStopStopDurationStrength = 15f;
         [SerializeField, Tooltip("Leans when the actor is grounded - like walking and running. [Default: true]")]
         protected bool m_moveLeanWhenGrounded = true;
         [SerializeField, Tooltip("Leans when the actor is not grounded - like jumping or flying. [Default: true]")]
@@ -189,7 +197,7 @@ namespace HoaxGames
 
         protected Vector3 m_prevTransformPosition;
         protected Vector3 m_prevBodyPosition;
-        protected Vector3 m_bodyOffset; public Vector3 bodyOffset { get { return m_bodyOffset; } } public Vector3 fullBodyOffset { get { return m_globalCharacterYOffset * m_transform.up + (m_bodyOffset + m_bodyPositionOffset * m_transform.up) * m_bodyPlacementWeight * m_bodyResetLerp + m_crouchOffset; } }
+        protected Vector3 m_bodyOffset; public Vector3 bodyOffset { get { return m_bodyOffset; } } public Vector3 fullBodyOffset { get { if (m_transform == null) return Vector3.zero; return m_globalCharacterYOffset * m_transform.up + (m_bodyOffset + m_bodyPositionOffset * m_transform.up) * m_bodyPlacementWeight * m_bodyResetLerp + m_crouchOffset; } }
         protected Vector3 m_rawbodyOffsetVec;
         protected Vector3 m_ikLeftOffset;
         protected Vector3 m_ikRightOffset;
@@ -203,6 +211,7 @@ namespace HoaxGames
         protected float m_feetResetLerp = 0;
         protected float m_bodyResetLerp = 0;
 
+        protected Vector3 m_rawVelocityPlanarMoveLean = Vector3.zero;
         protected Vector3 m_velocityPlanarMoveLean = Vector3.zero;
         protected Vector3 m_velocityPlanarSlopeLean = Vector3.zero;
 
@@ -226,6 +235,17 @@ namespace HoaxGames
         protected Vector3 m_resultRightLastTransformPosition;
         protected Quaternion m_resultRightLastTransformRotation;
 
+        protected Vector3 m_leftHandStartPos;
+        protected Vector3 m_leftShoulderStartPos;
+        protected Vector3 m_rightHandStartPos;
+        protected Vector3 m_rightShoulderStartPos;
+        protected Vector3 m_leftHandOffsetVec; public Vector3 getLeftHandOffsetVecIncludingLeaning() { return m_leftHandOffsetVec; }
+        protected Vector3 m_leftShoulderOffsetVec; public Vector3 getLeftShoulderOffsetVecIncludingLeaning() { return m_leftShoulderOffsetVec; }
+
+        protected Vector3 m_rightHandOffsetVec; public Vector3 getRightHandOffsetVecIncludingLeaning() { return m_rightHandOffsetVec; }
+        protected Vector3 m_rightShoulderOffsetVec; public Vector3 getRightShoulderOffsetVecIncludingLeaning() { return m_rightShoulderOffsetVec; }
+
+
         protected Transform m_spineTransform;
         protected Transform m_leftShoulderTransform;
         protected Transform m_rightShoulderTransform;
@@ -235,6 +255,8 @@ namespace HoaxGames
         protected Transform m_rightLowerLeg;
         protected Transform m_leftFoot;
         protected Transform m_rightFoot;
+        protected Transform m_rightHandTransform;
+        protected Transform m_leftHandTransform;
 
         protected Vector3 m_crouchOffset; public Vector3 crouchOffset { get { return m_crouchOffset; } }
 
@@ -258,7 +280,7 @@ namespace HoaxGames
         protected float m_prevCheckGroundedDistance;
         protected LayerMask m_prevCollisionLayerMask;
 
-        protected GroundedResult m_groundedResult; public GroundedResult getGroundedResult() { return m_groundedResult; }
+        protected GroundedResult m_groundedResult = new GroundedResult(false, false, null, Vector3.zero, Vector3.zero, Vector3.zero); public GroundedResult getGroundedResult() { return m_groundedResult; }
 
         protected Transform m_groundedResultLastTransform;
         protected Vector3 m_groundedResultLastTransformPosition;
@@ -479,6 +501,8 @@ namespace HoaxGames
                 m_rightLowerLeg = m_animator.GetBoneTransform(HumanBodyBones.RightLowerLeg);
                 m_leftFoot = m_animator.GetBoneTransform(HumanBodyBones.LeftFoot);
                 m_rightFoot = m_animator.GetBoneTransform(HumanBodyBones.RightFoot);
+                m_rightHandTransform = m_animator.GetBoneTransform(HumanBodyBones.RightHand);
+                m_leftHandTransform = m_animator.GetBoneTransform(HumanBodyBones.LeftHand);
 
                 findLegsForwardAxes(out m_leftAxisHint, out m_isLeftAxisHintNegative, out m_rightAxisHint, out m_isRightAxisHintNegative);
             }
@@ -527,7 +551,7 @@ namespace HoaxGames
             if (m_ikFootWidth < 0.001f) m_ikFootWidth = 0.001f;
 
             Vector3 feetZeroPos = m_transform.position;
-            m_groundedResult = isValidAndGrounded(feetZeroPos, m_transform.up, m_collisionLayerMask);
+            isValidAndGrounded(m_groundedResult, feetZeroPos, m_transform.up, m_collisionLayerMask);
 
             if (m_groundedResult.isGrounded && m_groundedResult.isValid)
             {
@@ -551,11 +575,11 @@ namespace HoaxGames
 
                 if (m_moveLeanWhenGrounded)
                 {
-                    m_velocityPlanarMoveLean = Vector3.Lerp(m_velocityPlanarMoveLean, calculatedPlanarTargetVelocity, Time.deltaTime * m_moveLeaningStiffness);
+                    m_rawVelocityPlanarMoveLean = calculatedPlanarTargetVelocity;
                 }
                 else
                 {
-                    m_velocityPlanarMoveLean = Vector3.Lerp(m_velocityPlanarMoveLean, Vector3.zero, Time.deltaTime * m_moveLeaningStiffness);
+                    m_rawVelocityPlanarMoveLean = Vector3.zero;
                 }
             }
             else
@@ -570,16 +594,47 @@ namespace HoaxGames
 
                 if (m_moveLeanWhenNotGrounded)
                 {
-                    m_velocityPlanarMoveLean = Vector3.Lerp(m_velocityPlanarMoveLean, calculatePlanarVelocity(feetZeroPos), Time.deltaTime * m_moveLeaningStiffness);
+                    Vector3 calculatedPlanarTargetVelocity = calculatePlanarVelocity(feetZeroPos);
+                    m_rawVelocityPlanarMoveLean = calculatedPlanarTargetVelocity;
                 }
                 else
                 {
-                    m_velocityPlanarMoveLean = Vector3.Lerp(m_velocityPlanarMoveLean, Vector3.zero, Time.deltaTime * m_moveLeaningStiffness);
+                    m_rawVelocityPlanarMoveLean = Vector3.zero;
                 }
             }
 
+            if (m_rightHandTransform)
+            {
+                m_rightHandStartPos = m_rightHandTransform.position + fullBodyOffset;
+            }
+
+            if (m_leftHandTransform)
+            {
+                m_leftHandStartPos = m_leftHandTransform.position + fullBodyOffset;
+            }
+
+            if (m_rightShoulderTransform)
+            {
+                m_rightShoulderStartPos = m_rightShoulderTransform.position + fullBodyOffset;
+            }
+
+            if (m_leftShoulderTransform)
+            {
+                m_leftShoulderStartPos = m_leftShoulderTransform.position + fullBodyOffset;
+            }
+
+            m_rightHandOffsetVec = Vector3.zero;
+            m_leftHandOffsetVec = Vector3.zero;
+            m_rightShoulderOffsetVec = Vector3.zero;
+            m_leftShoulderOffsetVec = Vector3.zero;
+
             updateSlopeLeaning(m_groundedResult);
             updateLeaning(feetZeroPos);
+
+            m_rightHandOffsetVec += fullBodyOffset;
+            m_leftHandOffsetVec += fullBodyOffset;
+            m_rightShoulderOffsetVec += fullBodyOffset;
+            m_leftShoulderOffsetVec += fullBodyOffset;
 
             m_prevTransformPosition = feetZeroPos;
             m_characterExternalMovingPlatformOffsetVec = Vector3.zero;
@@ -661,7 +716,7 @@ namespace HoaxGames
 
             if (m_relativeSpineRotationAxisAffectedBySlopeLeaning == Axis.X_AXIS)
             {
-                m_animator.SetBoneLocalRotation(HumanBodyBones.Spine, Quaternion.Euler(m_currSlopeLeaning, 0, 0) * m_spineTransform.localRotation);
+                m_spineTransform.localRotation = Quaternion.Euler(m_currSlopeLeaning, 0, 0) * m_spineTransform.localRotation;
 
                 if (m_shouldersCounteractSpineBending)
                 {
@@ -671,7 +726,7 @@ namespace HoaxGames
             }
             else if (m_relativeSpineRotationAxisAffectedBySlopeLeaning == Axis.Y_AXIS)
             {
-                m_animator.SetBoneLocalRotation(HumanBodyBones.Spine, Quaternion.Euler(0, m_currSlopeLeaning, 0) * m_spineTransform.localRotation);
+                m_spineTransform.localRotation = Quaternion.Euler(0, m_currSlopeLeaning, 0) * m_spineTransform.localRotation;
 
                 if (m_shouldersCounteractSpineBending)
                 {
@@ -681,7 +736,7 @@ namespace HoaxGames
             }
             else
             {
-                m_animator.SetBoneLocalRotation(HumanBodyBones.Spine, Quaternion.Euler(0, 0, m_currSlopeLeaning) * m_spineTransform.localRotation);
+                m_spineTransform.localRotation = Quaternion.Euler(0, 0, m_currSlopeLeaning) * m_spineTransform.localRotation;
 
                 if (m_shouldersCounteractSpineBending)
                 {
@@ -689,11 +744,13 @@ namespace HoaxGames
                     m_animator.SetBoneLocalRotation(HumanBodyBones.RightShoulder, Quaternion.Euler(0, 0, -m_currSlopeLeaning) * m_rightShoulderTransform.localRotation);
                 }
             }
+
+            m_animator.SetBoneLocalRotation(HumanBodyBones.Spine, m_spineTransform.localRotation);
         }
 
         protected virtual Vector3 calculatePlanarVelocity(Vector3 feetZeroPos)
         {
-            if (m_moveLeaningStrength < 0.001f && m_slopeLeaningType == SlopeLeaningType.DISABLED) return Vector3.zero;
+            if (m_moveLeaningStrength < 0.001f && m_moveSpineLeaningStrength < 0.001f && m_slopeLeaningType == SlopeLeaningType.DISABLED) return Vector3.zero;
 
             Vector3 velocity = Vector3.zero;
             if(Time.deltaTime > 0) velocity = (feetZeroPos - (m_prevTransformPosition + m_characterExternalMovingPlatformOffsetVec)) / Time.deltaTime;
@@ -701,14 +758,36 @@ namespace HoaxGames
             return velocity - velocityUp;
         }
 
+        protected Vector3 m_moveLeanChangeVec;
+        protected Vector3 m_velocityPlanarMoveLeanChange;
+
         protected virtual void updateLeaning(Vector3 feetZeroPos)
         {
-            if (m_moveLeaningStrength < 0.001f) return;
+            if (m_moveLeaningStrength < 0.001f && m_moveSpineLeaningStrength < 0.001f) return;
 
             Vector3 rotationVec = m_animator.bodyPosition - feetZeroPos;
 
-            Vector3 rightLeanVec = Vector3.Project(m_velocityPlanarMoveLean, m_transform.right);
-            Vector3 forwardLeanVec = Vector3.Project(m_velocityPlanarMoveLean, m_transform.forward);
+            m_velocityPlanarMoveLean = Vector3.Lerp(m_velocityPlanarMoveLean, m_rawVelocityPlanarMoveLean, Time.deltaTime * m_moveLeaningStiffness);
+
+            Vector3 velMoveLeanChange = m_rawVelocityPlanarMoveLean - m_velocityPlanarMoveLeanChange;
+
+            if(Vector3.Dot(velMoveLeanChange.normalized, m_rawVelocityPlanarMoveLean.normalized) < 0)
+            {
+                m_velocityPlanarMoveLeanChange = Vector3.Lerp(m_velocityPlanarMoveLeanChange, m_rawVelocityPlanarMoveLean, Time.deltaTime * 100.0f / Mathf.Max(m_moveLeaningIsStartStopStopDurationStrength, 1));
+            }
+            else
+            {
+                m_velocityPlanarMoveLeanChange = Vector3.Lerp(m_velocityPlanarMoveLeanChange, m_rawVelocityPlanarMoveLean, Time.deltaTime * 100.0f / Mathf.Max(m_moveLeaningIsStartStopStartDurationStrength, 1));
+            }
+
+            velMoveLeanChange = m_rawVelocityPlanarMoveLean - m_velocityPlanarMoveLeanChange;
+            m_moveLeanChangeVec = Vector3.Lerp(m_moveLeanChangeVec, velMoveLeanChange, Time.deltaTime * 10.0f);
+
+            Vector3 leaningVec = Vector3.Lerp(m_velocityPlanarMoveLean, m_moveLeanChangeVec, m_moveLeaningIsStartStopPercentage);
+
+
+            Vector3 rightLeanVec = Vector3.Project(leaningVec, m_transform.right);
+            Vector3 forwardLeanVec = Vector3.Project(leaningVec, m_transform.forward);
 
             float signRight = 1;
             float signForward = 1;
@@ -719,17 +798,62 @@ namespace HoaxGames
             if (m_flipForwardMoveLean) signForward *= -1;
             if (m_flipRightMoveLean) signRight *= -1;
 
+
+            // rotation spine
+            if(m_moveSpineLeaningStrength >= 0.001f)
+            {
+                Quaternion rotRightAxisSpine = Quaternion.AngleAxis(forwardLeanVec.magnitude * signForward * m_moveSpineLeaningStrength, m_transform.right);
+                Quaternion rotForwardAxisSpine = Quaternion.AngleAxis(rightLeanVec.magnitude * signRight * m_moveSpineLeaningStrength, m_transform.forward);
+                Quaternion worldDeltaRotSpine = rotForwardAxisSpine * rotRightAxisSpine;
+
+                m_spineTransform.rotation = worldDeltaRotSpine * m_spineTransform.rotation;
+                m_animator.SetBoneLocalRotation(HumanBodyBones.Spine, m_spineTransform.localRotation);
+            }
+
+
+            // rotating full body
+            if (m_moveLeaningStrength < 0.001f) return;
+
             Quaternion rotRightAxis = Quaternion.AngleAxis(forwardLeanVec.magnitude * signForward * m_moveLeaningStrength, m_transform.right);
             Quaternion rotForwardAxis = Quaternion.AngleAxis(rightLeanVec.magnitude * signRight * m_moveLeaningStrength, m_transform.forward);
             Quaternion fullRot = rotForwardAxis * rotRightAxis;
 
             Vector3 rotationVecRotated = fullRot * rotationVec;
-            Vector3 kneelOffset = Mathf.Min(m_velocityPlanarMoveLean.magnitude * m_moveLeaningKneelFactor * 0.25f, 1) * rotationVecRotated;
+            Vector3 kneelOffset = Mathf.Min(leaningVec.magnitude * m_moveLeaningKneelFactor * 0.25f, 1) * rotationVecRotated;
             m_animator.bodyPosition = feetZeroPos + rotationVecRotated - kneelOffset;
             m_animator.bodyRotation = fullRot * m_animator.bodyRotation;
 
+            // leaning support for hand offsets
+            if (m_rightHandTransform)
+            {
+                Vector3 rotationVecRightHand = m_rightHandStartPos - feetZeroPos;
+                Vector3 rotationVecRightHandRotated = fullRot * rotationVecRightHand;
+                m_rightHandOffsetVec += rotationVecRightHandRotated - rotationVecRightHand - kneelOffset;
+            }
+
+            if (m_leftHandTransform)
+            {
+                Vector3 rotationVecLeftHand = m_leftHandStartPos - feetZeroPos;
+                Vector3 rotationVecLeftHandRotated = fullRot * rotationVecLeftHand;
+                m_leftHandOffsetVec += rotationVecLeftHandRotated - rotationVecLeftHand - kneelOffset;
+            }
+
+            if (m_rightShoulderTransform)
+            {
+                Vector3 rotationVecRightShoulder = m_rightShoulderStartPos - feetZeroPos;
+                Vector3 rotationVecRightShoulderRotated = fullRot * rotationVecRightShoulder;
+                m_rightShoulderOffsetVec += rotationVecRightShoulderRotated - rotationVecRightShoulder - kneelOffset;
+            }
+
+            if (m_leftShoulderTransform)
+            {
+                Vector3 rotationVecLeftShoulder = m_leftShoulderStartPos - feetZeroPos;
+                Vector3 rotationVecLeftShoulderRotated = fullRot * rotationVecLeftShoulder;
+                m_leftShoulderOffsetVec += rotationVecLeftShoulderRotated - rotationVecLeftShoulder - kneelOffset;
+            }
+
             // fix hints
-            if(m_moveLeaningKneelFactor < 0.001f)
+            if (m_moveLeaningKneelFactor < 0.001f)
             {
                 // fix simple
                 Vector3 diffVecLeft = m_animator.GetIKHintPosition(AvatarIKHint.LeftKnee) - feetZeroPos;
@@ -996,9 +1120,6 @@ namespace HoaxGames
             Vector3 projOnRayDirVecRight = Vector3.Project(ikPosFromOriginRight, -m_transform.up);
             Vector3 ikBottomPointRight = ikRight - projOnRayDirVecRight;
 
-            var resultLeft = m_resultLeft;
-            var resultRight = m_resultRight;
-
             float legsPlanarForwardDist = (Vector3.Project(ikBottomPointRight, m_transform.forward) - Vector3.Project(ikBottomPointLeft, m_transform.forward)).magnitude * m_increaseBodyPositionMaxCorrectionWithForwardFootDistance * 0.5f;
             float maxBodyPositionCorrectionToUse = m_bodyPositionMaxCorrection + legsPlanarForwardDist;
             float raycastFeetDistance = Mathf.Max(maxBodyPositionCorrectionToUse, m_checkGroundedDistance + legsPlanarForwardDist);
@@ -1048,59 +1169,59 @@ namespace HoaxGames
             if (ikLeftMovementDistance > m_minimumMovementThreshold || forceUpdateLeft)
             {
                 m_prevIkLeft = ikLeft;
-                resultLeft = findNewIKPos(ikLeft, ikBottomPointLeft, m_ikFootHeightToUseLeft, m_ikFootForwardBias, m_transform.forward, m_transform.rotation, feetZeroPos, -m_transform.up, m_ikMaxCorrection, m_ikCorrectionRaycastMargin, maxBodyPositionCorrectionToUse, raycastFeetDistance, m_ikFootLengthToUseLeft, m_ikFootWidth, m_collisionLayerMask);
+                findNewIKPos(m_resultLeft, ikLeft, ikBottomPointLeft, m_ikFootHeightToUseLeft, m_ikFootForwardBias, m_transform.forward, m_transform.rotation, feetZeroPos, -m_transform.up, m_ikMaxCorrection, m_ikCorrectionRaycastMargin, maxBodyPositionCorrectionToUse, raycastFeetDistance, m_ikFootLengthToUseLeft, m_ikFootWidth, m_collisionLayerMask);
                 
-                if (resultLeft.primaryHitTransform != null)
+                if (m_resultLeft.primaryHitTransform != null)
                 {
-                    m_resultLeftLastTransformPosition = resultLeft.primaryHitTransform.position;
-                    m_resultLeftLastTransformRotation = resultLeft.primaryHitTransform.rotation;
+                    m_resultLeftLastTransformPosition = m_resultLeft.primaryHitTransform.position;
+                    m_resultLeftLastTransformRotation = m_resultLeft.primaryHitTransform.rotation;
                 }
             }
 
             if (ikRightMovementDistance > m_minimumMovementThreshold || forceUpdateRight)
             {
                 m_prevIkRight = ikRight;
-                resultRight = findNewIKPos(ikRight, ikBottomPointRight, m_ikFootHeightToUseRight, m_ikFootForwardBias, m_transform.forward, m_transform.rotation, feetZeroPos, -m_transform.up, m_ikMaxCorrection, m_ikCorrectionRaycastMargin, maxBodyPositionCorrectionToUse, raycastFeetDistance, m_ikFootLengthToUseRight, m_ikFootWidth, m_collisionLayerMask);
+                findNewIKPos(m_resultRight, ikRight, ikBottomPointRight, m_ikFootHeightToUseRight, m_ikFootForwardBias, m_transform.forward, m_transform.rotation, feetZeroPos, -m_transform.up, m_ikMaxCorrection, m_ikCorrectionRaycastMargin, maxBodyPositionCorrectionToUse, raycastFeetDistance, m_ikFootLengthToUseRight, m_ikFootWidth, m_collisionLayerMask);
 
-                if (resultRight.primaryHitTransform != null)
+                if (m_resultRight.primaryHitTransform != null)
                 {
-                    m_resultRightLastTransformPosition = resultRight.primaryHitTransform.position;
-                    m_resultRightLastTransformRotation = resultRight.primaryHitTransform.rotation;
+                    m_resultRightLastTransformPosition = m_resultRight.primaryHitTransform.position;
+                    m_resultRightLastTransformRotation = m_resultRight.primaryHitTransform.rotation;
                 }
             }
 
             // handling edge-case when one leg has no detection found and the other has
-            if (resultLeft.primaryHitTransform == null && resultRight.primaryHitTransform != null)
+            if (m_resultLeft.primaryHitTransform == null && m_resultRight.primaryHitTransform != null)
             {
-                Vector3 rightOffsetVec = Vector3.Project(resultRight.surfacePoint - feetZeroPos, m_transform.up);
-                if(Vector3.Dot(rightOffsetVec.normalized, m_transform.up) < 0) resultLeft = new IKResult(ikLeft, ikLeft + rightOffsetVec, false, ikBottomPointLeft + rightOffsetVec, ikBottomPointLeft + rightOffsetVec, m_transform.up, null, null);
+                Vector3 rightOffsetVec = Vector3.Project(m_resultRight.surfacePoint - feetZeroPos, m_transform.up);
+                if(Vector3.Dot(rightOffsetVec.normalized, m_transform.up) < 0) m_resultLeft.init(ikLeft, ikLeft + rightOffsetVec, false, ikBottomPointLeft + rightOffsetVec, ikBottomPointLeft + rightOffsetVec, m_transform.up, null, null);
             }
-            else if (resultLeft.primaryHitTransform != null && resultRight.primaryHitTransform == null)
+            else if (m_resultLeft.primaryHitTransform != null && m_resultRight.primaryHitTransform == null)
             {
-                Vector3 leftOffsetVec = Vector3.Project(resultLeft.surfacePoint - feetZeroPos, m_transform.up);
-                if(Vector3.Dot(leftOffsetVec.normalized, m_transform.up) < 0) resultRight = new IKResult(ikRight, ikRight + leftOffsetVec, false, ikBottomPointRight + leftOffsetVec, ikBottomPointRight + leftOffsetVec, m_transform.up, null, null);
+                Vector3 leftOffsetVec = Vector3.Project(m_resultLeft.surfacePoint - feetZeroPos, m_transform.up);
+                if(Vector3.Dot(leftOffsetVec.normalized, m_transform.up) < 0) m_resultRight.init(ikRight, ikRight + leftOffsetVec, false, ikBottomPointRight + leftOffsetVec, ikBottomPointRight + leftOffsetVec, m_transform.up, null, null);
             }
 
             // calculate body offset vector
-            Vector3 leftRightBottomDiffVec = resultRight.ikPos - resultLeft.ikPos;
+            Vector3 leftRightBottomDiffVec = m_resultRight.ikPos - m_resultLeft.ikPos;
             Vector3 leftRightBottomDiffProjVec = Vector3.Project(leftRightBottomDiffVec, m_transform.up);
 
-            Vector3 leftBottomVec = resultLeft.surfacePoint - feetZeroPos;
+            Vector3 leftBottomVec = m_resultLeft.surfacePoint - feetZeroPos;
             Vector3 leftBottomProjVec = Vector3.Project(leftBottomVec, m_transform.up);
 
-            Vector3 rightBottomVec = resultRight.surfacePoint - feetZeroPos;
+            Vector3 rightBottomVec = m_resultRight.surfacePoint - feetZeroPos;
             Vector3 rightBottomProjVec = Vector3.Project(rightBottomVec, m_transform.up);
 
             if (leftRightBottomDiffProjVec.magnitude > maxBodyPositionCorrectionToUse)
             {
                 if (Vector3.Dot(rightBottomProjVec.normalized, m_transform.up) < 0)
                 {
-                    resultRight = new IKResult(ikRight, ikRight, false, ikBottomPointRight, ikBottomPointRight, m_transform.up, null, null);
+                    m_resultRight.init(ikRight, ikRight, false, ikBottomPointRight, ikBottomPointRight, m_transform.up, null, null);
                     rightBottomProjVec = Vector3.zero;
                 }
                 else
                 {
-                    resultLeft = new IKResult(ikLeft, ikLeft, false, ikBottomPointLeft, ikBottomPointLeft, m_transform.up, null, null);
+                    m_resultLeft.init(ikLeft, ikLeft, false, ikBottomPointLeft, ikBottomPointLeft, m_transform.up, null, null);
                     leftBottomProjVec = Vector3.zero;
                 }
             }
@@ -1149,19 +1270,19 @@ namespace HoaxGames
 
                 // the ik point is not allowed to be lower than the original ik
                 Vector3 correctedIkPos = ikLeft + m_rawbodyOffsetVec;
-                Vector3 distVec = resultLeft.gluedIKPos - correctedIkPos;
+                Vector3 distVec = m_resultLeft.gluedIKPos - correctedIkPos;
                 if (Vector3.Dot(distVec.normalized, -m_transform.up) > 0)
                 {
-                    resultLeft.ikPos = correctedIkPos;
-                    resultLeft.isGlued = false;
+                    m_resultLeft.ikPos = correctedIkPos;
+                    m_resultLeft.isGlued = false;
                 }
 
                 correctedIkPos = ikRight + m_rawbodyOffsetVec;
-                distVec = resultRight.gluedIKPos - correctedIkPos;
+                distVec = m_resultRight.gluedIKPos - correctedIkPos;
                 if (Vector3.Dot(distVec.normalized, -m_transform.up) > 0)
                 {
-                    resultRight.ikPos = correctedIkPos;
-                    resultRight.isGlued = false;
+                    m_resultRight.ikPos = correctedIkPos;
+                    m_resultRight.isGlued = false;
                 }
             }
 
@@ -1179,25 +1300,25 @@ namespace HoaxGames
             // this makes the animations not being glued to the ground when the feet basically moves up + moves the feet downwards when the body position
             // is moved downwards as well. However, this is not moved by the same body offset vector, but by the respective feet downward vectors that may
             // or may not affect the body position, depending on the above case handling.
-            Vector3 ikLeftTargetPos = resultLeft.ikPos + ikLeftOffsetVec * m_bodyPlacementWeight;
-            Vector3 ikRightTargetPos = resultRight.ikPos + ikRightOffsetVec * m_bodyPlacementWeight;
+            Vector3 ikLeftTargetPos = m_resultLeft.ikPos + ikLeftOffsetVec * m_bodyPlacementWeight;
+            Vector3 ikRightTargetPos = m_resultRight.ikPos + ikRightOffsetVec * m_bodyPlacementWeight;
 
             // fix so that the new ikTargetPos doesn't get lower than the lowest allowed (glued) position.
-            Vector3 distVecLeft = ikLeftTargetPos - resultLeft.gluedIKPos;
-            Vector3 distVecRight = ikRightTargetPos - resultRight.gluedIKPos;
+            Vector3 distVecLeft = ikLeftTargetPos - m_resultLeft.gluedIKPos;
+            Vector3 distVecRight = ikRightTargetPos - m_resultRight.gluedIKPos;
 
             if (Vector3.Dot(distVecLeft.normalized, -m_transform.up) > 0)
             {
-                ikLeftTargetPos = resultLeft.gluedIKPos;
-                resultLeft.isGlued = true;
-                resultLeft.ikPos = ikLeftTargetPos;
+                ikLeftTargetPos = m_resultLeft.gluedIKPos;
+                m_resultLeft.isGlued = true;
+                m_resultLeft.ikPos = ikLeftTargetPos;
             }
 
             if (Vector3.Dot(distVecRight.normalized, -m_transform.up) > 0)
             {
-                ikRightTargetPos = resultRight.gluedIKPos;
-                resultRight.isGlued = true;
-                resultRight.ikPos = ikRightTargetPos;
+                ikRightTargetPos = m_resultRight.gluedIKPos;
+                m_resultRight.isGlued = true;
+                m_resultRight.ikPos = ikRightTargetPos;
             }
 
             debugDrawPoint(ikLeftTargetPos, Color.magenta);
@@ -1210,7 +1331,7 @@ namespace HoaxGames
             Vector3 leftOffsetDiff = ikLeftOffset - m_ikLeftOffset;
             Vector3 rightOffsetDiff = ikRightOffset - m_ikRightOffset;
 
-            if (resultLeft.primaryHitTransform != null && leftOffsetDiff.magnitude > 0.01f)
+            if (m_resultLeft.primaryHitTransform != null && leftOffsetDiff.magnitude > 0.01f)
             {
                 if (Vector3.Dot(leftOffsetDiff.normalized, m_transform.up) > 0)
                 {
@@ -1225,7 +1346,7 @@ namespace HoaxGames
             }
             else m_extrapolationLeft = Vector3.zero;
 
-            if (resultRight.primaryHitTransform != null && rightOffsetDiff.magnitude > 0.01f)
+            if (m_resultRight.primaryHitTransform != null && rightOffsetDiff.magnitude > 0.01f)
             {
                 if (Vector3.Dot(rightOffsetDiff.normalized, m_transform.up) > 0)
                 {
@@ -1320,14 +1441,14 @@ namespace HoaxGames
             m_animator.SetIKHintPositionWeight(AvatarIKHint.RightKnee, m_ikPlacementWeight * m_feetResetLerp);
 
             // glue fix
-            if ((m_ikLeftOffset.magnitude / targetOffsetLeft.magnitude) > m_isGluedToGroundNormalizedThreshold || m_ikLeftOffset.magnitude < m_isGluedToGroundDistanceThreshold) resultLeft.isGlued = true;
-            if ((m_ikRightOffset.magnitude / targetOffsetRight.magnitude) > m_isGluedToGroundNormalizedThreshold || m_ikRightOffset.magnitude < m_isGluedToGroundDistanceThreshold) resultRight.isGlued = true;
+            if ((m_ikLeftOffset.magnitude / targetOffsetLeft.magnitude) > m_isGluedToGroundNormalizedThreshold || m_ikLeftOffset.magnitude < m_isGluedToGroundDistanceThreshold) m_resultLeft.isGlued = true;
+            if ((m_ikRightOffset.magnitude / targetOffsetRight.magnitude) > m_isGluedToGroundNormalizedThreshold || m_ikRightOffset.magnitude < m_isGluedToGroundDistanceThreshold) m_resultRight.isGlued = true;
 
             // calculate ik rotations
             float rotationStiffnessSlerpValue = Time.deltaTime * m_ikRotationStiffness;
-            if (resultLeft.isGlued || m_onlyAdaptRotationWhenGluedToGround == false)
+            if (m_resultLeft.isGlued || m_onlyAdaptRotationWhenGluedToGround == false)
             {
-                Vector3 normalLeftFoot = resultLeft.normal;
+                Vector3 normalLeftFoot = m_resultLeft.normal;
                 Vector3 axis = Vector3.Cross(m_transform.up, normalLeftFoot);
                 float angle = Vector3.SignedAngle(m_transform.up, normalLeftFoot, axis);
                 angle = Mathf.Clamp(angle, -m_maxAnkleRotationAdaptionAngle, m_maxAnkleRotationAdaptionAngle);
@@ -1340,9 +1461,9 @@ namespace HoaxGames
                 m_ikLeftDeltaRotation = Quaternion.Slerp(m_ikLeftDeltaRotation, Quaternion.identity, rotationStiffnessSlerpValue);
             }
 
-            if (resultRight.isGlued || m_onlyAdaptRotationWhenGluedToGround == false)
+            if (m_resultRight.isGlued || m_onlyAdaptRotationWhenGluedToGround == false)
             {
-                Vector3 normalRightFoot = resultRight.normal;
+                Vector3 normalRightFoot = m_resultRight.normal;
                 Vector3 axis = Vector3.Cross(m_transform.up, normalRightFoot);
                 float angle = Vector3.SignedAngle(m_transform.up, normalRightFoot, axis);
                 angle = Mathf.Clamp(angle, -m_maxAnkleRotationAdaptionAngle, m_maxAnkleRotationAdaptionAngle);
@@ -1362,24 +1483,6 @@ namespace HoaxGames
 
             m_animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, m_ikPlacementWeight * m_feetResetLerp);
             m_animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, m_ikPlacementWeight * m_feetResetLerp);
-
-            m_resultLeft.bottomPoint = resultLeft.bottomPoint;
-            m_resultLeft.surfacePoint = resultLeft.surfacePoint;
-            m_resultLeft.gluedIKPos = resultLeft.gluedIKPos;
-            m_resultLeft.ikPos = resultLeft.ikPos;
-            m_resultLeft.isGlued = resultLeft.isGlued;
-            m_resultLeft.normal = resultLeft.normal;
-            m_resultLeft.primaryHitTransform = resultLeft.primaryHitTransform;
-            m_resultLeft.secondaryHitTransform = resultLeft.secondaryHitTransform;
-
-            m_resultRight.bottomPoint = resultRight.bottomPoint;
-            m_resultRight.surfacePoint = resultRight.surfacePoint;
-            m_resultRight.gluedIKPos = resultRight.gluedIKPos;
-            m_resultRight.ikPos = resultRight.ikPos;
-            m_resultRight.isGlued = resultRight.isGlued;
-            m_resultRight.normal = resultRight.normal;
-            m_resultRight.primaryHitTransform = resultRight.primaryHitTransform;
-            m_resultRight.secondaryHitTransform = resultRight.secondaryHitTransform;
 
             updateEvents(ikLeftTargetPos, ikRightTargetPos, transformMovementVec - transformMovementVerticalVec);
         }
@@ -1635,7 +1738,7 @@ namespace HoaxGames
         private HashSet<Collider> m_errorLogged = new HashSet<Collider>();
 #endif
 
-        protected virtual IKResult findNewIKPos(Vector3 ikPos, Vector3 ikBottomPoint, float heightOffset, float forwardBias, Vector3 forwardDir, Quaternion rotation, Vector3 origin, Vector3 rayDirection, float maxIKCorrection, float ikCorrectionRaycastMargin, float maxFootCorrection, float maxCenterOfMassCorrection, float raycastLength, float raycastWidth, int raycastLayer)
+        protected virtual void findNewIKPos(IKResult ikResult, Vector3 ikPos, Vector3 ikBottomPoint, float heightOffset, float forwardBias, Vector3 forwardDir, Quaternion rotation, Vector3 origin, Vector3 rayDirection, float maxIKCorrection, float ikCorrectionRaycastMargin, float maxFootCorrection, float maxCenterOfMassCorrection, float raycastLength, float raycastWidth, int raycastLayer)
         {
             float boxCastHeight = Mathf.Max(heightOffset * 0.01f, 0.01f);
 
@@ -1708,7 +1811,12 @@ namespace HoaxGames
                     }
                 }
 
-                if (Mathf.Abs(alpha) > m_maxGroundAngleAtWhichTheGroundIsDetectedAsGround) return new IKResult(ikPos, ikPos, false, ikBottomPoint, ikBottomPoint, -rayDirection, null, null);
+                if (Mathf.Abs(alpha) > m_maxGroundAngleAtWhichTheGroundIsDetectedAsGround)
+                {
+                    ikResult.init(ikPos, ikPos, false, ikBottomPoint, ikBottomPoint, -rayDirection, null, null);
+                    return;
+                }
+
                 alpha = Mathf.Clamp(alpha, -m_maxGroundAngleTheFeetsCanAdaptTo, m_maxGroundAngleTheFeetsCanAdaptTo);
 
                 Vector3 pointsDistVec = foundBottomPoint - hit.point;
@@ -1775,10 +1883,11 @@ namespace HoaxGames
                 debugDrawPoint(foundIKPos, Color.cyan);
                 debugDrawArrow(rayOrigin, hitPoint, Color.blue);
 
-                return new IKResult(foundIKPos, gluedIkPos, isGlued, foundBottomPoint, surfacePoint, normalToUse, hit.transform, fixHit.transform);
+                ikResult.init(foundIKPos, gluedIkPos, isGlued, foundBottomPoint, surfacePoint, normalToUse, hit.transform, fixHit.transform);
+                return;
             }
 
-            return new IKResult(ikPos, ikPos, false, ikBottomPoint, ikBottomPoint, -rayDirection, null, null);
+            ikResult.init(ikPos, ikPos, false, ikBottomPoint, ikBottomPoint, -rayDirection, null, null);
         }
 
         private void debugDrawPoint(Vector3 point, Color color)
@@ -1799,16 +1908,31 @@ namespace HoaxGames
 #endif
         }
 
-        protected virtual GroundedResult isValidAndGrounded(Vector3 feetZeroPos, Vector3 upVec, int collisionLayer)
+        protected virtual void isValidAndGrounded(GroundedResult groundedResult, Vector3 feetZeroPos, Vector3 upVec, int collisionLayer)
         {
             // general false validation
-            if (m_animator == null) return new GroundedResult(false, false, null, Vector3.zero, Vector3.zero, Vector3.zero);
-            if (m_animator.enabled == false) return new GroundedResult(false, false, null, Vector3.zero, Vector3.zero, Vector3.zero);
+            if (m_animator == null)
+            {
+                groundedResult.init(false, false, null, Vector3.zero, Vector3.zero, Vector3.zero);
+                return;
+            }
+            if (m_animator.enabled == false)
+            {
+                groundedResult.init(false, false, null, Vector3.zero, Vector3.zero, Vector3.zero);
+                return;
+            }
 
             bool isValid = true;
 
-            if (m_validationType == ValidationType.FORCE_INVALID) isValid = false;
-            else if (m_validationType == ValidationType.FORCE_VALID) return new GroundedResult(true, true, m_transform, feetZeroPos, feetZeroPos, upVec);
+            if (m_validationType == ValidationType.FORCE_INVALID)
+            {
+                isValid = false;
+            }
+            else if (m_validationType == ValidationType.FORCE_VALID)
+            {
+                groundedResult.init(true, true, m_transform, feetZeroPos, feetZeroPos, upVec);
+                return;
+            }
             // else -> Check_Is_Grounded
 
             foreach (var entry in m_deactiveOnAnimatorState)
@@ -1834,7 +1958,12 @@ namespace HoaxGames
                     m_upwardsVelocity = 0;
                     if(Time.deltaTime > 0) m_upwardsVelocity = distVec.magnitude / Time.deltaTime;
                     m_maxUpwardsVelocity = Mathf.Max(m_upwardsVelocity, m_maxUpwardsVelocity);
-                    if (m_upwardsVelocity > m_autoUngroundUpwardsVelocity) return new GroundedResult(isValid, false, null, Vector3.zero, Vector3.zero, Vector3.zero);
+
+                    if (m_upwardsVelocity > m_autoUngroundUpwardsVelocity)
+                    {
+                        groundedResult.init(isValid, false, null, Vector3.zero, Vector3.zero, Vector3.zero);
+                        return;
+                    }
                 }
             }
 
@@ -1846,10 +1975,11 @@ namespace HoaxGames
             Vector3 origin = feetZeroPos + upVec * raycastUpwardsOffset;
             if (Physics.SphereCast(origin, m_checkGroundedRadius, -upVec, out hit, raycastDistance, collisionLayer, m_triggerCollisionInteraction))
             {
-                return new GroundedResult(isValid, true, hit.transform, hit.point, origin - upVec * (hit.distance + m_checkGroundedRadius), hit.normal);
+                groundedResult.init(isValid, true, hit.transform, hit.point, origin - upVec * (hit.distance + m_checkGroundedRadius), hit.normal);
+                return;
             }
 
-            return new GroundedResult(isValid, false, null, Vector3.zero, Vector3.zero, Vector3.zero);
+            groundedResult.init(isValid, false, null, Vector3.zero, Vector3.zero, Vector3.zero);
         }
     }
 }

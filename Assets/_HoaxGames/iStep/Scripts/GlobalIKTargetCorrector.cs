@@ -10,6 +10,16 @@ namespace HoaxGames
         [SerializeField] bool m_utilizeLocalStartOffsetToParent = false;
         [SerializeField] bool m_resetToLocalStartPositionWhenDisabled = false;
         [SerializeField] bool m_resetToLocalStartPositionWhenFootIkIsDisabled = false;
+        [SerializeField] OffsetMethod m_offsetMethod = OffsetMethod.FULLBODY_OFFSET;
+
+        public enum OffsetMethod
+        {
+            FULLBODY_OFFSET,
+            RIGHT_HAND_OFFSET,
+            RIGHT_SHOULDER_OFFSET,
+            LEFT_HAND_OFFSET,
+            LEFT_SHOULDER_OFFSET
+        }
 
         public enum UpdateMode
         {
@@ -66,6 +76,24 @@ namespace HoaxGames
             }
 
             Vector3 offset = m_footIK.fullBodyOffset;
+
+            if (m_offsetMethod == OffsetMethod.RIGHT_HAND_OFFSET)
+            {
+                offset = m_footIK.getRightHandOffsetVecIncludingLeaning();
+            }
+            else if(m_offsetMethod == OffsetMethod.RIGHT_SHOULDER_OFFSET)
+            {
+                offset = m_footIK.getRightShoulderOffsetVecIncludingLeaning();
+            }
+            else if (m_offsetMethod == OffsetMethod.LEFT_HAND_OFFSET)
+            {
+                offset = m_footIK.getLeftHandOffsetVecIncludingLeaning();
+            }
+            else if (m_offsetMethod == OffsetMethod.LEFT_SHOULDER_OFFSET)
+            {
+                offset = m_footIK.getLeftShoulderOffsetVecIncludingLeaning();
+            }
+
             if (m_negate) offset *= -1;
 
             if (m_utilizeLocalStartOffsetToParent == false) m_transform.position = m_parentTransform.position + offset;

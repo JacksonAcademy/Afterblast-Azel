@@ -10,6 +10,7 @@ using FishNet.Serializing;
 using DamageNumbersPro;
 using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 using FishNet;
+using Unity.Services.Lobbies.Models;
 public static class PlayerExtensions
 {
     public static void WritePlayerData(this Writer writer, PlayerData value)
@@ -69,6 +70,8 @@ public class PlayerManager : NetworkBehaviour
 
     public PlayerData playerData;
 
+    public AudioListener listener;
+
     public GameObject gameUI;
     public List<Renderer> renderers;
     public Color playerColor;
@@ -88,6 +91,7 @@ public class PlayerManager : NetworkBehaviour
     private bool isPaused = false;
     private void Awake()
     {
+        mainCam.enabled = false;
         gameManager = GameManager.instance;
         Hide(false);
     }
@@ -97,7 +101,7 @@ public class PlayerManager : NetworkBehaviour
         gameUI.gameObject.SetActive(Owner.IsLocalClient);
         mainCam.gameObject.tag = (Owner.IsLocalClient ? "MainCamera" : "Untagged");
     }
-    public void SetPlayerName(PlayerData player, Color playerColore)
+    public void ClientSync(PlayerData player, Color playerColore)
     {
         //SEt the player data for other clients
         playerData = player;
@@ -111,45 +115,30 @@ public class PlayerManager : NetworkBehaviour
             renderers[i].material.color = playerColor;
         }
     }
-    public override void OnStopClient()
-    {
-        //When player leaves game, unintentionally or intentioanlly
-        gameManager.RemovePlayer(Time.time, playerData, NetworkObject);
-        DropWeapons();
-    }
     public override void OnStartClient()
     {
         base.OnStartClient();
         Initialize();
     }
-    public override void OnStartNetwork()
-    {
-        base.OnStartNetwork();
-        //Initialize();
-    }
-    public override void OnStopNetwork()
-    {
-        base.OnStopNetwork();
-    }
     public void Initialize()
     {
-        if (base.IsOwner)
-        {
-            //Set Player Data
-            playerData.playerClientID = Owner.ClientId;
-            playerData.playerKills = 0;
-            playerData.playerDeaths = 0;
-            //If the player didn't input a name, choose a default name "player 1"
-            if (gameManager.matchmaker._playerName.text == string.Empty)
-                playerData.playerName = "Player " + (gameManager.playerCount+1);
-            else
-                playerData.playerName = gameManager.matchmaker._playerName.text;
 
-            //SEnd Player Data to SErver
-            gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
-        }
+        //Set Player Data
+        playerData.playerClientID = Owner.ClientId;
+        playerData.playerKills = 0;
+        playerData.playerDeaths = 0;
+        //If the player didn't input a name, choose a default name "player 1"
+        if (gameManager.matchmaker._playerName.text == string.Empty)
+            playerData.playerName = "Player " + (gameManager.players.Count + 1);
+        else
+            playerData.playerName = gameManager.matchmaker._playerName.text;
+
+        //SEnd Player Data to SErver
+        gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
+        Show(false);
+
+        mainCam.enabled = true;
         playerUI.SetActive(Owner.IsLocalClient);
-        Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
         respawn.Play(transform.position);
     }
     public void Die()
@@ -157,13 +146,35 @@ public class PlayerManager : NetworkBehaviour
         DropWeapons();
         death.Play(transform.position);
     }
+
     public void DropWeapons()
     {
         print("DRopped Weapons for player: " + playerData.playerName);
         if(gunManager.equippedGun)
             gunManager.Drop(gunManager.equippedGun, mainCam.transform.forward * 10);
     }
+    public void RemovePlayer(NetworkConnection conn)
+    {
+        gameManager.RemovePlayerServer(Time.time, playerData, conn.FirstObject);
+    }
+    private void OnPreDestroyClientObjects(NetworkConnection conn)
+    {
+        print("Player left: " + conn.FirstObject.gameObject.name);
+        gameManager.RemovePlayerLocal(Time.time, playerData, conn.FirstObject);
+        //RemovePlayer(conn);
+        RemoveOwnership();
 
+
+        if (conn == Owner)
+        {
+
+
+        }
+    }
+    public override void OnOwnershipServer(NetworkConnection prevOwner)
+    {
+        base.OnOwnershipServer(prevOwner);
+    }
     //This function runs on every client
     [ObserversRpc]
     public void DamagePlayerObservers(int damage, NetworkObject whoGotShot)
@@ -203,7 +214,7 @@ public class PlayerManager : NetworkBehaviour
         PlayerManager playerWhoIKilled = whoIKilled.GetComponent<PlayerManager>();
         print("Eliminated + " + playerWhoIKilled.playerData.playerName);
 
-playerData.playerKills++;
+        playerData.playerKills++;
         gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
         gameManager.Elimination(playerData.playerName + " eliminated " + playerWhoIKilled.playerData.playerName);
         StartCoroutine (KillCoroutine(playerWhoIKilled));
@@ -234,12 +245,12 @@ playerData.playerKills++;
                 PauseGame();
         }
         eliminationsText.text = playerData.playerKills.ToString();
-        serverPlayerCountText.text = gameManager.playerCount.ToString();
+        serverPlayerCountText.text = gameManager.players.Count.ToString();
     }
-    private IEnumerator RespawnCoroutine(Vector3 position)
+    public IEnumerator RespawnCoroutine(Vector3 position)
     {
         HideModel();
-        transform.position = position;
+        transform.position = position + gameManager.spawnOffset;
         GameObject effect = Instantiate(spawnEffect, transform.position, Quaternion.identity);
         Destroy(effect, 10);
         yield return new WaitForSeconds(spawnInDelay);
@@ -255,7 +266,7 @@ playerData.playerKills++;
     {
         playerMovement.canMove = false;
         playerShoot.enabled = false;
-        if(base.IsOwner)
+        if(base.Owner.IsLocalClient)
             gameUI.SetActive(false);
         nameText.gameObject.SetActive(false);
         model.SetActive(false);
@@ -263,7 +274,7 @@ playerData.playerKills++;
     public void ShowModel()
     {
         model.SetActive(true);
-        if (base.IsOwner)
+        if (base.Owner.IsLocalClient)
             gameUI.SetActive(true);
         playerMovement.canMove = true;
         nameText.gameObject.SetActive(!Owner.IsLocalClient);
@@ -294,23 +305,15 @@ playerData.playerKills++;
         Application.Quit();
 
     }
+    [ServerRpc(RequireOwnership = false)]
     public void Respawn(Vector3 position)
     {
         StartCoroutine(RespawnCoroutine(position));
-        CMDRespawn(position);
-    }
-    [ServerRpc(RequireOwnership = false)]
-    public void CMDRespawn(Vector3 position)
-    {
-        if (!base.IsOwner)
-            StartCoroutine(RespawnCoroutine(position));
         ObserversRespawn(position);
     }
     [ObserversRpc]
     public void ObserversRespawn(Vector3 position)
     {
-        if (base.IsOwner || base.IsServerInitialized)
-            return;
         StartCoroutine(RespawnCoroutine(position));
     }
     [ObserversRpc]
@@ -344,6 +347,21 @@ playerData.playerKills++;
     public float GetHealth(PlayerManager whoRequested)
     {
         return playerHealth.health;
+    }
+    public override void OnStartNetwork()
+    {
+        base.OnStartNetwork();
+        base.Owner.SetFirstObject(NetworkObject);
+    }
+    public override void OnStartServer()
+    {
+        ServerManager.Objects.OnPreDestroyClientObjects += OnPreDestroyClientObjects;
+        //LocalConnection.SetFirstObject(NetworkObject);
+    }
+    public override void OnStopServer()
+    {
+       // if (ServerManager != null)
+           // ServerManager.Objects.OnPreDestroyClientObjects -= OnPreDestroyClientObjects;
     }
 }
 public static class IntBitExtentions

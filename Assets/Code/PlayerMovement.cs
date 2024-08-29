@@ -131,9 +131,7 @@ public class PlayerMovement : NetworkBehaviour
     private float mouseX, mouseY;
 
     [SerializeField]
-    private AudioListener _listener;
-
-    private CharacterController _characterController;
+    public CharacterController _characterController;
     [HideInInspector] public bool _jumpInput, _sprintingInput, _crouchingInput, _aimingInput, _slidingInput, _slidePressed;
     public bool _grounded, _ceiling, _crouching, _sprinting, _aiming, _sliding;
     private float _verticalVelocity, _nextAllowedJumpTime, _nextAllowedLandTime, _nextAllowedSlideTime, slopeAngle;
@@ -162,7 +160,7 @@ public class PlayerMovement : NetworkBehaviour
         _crouching = false;
         if (!replaying)
         {
-            print("play jumping sound");
+
             jump.Play(transform.position);
             jumpParticles.Play();
             _jumpInput = false;
@@ -265,21 +263,11 @@ public class PlayerMovement : NetworkBehaviour
     public override void OnStartNetwork()
     {
         base.TimeManager.OnTick += TimeManager_OnTick;
-        Initialize();
     }
-    public void Initialize()
-    {
-        _characterController = GetComponent<CharacterController>();
-        _listener.enabled = Owner.IsLocalClient;
-        _camera.enabled = Owner.IsLocalClient;
-    }
-
     public override void OnStopNetwork()
     {
         base.TimeManager.OnTick -= TimeManager_OnTick;
     }
-
-
     private void TimeManager_OnTick()
     {
         if (!canMove)
@@ -411,7 +399,6 @@ public class PlayerMovement : NetworkBehaviour
         if (_grounded && !previousGrounded && Time.time > _nextAllowedLandTime && !state.IsReplayed())
         {
             _nextAllowedLandTime = Time.time + .2f;
-            print("Playing landing sound at vertical velocity: " + _verticalVelocity);
             land.Play(transform.position);
             previousGrounded = true;
         }
