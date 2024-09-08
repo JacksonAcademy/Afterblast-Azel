@@ -55,13 +55,57 @@ MonoBehaviour:
   active: 1
   shadows:
     m_OverrideState: 1
-    m_Value: {r: 0.093049124, g: 0.32706228, b: 0.38679248, a: 1}
+    m_Value: {r: 0.13563547, g: 0.16342379, b: 0.2264151, a: 1}
   highlights:
-    m_OverrideState: 1
-    m_Value: {r: 0.7924528, g: 0.7924528, b: 0.7924528, a: 1}
+    m_OverrideState: 0
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
   balance:
     m_OverrideState: 1
     m_Value: 0
+--- !u!114 &-6991080980970560616
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5e1dc532bcb41949b58bc4f2abfbb7e, type: 3}
+  m_Name: LensDistortion
+  m_EditorClassIdentifier: 
+  active: 0
+  intensity:
+    m_OverrideState: 1
+    m_Value: 1
+  xMultiplier:
+    m_OverrideState: 0
+    m_Value: 1
+  yMultiplier:
+    m_OverrideState: 0
+    m_Value: 1
+  center:
+    m_OverrideState: 0
+    m_Value: {x: 0.5, y: 0.5}
+  scale:
+    m_OverrideState: 0
+    m_Value: 1
+--- !u!114 &-6391697326544956228
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81180773991d8724ab7f2d216912b564, type: 3}
+  m_Name: ChromaticAberration
+  m_EditorClassIdentifier: 
+  active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.119
 --- !u!114 &-5076304803777264635
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -99,10 +143,10 @@ MonoBehaviour:
     m_Value: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 3
+    m_Value: 2.6
   intensity:
     m_OverrideState: 1
-    m_Value: 2.15
+    m_Value: 0.1
   scatter:
     m_OverrideState: 1
     m_Value: 0.367
@@ -111,7 +155,7 @@ MonoBehaviour:
     m_Value: 65472
   tint:
     m_OverrideState: 1
-    m_Value: {r: 0.9899498, g: 0.3726415, b: 1, a: 1}
+    m_Value: {r: 1, g: 0.95232886, b: 0.5613208, a: 1}
   highQualityFiltering:
     m_OverrideState: 0
     m_Value: 0
@@ -145,3 +189,5 @@ MonoBehaviour:
   - {fileID: -5076304803777264635}
   - {fileID: -8117296884917333483}
   - {fileID: -3733812025410997803}
+  - {fileID: -6991080980970560616}
+  - {fileID: -6391697326544956228}

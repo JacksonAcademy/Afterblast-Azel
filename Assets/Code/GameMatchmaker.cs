@@ -40,19 +40,23 @@ public class GameMatchmaker : MonoBehaviour
 
     public NetworkObject player;
 
-    Multipass mp;
-    private Lobby _connectedLobby;
+    public Camera lobbyCam, serverSpectateCamera;
     public TextMeshProUGUI _debugText;
     public NetworkManager _networkManager;
-    private const string JoinCodeKey = "k";
     public TMP_InputField _playerName;
-    private string _playerId;
     public static GameMatchmaker instance;
     public Transport tugboat;
+
+    public bool spawnPlayer = true;
     private void Awake()
     {
         instance = this;
+
         _lobby.SetActive(true);
+
+        lobbyCam.enabled = true;
+        serverSpectateCamera.enabled = false;
+
         _buttons.SetActive(true);
 
             if (Application.isBatchMode && !Application.isEditor)
@@ -87,26 +91,36 @@ public class GameMatchmaker : MonoBehaviour
     }
     public void StartServer()
     {
+        print("STarted server");
+        spawnPlayer = false;
+        GameManager.instance.gameObject.SetActive(true);
         tugboat.StartConnection(true);
-        if(_playerName.text.Length > 0)
-        {
-            tugboat.StartConnection(false);
-            _buttons.SetActive(false);
-            _lobby.SetActive(false);
-        }
+        tugboat.StartConnection(false);
+    
 
+        lobbyCam.enabled = false;
+        serverSpectateCamera.enabled = true;
 
+        _buttons.SetActive(false);
+        _lobby.SetActive(false);
 
-        //await Authenticate();
-        //_connectedLobby =  await CreateLobby();
-        //Debug.LogWarning("Server CREATED!!!!");
+       // GameManager.instance.StartServer();
+
     }
 
     public void Play()
     {
-            tugboat.StartConnection(false);
-            _buttons.SetActive(false);
-            _lobby.SetActive(false);
+        spawnPlayer = true;
+        GameManager.instance.gameObject.SetActive(true);
+        tugboat.StartConnection(false);
+        
+        _buttons.SetActive(false);
+        _lobby.SetActive(false);
+
+        lobbyCam.enabled = false;
+        serverSpectateCamera.enabled = false;
+
+       // GameManager.instance.StartClient();
     }
 //    private async Task Authenticate()
 //    {

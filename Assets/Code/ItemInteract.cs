@@ -5,7 +5,7 @@ using FishNet;
 using FishNet.Object;
 public class ItemInteract : NetworkBehaviour
 {
-    public Transform camera;
+    public new Transform camera;
     public float interactLength;
     public LayerMask interactLayer;
 

@@ -12,9 +12,7 @@ using FishNet.Managing.Server;
 using Unity.Services.Lobbies.Models;
 using FishNet;
 using FishNet.Managing;
-using UnityEngine.UIElements;
 using System;
-using UnityEditor.MemoryProfiler;
 public class GameManager : NetworkBehaviour
 {
     public Vector3 spawnOffset;
@@ -30,26 +28,35 @@ public class GameManager : NetworkBehaviour
     public NetworkObject playerObject;
     [HideInInspector] public bool IsReady = false;
     public GameObject playerDespawnEffect;
-
-    public event Action<NetworkObject> OnSpawned;
     void Awake()
     {
         instance = this;
         disconnectedUI.SetActive(false);
-        
+
+        //networkManager.SceneManager.OnClientLoadedStartScenes += Play;
     }
     public override void OnStartClient()
     {
         base.OnStartClient();
         IsReady = true;
+        SpawnPlayer(LocalConnection);
     }
+    ///[ServerRpc(RequireOwnership =false)]
+    public void SpawnPlayer(NetworkConnection local)
+    {
+        if (!GameMatchmaker.instance.spawnPlayer)
+            return;
+
+        NetworkObject nob = Instantiate(playerObject);
+        Spawn(nob, LocalConnection);
+    }
+
     private void Start()
     {
         killfeedManager = KillfeedManager.instance;
 
-        networkManager.SceneManager.OnClientLoadedStartScenes += Play;
     }
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void UpdatePlayer(float timeSent, PlayerData playerToUpdate, NetworkObject player)
     {
         UpdatePlayerLocal(timeSent, playerToUpdate, player);
@@ -64,17 +71,9 @@ public class GameManager : NetworkBehaviour
     {
         return spawnPositions[UnityEngine.Random.Range(0, spawnPositions.Count)].position;
     }
-    private void Play(NetworkConnection conn, bool asServer)
-    {
-        if (!asServer)
-            return;
-        GiveOwnership(conn);
-        NetworkObject nob = Instantiate(playerObject);
-        networkManager.ServerManager.Spawn(nob, conn);
-        //nob.LocalConnection.SetFirstObject(nob);
-    }
     public void UpdatePlayerLocal(float timeSent, PlayerData playerData, NetworkObject player)
     {
+        print("Updating player: " + playerData.playerName);
         float currentTime = Time.time;
         float killfeedDelay = 2;
 
@@ -85,7 +84,6 @@ public class GameManager : NetworkBehaviour
             {
                 containsPlayerAlready = true;
                 players[i] = playerData;
-                print("Player updated:" + playerData.playerName);
             }
         }
         if (!containsPlayerAlready)
@@ -99,30 +97,40 @@ public class GameManager : NetworkBehaviour
         playerManager.ClientSync(playerData, playerColors[players.Count]);
     }
     [ServerRpc(RequireOwnership = false)]
-    public void RemovePlayerServer(float timeSent, PlayerData playerToRemove, NetworkObject player)
+    public void RemovePlayerServer(float timeSent, PlayerData playerToRemove, NetworkObject player, Vector3 despawnPos)
     {
-        print("SERVER MADE PLAYER LEAVE: " + playerToRemove.playerName);
-        RemovePlayerLocal(timeSent, playerToRemove, player);
-        RemovePlayerObserver(timeSent, playerToRemove, player);
+        if (player == null)
+            return;
+
+        RemovePlayerLocal(timeSent, playerToRemove, player, despawnPos);
+        RemovePlayerObserver(timeSent, playerToRemove, player, despawnPos);
+        print("Player removed Object: " + player.Owner.FirstObject);
+        //ServerManager.Kick;
+        //player.Despawn();
     }
-    public void RemovePlayerLocal(float timeSent, PlayerData playerToRemove, NetworkObject player)
+    public void RemovePlayerLocal(float timeSent, PlayerData playerToRemove, NetworkObject player, Vector3 despawnPos)
     {
         //We don't want players adding things to the killfeed a certain time after the RPC has been sent, or else it'll clog up
-      //  float currentTime = Time.time;
-       // float killfeedDelay = 2;
+        //  float currentTime = Time.time;
+        // float killfeedDelay = 2;
         //if (currentTime - killfeedDelay < timeSent)
-            killfeedManager.AddItem(playerToRemove.playerName + " left the game!");
+        print("Removing player: " + playerToRemove.playerName);
+        killfeedManager.AddItem(playerToRemove.playerName + " left the game!");
         players.Remove(playerToRemove);
-        GameObject effect = Instantiate(playerDespawnEffect, player.transform.position, Quaternion.identity);
-        Destroy(effect, 2);
-        Destroy(player.gameObject);
 
+        GameObject effect = Instantiate(playerDespawnEffect, despawnPos, Quaternion.identity);
+        Destroy(effect, 2);
+
+        Destroy(player.gameObject);
     }
     [ObserversRpc(BufferLast = true)]
-    public void RemovePlayerObserver(float timeSent, PlayerData playerToRemove, NetworkObject player)
+    public void RemovePlayerObserver(float timeSent, PlayerData playerToRemove, NetworkObject player, Vector3 despawnPos)
     {
-        print("Player left: " + playerToRemove.playerName);
-        RemovePlayerLocal(timeSent, playerToRemove, player);
+        //Server already removed player
+        if (IsServerInitialized)
+            return;
+
+        RemovePlayerLocal(timeSent, playerToRemove, player, despawnPos);
     }
     [ServerRpc(RequireOwnership=false)]
     public void Elimination(string elimination)
@@ -141,8 +149,18 @@ public class GameManager : NetworkBehaviour
         if(!IsServerInitialized)
         {
             disconnectedUI.SetActive(true);
-            GameMatchmaker.instance._lobby.SetActive(true);
-            GameMatchmaker.instance._buttons.SetActive(true);
+            if(GameMatchmaker.instance)
+            {
+                if (!GameMatchmaker.instance._lobby)
+                    return;
+
+                GameMatchmaker.instance._lobby.SetActive(true);
+                GameMatchmaker.instance._buttons.SetActive(true);
+                GameMatchmaker.instance.lobbyCam.enabled = true;
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+
+            }
         }
 
     }

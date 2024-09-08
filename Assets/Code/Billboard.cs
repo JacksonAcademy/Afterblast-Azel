@@ -16,7 +16,8 @@ public class Billboard : MonoBehaviour
         if (!mainCam)
             mainCam = Camera.main;
 
-        transform.forward = mainCam.transform.forward;
+        if(mainCam)
+            transform.forward = mainCam.transform.forward;
         //transform.rotation = Quaternion.LookRotation( transform.position - cam.position );
     }
 

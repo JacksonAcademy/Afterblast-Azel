@@ -28,16 +28,6 @@ public class GunManager : NetworkBehaviour
         equippedGun = null;
         NoGun();
     }
-    public void NoGun()
-    {
-        for (int i = 0; i < assaultRifleRigs.Count; i++)
-            assaultRifleRigs[i].weight = 0;
-        for (int i = 0; i < pistolRigs.Count; i++)
-            pistolRigs[i].weight = 0;
-
-        for (int i = 0; i < handIK.Count; i++)
-            handIK[i].SetIK(null);
-    }
     public void Update()
     {
         if (equippedGunType == 0)
@@ -72,26 +62,54 @@ public class GunManager : NetworkBehaviour
         if (!base.IsOwner)
             return;
 
-        if(Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            if(equippedGun != null)
+            if (equippedGun != null)
             {
                 Drop(equippedGun, playerManager.mainCam.transform.forward * dropForce);
+                ServerDrop();
             }
         }
+    }
+    [ServerRpc(RequireOwnership = false)]
+    public void ServerDrop()
+    {
+        Drop(equippedGun, playerManager.mainCam.transform.forward * dropForce);
+        ObserversDrop();
+    }
+    [ObserversRpc(ExcludeOwner = true)]
+    public void ObserversDrop()
+    {
+        if (IsServerInitialized)
+            return;
+        Drop(equippedGun, playerManager.mainCam.transform.forward * dropForce);
     }
     public void Drop(Gun gun, Vector3 force)
     {
         NoGun();
         gun.Drop(force, transform.position);
-        equippedGunInteract.Drop();
-        equippedGunInteract = null;
+        if(equippedGunInteract)
+        {
+            equippedGunInteract.Drop();
+            equippedGunInteract = null;
+        }
+
         equippedGun = null;
     }
     public void SetHandIK(Gun gun)
     {
         for (int i = 0; i < handIK.Count; i++)
             handIK[i].SetIK(gun);
+    }
+    public void NoGun()
+    {
+        for (int i = 0; i < assaultRifleRigs.Count; i++)
+            assaultRifleRigs[i].weight = 0;
+        for (int i = 0; i < pistolRigs.Count; i++)
+            pistolRigs[i].weight = 0;
+
+        for (int i = 0; i < handIK.Count; i++)
+            handIK[i].SetIK(null);
     }
     public void Pickup(Gun gun)
     {

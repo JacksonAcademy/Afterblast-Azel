@@ -6,11 +6,11 @@ public class InteractionManager : MonoBehaviour
 {
     public static InteractionManager instance;
     public InteractionItem interactionItem;
-
+    public PlayerManager player;
     public List<InteractionItem> interactions;
 
     public Vector3 interactOffset;
-    public Camera camera;
+    public new Camera camera;
     private void Awake()
     {
         instance = this;
@@ -39,6 +39,9 @@ public class InteractionManager : MonoBehaviour
     }
     public void LateUpdate()
     {
+        if (!player.IsOwner)
+            return;
+
         for(int i =0; i < interactions.Count; ++i)
         {
             interactions[i].SetPosition(camera.WorldToScreenPoint(interactions[i].trueCenter.position + interactOffset));

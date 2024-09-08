@@ -94,12 +94,27 @@ public class PlayerManager : NetworkBehaviour
         mainCam.enabled = false;
         gameManager = GameManager.instance;
         Hide(false);
+        //Initialize();
+        //print("Player joined: " + playerData.playerName);
+
+    }
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        NetworkManager.SceneManager.AddOwnerToDefaultScene(NetworkObject);
     }
     private void Start()
     {
+
         nameText.gameObject.SetActive(!Owner.IsLocalClient);
         gameUI.gameObject.SetActive(Owner.IsLocalClient);
         mainCam.gameObject.tag = (Owner.IsLocalClient ? "MainCamera" : "Untagged");
+        Initialize();
+    }
+    public override void OnStartServer()
+    {
+        base.OnStartServer(); 
+        ServerManager.Objects.OnPreDestroyClientObjects += OnPreDestroyClientObjects;
     }
     public void ClientSync(PlayerData player, Color playerColore)
     {
@@ -115,11 +130,6 @@ public class PlayerManager : NetworkBehaviour
             renderers[i].material.color = playerColor;
         }
     }
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-        Initialize();
-    }
     public void Initialize()
     {
 
@@ -134,10 +144,17 @@ public class PlayerManager : NetworkBehaviour
             playerData.playerName = gameManager.matchmaker._playerName.text;
 
         //SEnd Player Data to SErver
-        gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
+        if(Owner.IsLocalClient)
+        {
+            gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
+            Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
+            print("Sending player data to server");
+        }
+
         Show(false);
 
-        mainCam.enabled = true;
+        mainCam.enabled = Owner.IsLocalClient;
+        name = playerData.playerName;
         playerUI.SetActive(Owner.IsLocalClient);
         respawn.Play(transform.position);
     }
@@ -153,27 +170,19 @@ public class PlayerManager : NetworkBehaviour
         if(gunManager.equippedGun)
             gunManager.Drop(gunManager.equippedGun, mainCam.transform.forward * 10);
     }
-    public void RemovePlayer(NetworkConnection conn)
-    {
-        gameManager.RemovePlayerServer(Time.time, playerData, conn.FirstObject);
-    }
     private void OnPreDestroyClientObjects(NetworkConnection conn)
     {
-        print("Player left: " + conn.FirstObject.gameObject.name);
-        gameManager.RemovePlayerLocal(Time.time, playerData, conn.FirstObject);
-        //RemovePlayer(conn);
-        RemoveOwnership();
-
-
-        if (conn == Owner)
+        if(conn == Owner)
         {
-
-
+            DropWeapons();
+            RemoveOwnership();
+            gameManager.RemovePlayerServer(Time.time, playerData, NetworkObject, transform.position);
         }
     }
-    public override void OnOwnershipServer(NetworkConnection prevOwner)
+    public override void OnStopServer()
     {
-        base.OnOwnershipServer(prevOwner);
+        if (ServerManager != null)
+            ServerManager.Objects.OnPreDestroyClientObjects -= OnPreDestroyClientObjects;
     }
     //This function runs on every client
     [ObserversRpc]
@@ -347,21 +356,6 @@ public class PlayerManager : NetworkBehaviour
     public float GetHealth(PlayerManager whoRequested)
     {
         return playerHealth.health;
-    }
-    public override void OnStartNetwork()
-    {
-        base.OnStartNetwork();
-        base.Owner.SetFirstObject(NetworkObject);
-    }
-    public override void OnStartServer()
-    {
-        ServerManager.Objects.OnPreDestroyClientObjects += OnPreDestroyClientObjects;
-        //LocalConnection.SetFirstObject(NetworkObject);
-    }
-    public override void OnStopServer()
-    {
-       // if (ServerManager != null)
-           // ServerManager.Objects.OnPreDestroyClientObjects -= OnPreDestroyClientObjects;
     }
 }
 public static class IntBitExtentions

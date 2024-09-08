@@ -8,26 +8,39 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Cloudy02
-  m_Shader: {fileID: 103, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 4800000, guid: 5e444cd13928b274babcaedb447ba3ef, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _FOGBOTTOM_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _Tex:
-        m_Texture: {fileID: 8900000, guid: f1b504bff46c95346b5b1e99fd731eff, type: 3}
+        m_Texture: {fileID: 8900000, guid: 18716c66523045e4eb376e6c09b53823, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Exposure: 1
-    - _Rotation: 0
+    - _FogBottom: 1
+    - _FogEnd: 0.354
+    - _FogIntens: 1
+    - _FogStart: 0
+    - _MieIntens: 0
+    - _MieSize: 0.469
+    - _Rotation: 192
+    - _SunDir: 126
     m_Colors:
-    - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+    - _FogCol: {r: 0.38781592, g: 0.7482841, b: 0.990566, a: 1}
+    - _MieTint: {r: 0.500623, g: 0.6997007, b: 0.8490566, a: 0.5}
+    - _Tint: {r: 0.4298683, g: 0.50319034, b: 0.5660378, a: 1}
   m_BuildTextureStacks: []
