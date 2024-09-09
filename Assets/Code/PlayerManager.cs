@@ -11,6 +11,7 @@ using DamageNumbersPro;
 using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 using FishNet;
 using Unity.Services.Lobbies.Models;
+using UnityEngine.EventSystems;
 public static class PlayerExtensions
 {
     public static void WritePlayerData(this Writer writer, PlayerData value)
@@ -87,8 +88,10 @@ public class PlayerManager : NetworkBehaviour
     public DamageNumber damagePopup;
 
     public TextMeshProUGUI nameText;
+    public EventSystem eventSystem;
     public NetworkObject playerObject;
     private bool isPaused = false;
+
     private void Awake()
     {
         mainCam.enabled = false;
@@ -154,6 +157,8 @@ public class PlayerManager : NetworkBehaviour
         Show(false);
 
         mainCam.enabled = Owner.IsLocalClient;
+        listener.enabled = Owner.IsLocalClient;
+        eventSystem.enabled = Owner.IsLocalClient;
         name = playerData.playerName;
         playerUI.SetActive(Owner.IsLocalClient);
         respawn.Play(transform.position);

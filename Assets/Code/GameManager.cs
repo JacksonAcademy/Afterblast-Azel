@@ -62,7 +62,7 @@ public class GameManager : NetworkBehaviour
         UpdatePlayerLocal(timeSent, playerToUpdate, player);
         UpdateObserverPlayers(timeSent, playerToUpdate, player);
     }
-    [ObserversRpc(BufferLast = true)]
+    [ObserversRpc(BufferLast = true, ExcludeServer = true)]
     public void UpdateObserverPlayers(float timeSent, PlayerData playerData, NetworkObject player)
     {
         UpdatePlayerLocal(timeSent, playerData, player);
@@ -73,7 +73,6 @@ public class GameManager : NetworkBehaviour
     }
     public void UpdatePlayerLocal(float timeSent, PlayerData playerData, NetworkObject player)
     {
-        print("Updating player: " + playerData.playerName);
         float currentTime = Time.time;
         float killfeedDelay = 2;
 
@@ -88,6 +87,7 @@ public class GameManager : NetworkBehaviour
         }
         if (!containsPlayerAlready)
         {
+            print("Player joined: " + playerData.playerName);
             //Player joined teh game
             players.Add(playerData);
             if (currentTime - killfeedDelay < timeSent)
@@ -104,7 +104,7 @@ public class GameManager : NetworkBehaviour
 
         RemovePlayerLocal(timeSent, playerToRemove, player, despawnPos);
         RemovePlayerObserver(timeSent, playerToRemove, player, despawnPos);
-        print("Player removed Object: " + player.Owner.FirstObject);
+        print("Player left: " + playerToRemove.playerName);
         //ServerManager.Kick;
         //player.Despawn();
     }
@@ -114,7 +114,6 @@ public class GameManager : NetworkBehaviour
         //  float currentTime = Time.time;
         // float killfeedDelay = 2;
         //if (currentTime - killfeedDelay < timeSent)
-        print("Removing player: " + playerToRemove.playerName);
         killfeedManager.AddItem(playerToRemove.playerName + " left the game!");
         players.Remove(playerToRemove);
 

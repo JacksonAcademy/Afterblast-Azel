@@ -49,7 +49,7 @@ public class PlayerShoot : NetworkBehaviour
     }
     private void Update()
     {
-        if(base.IsOwner)
+        if(playerManager.IsOwner)
         {
             if (!GunManager.instance.equippedGun)
                 return;
@@ -120,29 +120,49 @@ public class PlayerShoot : NetworkBehaviour
         RaycastHit hit = new RaycastHit();
        // base.RollbackManager.Rollback(pt, RollbackPhysicsType.Physics, base.IsOwner);
 
-        //Shoot a linecast to see if the client shoot path is valid, if the client shot a player
+
         if(whoGotShot != null)
         {
-            if (Physics.Linecast(shootPoint, whoGotShot.transform.position, out hit, shootLayer))
+            Debug.DrawLine(shootPoint, whoGotShot.transform.position, Color.green, 10f);
+            //Shoot a linecast to see if the client shoot path is valid, if the client shot a player
+            //if (Physics.Linecast(shootPoint, whoGotShot.transform.position, out hit, shootLayer))
+            //{
+            //    print("Server linecast hit: " + hit.transform.name);
+            //    if (hit.transform.tag == "PlayerHitbox")
+            //    {
+            //        PlayerManager playerShot = whoShot.GetComponent<PlayerManager>();
+            //        PlayerManager playerWhoGotShot = whoGotShot.GetComponent<PlayerManager>();
+
+            //        playerWhoGotShot.DamagePlayerObservers(damage, whoGotShot); 
+
+            //        ////Damage hasn't been applied yet, so subtract the damage that will be applied from the base health
+            //        if(playerWhoGotShot.playerHealth.health-damage <= 0)
+            //        {
+            //            playerWhoGotShot.playerHealth.ObserversDieEffects(whoShot);
+            //            playerShot.Kill(whoShot.Owner, whoGotShot);
+            //        }
+
+            //    }
+            //}
+            //Shoot a ray to see if the client shoot path is valid, if the client shot a player
+            if (Physics.Raycast(shootPoint, shootDirection, out hit, Mathf.Infinity, shootLayer))
             {
-                print("SErver hit: " + hit.transform.name);
+                print("Server ray hit: " + hit.transform.name);
                 if (hit.transform.tag == "PlayerHitbox")
                 {
                     PlayerManager playerShot = whoShot.GetComponent<PlayerManager>();
                     PlayerManager playerWhoGotShot = whoGotShot.GetComponent<PlayerManager>();
 
-                    playerWhoGotShot.DamagePlayerObservers(damage, whoGotShot); 
+                    playerWhoGotShot.DamagePlayerObservers(damage, whoGotShot);
 
                     ////Damage hasn't been applied yet, so subtract the damage that will be applied from the base health
-                    if(playerWhoGotShot.playerHealth.health-damage <= 0)
+                    if (playerWhoGotShot.playerHealth.health - damage <= 0)
                     {
                         playerWhoGotShot.playerHealth.ObserversDieEffects(whoShot);
                         playerShot.Kill(whoShot.Owner, whoGotShot);
                     }
 
                 }
-                else if (hit.transform.tag == "Target")
-                    DamageTarget(damage, hitPlayer);
             }
         }
         else
@@ -153,6 +173,7 @@ public class PlayerShoot : NetworkBehaviour
             }
         }
         Debug.DrawRay(shootPoint, shootDirection * 2, Color.red, 10f);
+
         ObserversFire(shootPoint, shootPointRotation, shootDirection, clientHitPoint, hit.normal, whoGotShot!=null, whoGotShot);
         //base.RollbackManager.Return();
     }
