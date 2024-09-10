@@ -88,7 +88,6 @@ public class PlayerManager : NetworkBehaviour
     public DamageNumber damagePopup;
 
     public TextMeshProUGUI nameText;
-    public EventSystem eventSystem;
     public NetworkObject playerObject;
     private bool isPaused = false;
 
@@ -158,7 +157,6 @@ public class PlayerManager : NetworkBehaviour
 
         mainCam.enabled = Owner.IsLocalClient;
         listener.enabled = Owner.IsLocalClient;
-        eventSystem.enabled = Owner.IsLocalClient;
         name = playerData.playerName;
         playerUI.SetActive(Owner.IsLocalClient);
         respawn.Play(transform.position);

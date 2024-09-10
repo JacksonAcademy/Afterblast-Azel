@@ -4,18 +4,12 @@ using UnityEngine;
 
 public class InteractionManager : MonoBehaviour
 {
-    public static InteractionManager instance;
     public InteractionItem interactionItem;
     public PlayerManager player;
     public List<InteractionItem> interactions;
 
     public Vector3 interactOffset;
     public new Camera camera;
-    private void Awake()
-    {
-        instance = this;
-    }
-
     public void AddInteract(string itemName, string itemRarity, int itemAmount, Transform interactObject, Transform trueCenter)
     {
         InteractionItem instantiatedItem = Instantiate(interactionItem, transform);

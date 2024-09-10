@@ -77,7 +77,7 @@ public class GunManager : NetworkBehaviour
         Drop(equippedGun, playerManager.mainCam.transform.forward * dropForce);
         ObserversDrop();
     }
-    [ObserversRpc(ExcludeOwner = true)]
+    [ObserversRpc(BufferLast = true, ExcludeOwner = true)]
     public void ObserversDrop()
     {
         if (IsServerInitialized)

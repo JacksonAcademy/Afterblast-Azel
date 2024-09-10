@@ -14,9 +14,10 @@ public class ItemInteract : NetworkBehaviour
     public Gun hoveredGun;
     public PlayerManager playerManager;
     public Interactable hoveredInteractable;
+    public InteractionManager interactionManager;
     public void Update()
     {
-        if (!base.IsOwner)
+        if (!IsOwner)
             return;
 
         RaycastHit hit;
@@ -29,7 +30,7 @@ public class ItemInteract : NetworkBehaviour
 
                 previousInteracted = hit;
                 hoveredInteractable = hit.transform.GetComponent<Interactable>();
-                InteractionManager.instance.AddInteract(hoveredInteractable.itemName, hoveredInteractable.rarity, hoveredInteractable.amount, hit.transform, hoveredInteractable.trueCenter);
+                interactionManager.AddInteract(hoveredInteractable.itemName, hoveredInteractable.rarity, hoveredInteractable.amount, hit.transform, hoveredInteractable.trueCenter);
                 hoveredGun = hoveredInteractable.GetComponent<Gun>();
             }
 
@@ -38,7 +39,7 @@ public class ItemInteract : NetworkBehaviour
         {
             if (previousInteracted.transform != null)
             {
-                InteractionManager.instance.RemoveInteract(hoveredInteractable.transform);
+                interactionManager.RemoveInteract(hoveredInteractable.transform);
                 hoveredInteractable = null;
                 hoveredGun = null;
                 previousInteracted = default;
@@ -52,7 +53,7 @@ public class ItemInteract : NetworkBehaviour
             {
                 gunManager.Pickup(hoveredGun);
                 hoveredInteractable.Pickup();
-                InteractionManager.instance.RemoveInteract(hoveredInteractable.transform);
+                interactionManager.RemoveInteract(hoveredInteractable.transform);
                 hoveredInteractable = null;
                 hoveredGun = null;
                 previousInteracted = default;
