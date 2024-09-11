@@ -15,14 +15,14 @@ public class PlayerHitbox : NetworkBehaviour
     }
     private void Start()
     {
-        //if(Owner.IsLocalClient)
-        //{
-        //    col.enabled = false;
-        //}
-        //else
-        //{
-        //    col.enabled = true;
-        //}
+        if (Owner.IsLocalClient)
+        {
+            col.enabled = false;
+        }
+        else
+        {
+            col.enabled = true;
+        }
     }
     [TargetRpc]
     public void Damage(NetworkConnection conn, int amount, PlayerManager playerDamaged)

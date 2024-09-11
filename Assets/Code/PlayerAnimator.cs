@@ -14,7 +14,7 @@ public class PlayerAnimator : NetworkBehaviour
     private PlayerMovement playerMovement;
 
     [SerializeField]
-    private Animator _animator;
+    public Animator _animator;
     public GameObject gun;
     public PlayerManager playerManager;
     private bool previousGrounded;

@@ -3269,7 +3269,7 @@ MonoBehaviour:
   bulletTravelTime: 400
   shootLayer:
     serializedVersion: 2
-    m_Bits: 192
+    m_Bits: 128
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -111066,6 +111066,11 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: 7b6c5e09358890c4985759f57322c534, type: 2}
     - target: {fileID: 5866666021909216657, guid: 7fb529638adf4964bade3d00ad63aa52,
         type: 3}
+      propertyPath: m_CullingMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 7fb529638adf4964bade3d00ad63aa52,
+        type: 3}
       propertyPath: m_WarningMessage
       value: 
       objectReference: {fileID: 0}
@@ -112071,7 +112076,7 @@ MonoBehaviour:
   m_animatorIkPassLayerIndex: 0
   m_collisionLayerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 64
   m_triggerCollisionInteraction: 1
   m_resetToDefaultValuesSpeed: 1
   m_activateCrouchSpecificBehaviour: 0
@@ -112124,7 +112129,7 @@ MonoBehaviour:
   m_shouldersCounteractSpineBending: 1
   m_ignoreVelocityDependency: 0
   m_relativeSpineRotationAxisAffectedBySlopeLeaning: 0
-  m_moveLeaningStrength: 0
+  m_moveLeaningStrength: 1
   m_moveLeaningKneelFactor: 0
   m_moveSpineLeaningStrength: 0
   m_moveLeaningStiffness: 12
@@ -112134,7 +112139,7 @@ MonoBehaviour:
   m_moveLeanWhenGrounded: 1
   m_moveLeanWhenNotGrounded: 1
   m_flipRightMoveLean: 1
-  m_flipForwardMoveLean: 1
+  m_flipForwardMoveLean: 0
   m_eventCheckResetDistance: 0.05
   m_stepLength: 0.7
   m_footstepEventDelay: 0
@@ -112156,11 +112161,11 @@ MonoBehaviour:
   m_onGroundedExited:
     m_PersistentCalls:
       m_Calls: []
-  m_isGrounded: 0
-  m_currBodyPositionOffset: 0
-  m_maxBodyPositionOffset: 0
-  m_currIkCorrectionOffset: 0
-  m_maxIkCorrectionOffset: 0
+  m_isGrounded: 1
+  m_currBodyPositionOffset: 0.08494951
+  m_maxBodyPositionOffset: 0.45683554
+  m_currIkCorrectionOffset: 0.072302215
+  m_maxIkCorrectionOffset: 0.44266397
   m_upwardsVelocity: 0
   m_maxUpwardsVelocity: 0
 --- !u!114 &4916353312662623013
