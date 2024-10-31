@@ -10,7 +10,6 @@ public class Interactable : MonoBehaviour
 
     public int interactLayer = 8;
     public int defaultLayer = 1;
-    public Transform trueCenter;
     private void Awake()
     {
         Drop();   
@@ -23,4 +22,24 @@ public class Interactable : MonoBehaviour
     {
         gameObject.layer = interactLayer;
     }
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+
+
 }

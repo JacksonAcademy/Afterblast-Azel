@@ -9,29 +9,27 @@ public class ItemInteract : NetworkBehaviour
     public float interactLength;
     public LayerMask interactLayer;
 
-    public RaycastHit previousInteracted;
-    public GunManager gunManager;
-    public Gun hoveredGun;
+    [HideInInspector] public RaycastHit previousInteracted;
+
+    [HideInInspector] public Pickup hoveredPickup;
     public PlayerManager playerManager;
-    public Interactable hoveredInteractable;
+    [HideInInspector] public Interactable hoveredInteractable;
     public InteractionManager interactionManager;
-    public void Update()
+    public void FixedUpdate()
     {
         if (!IsOwner)
             return;
 
         RaycastHit hit;
-        Debug.DrawRay(camera.position, camera.forward * interactLength, Color.yellow);
 
         if (Physics.Raycast(camera.position, camera.forward, out hit, interactLength, interactLayer))
         {
-            if (previousInteracted.transform == null && gunManager.equippedGun == null) 
+            if (previousInteracted.transform == null) 
             {
-
                 previousInteracted = hit;
                 hoveredInteractable = hit.transform.GetComponent<Interactable>();
-                interactionManager.AddInteract(hoveredInteractable.itemName, hoveredInteractable.rarity, hoveredInteractable.amount, hit.transform, hoveredInteractable.trueCenter);
-                hoveredGun = hoveredInteractable.GetComponent<Gun>();
+                interactionManager.AddInteract(hoveredInteractable.itemName, hoveredInteractable.rarity, hoveredInteractable.amount, hit.transform);
+                hoveredPickup = hoveredInteractable.GetComponent<Pickup>();
             }
 
         }
@@ -41,25 +39,26 @@ public class ItemInteract : NetworkBehaviour
             {
                 interactionManager.RemoveInteract(hoveredInteractable.transform);
                 hoveredInteractable = null;
-                hoveredGun = null;
+                hoveredPickup = null;
                 previousInteracted = default;
             }
 
         }
-
-        if (hoveredGun)
+    }
+    private void Update()
+    {
+        if (hoveredPickup)
         {
             if (Input.GetKeyDown(KeyCode.E))
             {
-                gunManager.Pickup(hoveredGun);
-                hoveredInteractable.Pickup();
+                hoveredPickup.PickupItem(playerManager.NetworkObject);
+
                 interactionManager.RemoveInteract(hoveredInteractable.transform);
                 hoveredInteractable = null;
-                hoveredGun = null;
+                hoveredPickup = null;
                 previousInteracted = default;
 
             }
         }
-
     }
 }

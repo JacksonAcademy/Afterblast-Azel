@@ -10,12 +10,11 @@ public class InteractionManager : MonoBehaviour
 
     public Vector3 interactOffset;
     public new Camera camera;
-    public void AddInteract(string itemName, string itemRarity, int itemAmount, Transform interactObject, Transform trueCenter)
+    public void AddInteract(string itemName, string itemRarity, int itemAmount, Transform interactObject)
     {
         InteractionItem instantiatedItem = Instantiate(interactionItem, transform);
         instantiatedItem.SetText(itemRarity, itemName, itemAmount);
         instantiatedItem.interactObject = interactObject;
-        instantiatedItem.SetCam(camera, trueCenter);
         Interactable interact = interactObject.GetComponent<Interactable>();
         interactions.Add(instantiatedItem);
     }
@@ -31,14 +30,14 @@ public class InteractionManager : MonoBehaviour
             }
         }
     }
-    public void LateUpdate()
+    public void FixedUpdate()
     {
         if (!player.IsOwner)
             return;
 
         for(int i =0; i < interactions.Count; ++i)
         {
-            interactions[i].SetPosition(camera.WorldToScreenPoint(interactions[i].trueCenter.position + interactOffset));
+            interactions[i].transform.position = camera.WorldToScreenPoint(interactions[i].interactObject.transform.position) + interactOffset;
         }
     }
 }

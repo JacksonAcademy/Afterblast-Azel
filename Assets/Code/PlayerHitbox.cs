@@ -24,10 +24,4 @@ public class PlayerHitbox : NetworkBehaviour
             col.enabled = true;
         }
     }
-    [TargetRpc]
-    public void Damage(NetworkConnection conn, int amount, PlayerManager playerDamaged)
-    {
-        playerHealth.TakeDamage(amount);
-        print ("Took damage by: " + playerDamaged.playerData.playerName) ;
-    }
 }

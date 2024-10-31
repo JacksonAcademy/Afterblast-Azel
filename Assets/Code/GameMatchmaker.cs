@@ -48,6 +48,8 @@ public class GameMatchmaker : MonoBehaviour
     public Transport tugboat;
 
     public bool spawnPlayer = true;
+
+    public string defaultIP = "18.191.185.25";
     private void Awake()
     {
         instance = this;
@@ -70,8 +72,8 @@ public class GameMatchmaker : MonoBehaviour
         {
             StartServer();
         }
-        SetIPAddress("18.191.185.25");
-        clientIPAddress.SetTextWithoutNotify("18.191.185.25");
+        SetIPAddress(defaultIP);
+        clientIPAddress.SetTextWithoutNotify(defaultIP);
     }
     public void SetIPAddress(string ip)
     {
@@ -89,8 +91,6 @@ public class GameMatchmaker : MonoBehaviour
         if (Application.isBatchMode && !Application.isEditor)
             tugboat.StartConnection(false);
 
-
-
         lobbyCam.enabled = false;
         serverSpectateCamera.enabled = true;
 
@@ -105,8 +105,16 @@ public class GameMatchmaker : MonoBehaviour
     {
         spawnPlayer = true;
         GameManager.instance.gameObject.SetActive(true);
+        if (_playerName.text == "server")
+        {
+            tugboat.SetClientAddress("localhost");
+            tugboat.StartConnection(true);
+        }
+
         tugboat.StartConnection(false);
-        
+
+
+
         _buttons.SetActive(false);
         _lobby.SetActive(false);
 

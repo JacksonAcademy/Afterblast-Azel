@@ -36,12 +36,18 @@ public class PlayerHealth : NetworkBehaviour
     [ObserversRpc]
     public void ObserversDieEffects(NetworkObject whoKilledMe)
     {
-        player.Hide(false);
+        DieEffect();
         if (base.IsOwner)
             player.DieScreen(whoKilledMe.GetComponent<PlayerManager>());
         SetHealth(startingHealth);
         DieEffects(whoKilledMe);
         player.Die();
+    }
+    public IEnumerator DieEffect()
+    {
+        animator._animator.SetTrigger("Death");
+        yield return new WaitForSeconds(3);
+        player.Hide(false);
     }
     public void DieEffects(NetworkObject whoKilledMe)
     {

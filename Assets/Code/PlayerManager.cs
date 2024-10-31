@@ -8,10 +8,10 @@ using FishNet.Connection;
 using Unity.VisualScripting;
 using FishNet.Serializing;
 using DamageNumbersPro;
-using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 using FishNet;
 using Unity.Services.Lobbies.Models;
 using UnityEngine.EventSystems;
+using Demo.Scripts.Runtime.Item;
 public static class PlayerExtensions
 {
     public static void WritePlayerData(this Writer writer, PlayerData value)
@@ -64,6 +64,12 @@ public class PlayerManager : NetworkBehaviour
     public TextMeshProUGUI serverPlayerCountText;
     public TextMeshProUGUI eliminationsText;
 
+    public weaponManager weaponManager;
+
+    public EmptyParentBehaviour weaponBone;
+
+    public List<FPSItem> weapons = new List<FPSItem>();
+
     public GameObject spawnEffect;
     public PlayerMovement playerMovement;
     public PlayerShoot playerShoot;
@@ -81,7 +87,6 @@ public class PlayerManager : NetworkBehaviour
 
     public PlayerAnimator animator;
     public PlayerHealth playerHealth;
-    public GunManager gunManager;
     public LeaderboardManager leaderboardManager;
     public sound respawn, death, elimination;
 
@@ -150,7 +155,7 @@ public class PlayerManager : NetworkBehaviour
         {
             gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
             Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
-            print("Sending player data to server");
+           // print("Sending player data to server");
         }
 
         Show(false);
@@ -170,8 +175,6 @@ public class PlayerManager : NetworkBehaviour
     public void DropWeapons()
     {
         print("DRopped Weapons for player: " + playerData.playerName);
-        if(gunManager.equippedGun)
-            gunManager.Drop(gunManager.equippedGun, mainCam.transform.forward * 10);
     }
     private void OnPreDestroyClientObjects(NetworkConnection conn)
     {
@@ -187,7 +190,6 @@ public class PlayerManager : NetworkBehaviour
         if (ServerManager != null)
             ServerManager.Objects.OnPreDestroyClientObjects -= OnPreDestroyClientObjects;
     }
-    //This function runs on every client
     [ObserversRpc]
     public void DamagePlayerObservers(int damage, NetworkObject whoGotShot)
     {
@@ -249,6 +251,7 @@ public class PlayerManager : NetworkBehaviour
         {
             Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
         }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
@@ -291,6 +294,10 @@ public class PlayerManager : NetworkBehaviour
         playerMovement.canMove = true;
         nameText.gameObject.SetActive(!Owner.IsLocalClient);
         playerShoot.enabled = true;
+    }
+    public void DropItem()
+    {
+
     }
     public void Show(bool serverShow)
     {

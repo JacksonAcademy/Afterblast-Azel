@@ -40,7 +40,6 @@ public class PlayerShoot : NetworkBehaviour
     [HideInInspector] public NetworkObject hitPlayerObject;
     [HideInInspector] public Vector3 clientHitPoint, shootDirection;
     [HideInInspector] public bool canShoot;
-    public GunManager gunManager;
     public sound damageSound;
     private void Awake()
     {
@@ -54,7 +53,7 @@ public class PlayerShoot : NetworkBehaviour
 
         CamFOV();
 
-        if (!gunManager.equippedGun)
+        if (!playerManager.weaponManager.equippedItem)
             return;
 
         CheckShot();
@@ -73,15 +72,15 @@ public class PlayerShoot : NetworkBehaviour
             fov = slidingFOV;
         }
 
-        _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, fov, aimLerp * Time.deltaTime);
-        _camera.transform.localPosition = Vector3.Lerp(_camera.transform.localPosition, camPos, aimLerp * Time.deltaTime);
+        //_camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, fov, aimLerp * Time.deltaTime);
+        // _camera.transform.localPosition = Vector3.Lerp(_camera.transform.localPosition, camPos, aimLerp * Time.deltaTime);
     }
     private void CheckShot()
     {
         RaycastHit hit;
-        Vector3 shootPoint = gunManager.equippedGun.shootPoint.position;
-        Quaternion shootRot = gunManager.equippedGun.shootPoint.rotation;
-        if (Physics.Linecast(_camera.transform.position, shootPoint, out hit, groundLayer)) 
+        Vector3 shootPoint = playerManager.weaponManager.equippedItem.shootPoint.position;
+        Quaternion shootRot = playerManager.weaponManager.equippedItem.shootPoint.rotation;
+        if (Physics.Linecast(_camera.transform.position, shootPoint, out hit, groundLayer))
         {
             cantShootCrosshair.SetActive(true);
             cantShootCrosshair.transform.position = _camera.WorldToScreenPoint(hit.point);
@@ -96,18 +95,18 @@ public class PlayerShoot : NetworkBehaviour
             return;
         if (!Input.GetMouseButtonDown(0))
             return;
-        if (gunManager.equippedGun == null)
+        if (playerManager.weaponManager.equippedItem == null)
             return;
         if (!canShoot)
             return;
 
         Vector3 direction = GetDirection();
         hitPlayerObject = null;
-        int damage = (int)gunManager.equippedGun.damage;
-        float nextFire = Time.time + gunManager.equippedGun.timeBetweenShots;
+        int damage = (int)playerManager.weaponManager.equippedItem.damage;
+        float nextFire = Time.time + playerManager.weaponManager.equippedItem.timeBetweenShots;
 
         ShootClient(shootPoint, direction, damage, nextFire);
-       
+
     }
     public void ShootClient(Vector3 start, Vector3 direction, int damage, float nextFire)
     {
@@ -120,7 +119,6 @@ public class PlayerShoot : NetworkBehaviour
         if (Physics.Raycast(ray, out hitPlayer, Mathf.Infinity))
         {
             shootDirection = Vector3.Normalize(hitPlayer.point - start);
-            print(playerManager.playerData.playerName + " position : " + transform.position + ". ");
 
             if (Physics.Raycast(start, shootDirection, out hitPlayer, Mathf.Infinity, shootLayer))
             {
@@ -148,7 +146,8 @@ public class PlayerShoot : NetworkBehaviour
         PlayerManager playerShot = whoShot.GetComponent<PlayerManager>();
         _nextFire = nextFire;
         RaycastHit hit = new RaycastHit();
-        RollbackManager.Rollback(pt, RollbackPhysicsType.Physics);
+        if (RollbackManager)
+            RollbackManager.Rollback(pt, RollbackPhysicsType.Physics);
         bool reconcilePlayerDamage = true;
         //Shoot a ray to see if the client shoot path is valid, if the client shot a player
 
@@ -157,7 +156,7 @@ public class PlayerShoot : NetworkBehaviour
         animatorinfo = playerShot.animator._animator.GetCurrentAnimatorClipInfo(0);
 
         current_animation = animatorinfo[0].clip.name;
-        print("Playing current animation: " +  current_animation);
+        print("Playing current animation: " + current_animation);
 
         if (Physics.Raycast(shootPoint, shootDirection, out hit, Mathf.Infinity, shootLayer))
         {
@@ -170,9 +169,9 @@ public class PlayerShoot : NetworkBehaviour
 
             print(playerWhoGotShot.playerData.playerName + " got shot by " + playerShot.playerData.playerName);
 
-            playerWhoGotShot.DamagePlayerObservers((int)playerShot.gunManager.equippedGun.damage, playerWhoGotShot.NetworkObject);
+            playerWhoGotShot.DamagePlayerObservers((int)playerShot.weaponManager.equippedItem.damage, playerWhoGotShot.NetworkObject);
 
-            if (playerWhoGotShot.playerHealth.health - (int)playerShot.gunManager.equippedGun.damage <= 0)
+            if (playerWhoGotShot.playerHealth.health - (int)playerShot.weaponManager.equippedItem.damage <= 0)
             {
                 playerWhoGotShot.playerHealth.ObserversDieEffects(whoShot);
                 playerShot.Kill(whoShot.Owner, playerWhoGotShot.NetworkObject);
@@ -183,7 +182,7 @@ public class PlayerShoot : NetworkBehaviour
         {
             Debug.DrawRay(shootPoint, shootDirection * 100, Color.red, 10f);
         }
-        if(reconcilePlayerDamage)
+        if (reconcilePlayerDamage)
         {
             //playerShot.playerShoot.ReconcileDamage(playerShot.LocalConnection);
         }
@@ -203,24 +202,19 @@ public class PlayerShoot : NetworkBehaviour
     }
     private void OnCompleted(object sender, System.EventArgs e)
     {
-        // Handle complete event here
-        if (sender is TracerObject tracerObject)
-        {
-            Destroy(tracerObject.gameObject);
-
-        }
+        if (sender is TracerObject tracerObject) Destroy(tracerObject.gameObject);
     }
     public void ShootEffect(Vector3 shootPoint, Vector3 direction, NetworkObject whoShot)
     {
         bool hitPlayer = false;
         PlayerManager playerWhoShot = whoShot.GetComponent<PlayerManager>();
-        GameObject muzzleFlash = Instantiate(muzzleEffect, shootPoint, Quaternion.LookRotation(playerWhoShot.gunManager.equippedGun.shootPoint.eulerAngles));
+        GameObject muzzleFlash = Instantiate(muzzleEffect, shootPoint, Quaternion.LookRotation(playerWhoShot.weaponManager.equippedItem.transform.position));
         Destroy(muzzleFlash, 1f);
+        Pickup pickup = weaponManager.instance.equippedItem;
 
-        playerAnimator.ResetAim();
-        gunRecoil.Shoot();
+        if (pickup.weapon)
+            pickup.weapon.OnFire();
 
-        gunManager.equippedGun.Shoot(shootPoint);
         Bullet bullet = Instantiate(bulletPrefab);
         SmokeTrail smokeTrail = Instantiate(smokeTrailPrefab);
 
@@ -235,7 +229,6 @@ public class PlayerShoot : NetworkBehaviour
 
         void OnImpact(object sender, System.EventArgs e)
         {
-            gunManager.equippedGun.bulletWhiz.Play(hit.point);
             if (hitPlayer)
             {
                 GameObject effect = Instantiate(shotBlank, hit.point, Quaternion.identity);

@@ -7,21 +7,17 @@ using UnityEngine.Animations.Rigging;
 
 public class PlayerAnimator : NetworkBehaviour
 {
-    public float gravity;
-    public bool grounded;
+    [HideInInspector] public float gravity;
+    [HideInInspector] public bool grounded;
     public float animationSmoothing, rigSmoothing;
     private PlayerShoot playerShoot;
     private PlayerMovement playerMovement;
 
-    [SerializeField]
     public Animator _animator;
-    public GameObject gun;
     public PlayerManager playerManager;
     private bool previousGrounded;
     public float aimTimer;
     public float aimDelay;
-
-    public GunManager gunManager;
 
     private Vector2 animationVelocity;
     private Vector2 tickAnimationVelocity;
@@ -43,13 +39,14 @@ public class PlayerAnimator : NetworkBehaviour
         animationVelocity = Vector2.Lerp(animationVelocity, tickAnimationVelocity, animationSmoothing * Time.deltaTime);
         _animator.SetFloat("XVelocity", animationVelocity.x);
         _animator.SetFloat("YVelocity", animationVelocity.y);
-
+        float velocity = animationVelocity.SqrMagnitude();
+        _animator.SetFloat("Velocity", velocity);
     }
     public void ResetAim()
     {
         aimTimer = aimDelay;
     }
-    public void UpdateAnimator(Vector2 velocity, float gravity, bool grounded, bool aim, bool crouching, bool sliding, bool sprinting, float delta, int gunType)
+    public void UpdateAnimator(Vector2 velocity, float gravity, bool grounded, bool aim, bool crouching, bool sliding, bool sprinting, bool wallRunning, float wallRunSide, float delta)
     {
         tickAnimationVelocity = velocity;
         _animator.SetBool("Grounded", grounded);
@@ -57,10 +54,8 @@ public class PlayerAnimator : NetworkBehaviour
         _animator.SetBool("Aim", aim);
         _animator.SetBool("Crouch", crouching);
         _animator.SetBool("Sliding", sliding);
-        _animator.SetBool("Gun", gunType == 0);
-
-        gunManager.sprinting = sprinting;
-
+        _animator.SetBool("WallRun", wallRunning);
+        _animator.SetFloat("WallRunSide", wallRunSide);
         if (grounded && !previousGrounded)
         {
             previousGrounded = true;
@@ -71,31 +66,14 @@ public class PlayerAnimator : NetworkBehaviour
 
         if (!sprinting)
         {
-            _animator.SetInteger("GunType", gunType);
             aimTimer -= delta;
-            if (aimTimer > 0)
-                GunAim();
-            else
-                GunIdle();
         }
         else
         {
-            gunManager.NoGun();
             aimTimer = 0;
-            GunIdle();
         }
 
+        aimTimer = Mathf.Clamp(aimTimer, 0, 1000);
 
-
-    }
-    public void GunAim()
-    {
-        gunManager.aimWeight = 1;
-        _animator.SetBool("Aim", true);
-    }
-    public void GunIdle()
-    {
-        _animator.SetBool("Aim", false);
-        gunManager.aimWeight = 0;
     }
 }

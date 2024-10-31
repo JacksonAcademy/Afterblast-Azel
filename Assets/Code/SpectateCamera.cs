@@ -26,13 +26,14 @@ public class SpectateCamera : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             lockCursor = !lockCursor;
+
+
         }
 
-        Cursor.lockState = lockCursor ? CursorLockMode.Locked : CursorLockMode.None;
-        Cursor.visible = !lockCursor;
         if (!cam.enabled)
             return;
-
+        Cursor.lockState = lockCursor ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !lockCursor;
         rotation.x += Input.GetAxis(xAxis) * sensitivity;
         rotation.y += Input.GetAxis(yAxis) * sensitivity;
         rotation.y = Mathf.Clamp(rotation.y, -yRotationLimit, yRotationLimit);
