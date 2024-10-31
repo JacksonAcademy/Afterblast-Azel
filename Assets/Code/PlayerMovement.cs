@@ -60,6 +60,8 @@ public struct ReconcileData : IReconcileData
     public Vector3 Position;
 
     public Vector3 SlideDirection;
+
+    public Vector3 WallRunVector;
     public float SlopeAngle;
     public bool Sprinting;
     public bool Sliding;
@@ -69,7 +71,7 @@ public struct ReconcileData : IReconcileData
     public float VerticalVelocity;
     public float SlideForce;
 
-    public ReconcileData(Vector3 position, float verticalVelocity, float slideForce, float slopeAngle, Vector3 slideDirection, 
+    public ReconcileData(Vector3 position, Vector3 wallRunVector, float verticalVelocity, float slideForce, float slopeAngle, Vector3 slideDirection, 
         bool sprinting, bool sliding, bool grounded, bool wallRunning, bool jumping)
     {
         Position = position;
@@ -83,6 +85,7 @@ public struct ReconcileData : IReconcileData
         SlideDirection = slideDirection;
         WallRunning = wallRunning;
         Sprinting = sprinting;
+        WallRunVector = wallRunVector;
         _tick = 0;
     }
 
@@ -205,7 +208,6 @@ public class PlayerMovement : NetworkBehaviour
         _jumping = true;
         if (_sliding)
         {
-            print("Slide Jumped");
             StopSlide(replaying, false);
             _slideForce = _airSlideVelocity;
         }
@@ -213,11 +215,9 @@ public class PlayerMovement : NetworkBehaviour
         {
             Debug.DrawRay(transform.position + Vector3.up * 5, Vector3.right * 10, Color.yellow, 10);
             _verticalVelocity = _jumpForce;
-            print("Regular Jumping");
         }
         else
         {
-            print("Wall Jumping");
             StopWallRun();
             _wallRunning = false;
             Vector3 wallNormal = wallRight ? rightWallhit.normal : leftWallhit.normal;
@@ -227,11 +227,7 @@ public class PlayerMovement : NetworkBehaviour
             _wallRunVector = force;
             _verticalVelocity = force.y;
 
-
             wallJumpTimer = wallJumpDelay;
-            Debug.DrawRay(transform.position, force * 10, Color.yellow, 10);
-            Debug.DrawRay(transform.position, wallNormal, Color.red, 10);
-
         }
         if (!replaying)
         {
@@ -241,7 +237,6 @@ public class PlayerMovement : NetworkBehaviour
             _jumpInput = false;
             _crouching = false;
         }
-
     }
     public void CheckForWall()
     {
@@ -251,7 +246,7 @@ public class PlayerMovement : NetworkBehaviour
     public void StopSlide(bool replaying, bool removeVelocity)
     {
         SetControllerScale(normalScale);
-            _sliding = false;
+        _sliding = false;
 
         slideParticles.Stop();
         if (removeVelocity)
@@ -295,8 +290,7 @@ public class PlayerMovement : NetworkBehaviour
             _characterController.enabled = true;
         }
         if (base.IsOwner)
-        {
-            
+        {           
             _ceiling = Physics.Raycast(ceilingPosition.position, Vector3.up, 1, groundLayer);
             _sprintingInput = Input.GetKey(KeyCode.LeftShift) && Input.GetAxisRaw("Vertical") > 0;
 
@@ -308,7 +302,6 @@ public class PlayerMovement : NetworkBehaviour
             CheckJumpInput();
             CheckSlideInput();
             CheckForWall();
-            //CheckWallRunInput();
 
             if(Input.GetKeyDown(slideKey) && !_crouching)
                 _slidePressed = true;
@@ -334,13 +327,11 @@ public class PlayerMovement : NetworkBehaviour
 
         mouseY = Mathf.Clamp(mouseY, -90, 90);
 
-
         transform.eulerAngles = new Vector3(0, mouseX, 0);
 
         _userInput.SetValue(FPSANames.MouseInput, new Vector4(mouseX, mouseY));
         _userInput.SetValue(FPSANames.MouseDeltaInput, new Vector4(Input.GetAxis("Mouse X") * _mouseSensivity, Input.GetAxis("Mouse Y") * _mouseSensivity));
     }
-
     public override void OnStartNetwork()
     {
         base.TimeManager.OnTick += TimeManager_OnTick;
@@ -359,7 +350,7 @@ public class PlayerMovement : NetworkBehaviour
     }
     public override void CreateReconcile()
     {
-        ReconcileData rd = new ReconcileData(transform.position, _verticalVelocity, _slideForce, _slopeAngle, _slideDirection, _sprinting, _sliding, _grounded, _wallRunning, _jumping);
+        ReconcileData rd = new ReconcileData(transform.position, _wallRunVector, _verticalVelocity, _slideForce, _slopeAngle, _slideDirection, _sprinting, _sliding, _grounded, _wallRunning, _jumping);
         ReconcileState(rd);
     }
     private ReplicateData BuildMoveData()
@@ -419,13 +410,14 @@ public class PlayerMovement : NetworkBehaviour
             return false;
 
         return true;
-
     }
     private bool CanSlide()
     {
         if (!_grounded)
             return false;
         if (_slidingInput)
+            return false;
+        if (_jumping)
             return false;
 
         float nextAllowedSlideTime = (base.IsServerInitialized && !base.IsOwner) ? _nextAllowedSlideTime - 0.15f : _nextAllowedSlideTime;
@@ -436,7 +428,6 @@ public class PlayerMovement : NetworkBehaviour
     }
     public void Slide(bool replaying, float deltaTime)
     {
-        print("Sliding");
         _slideForce -= _slideGroundFriction * deltaTime;
         _slideDirection.y = Mathf.Clamp(_slideDirection.y, -10, 10);
 
@@ -454,7 +445,6 @@ public class PlayerMovement : NetworkBehaviour
     public void WallRunMovement(float delta, Vector3 moveInput, float speed)
     {
         Vector3 wallNormal = wallRight ? rightWallhit.normal : leftWallhit.normal;
-
         Vector3 wallForward = Vector3.Cross(wallNormal, transform.up);
 
         if ((_camera.transform.forward - wallForward).magnitude > (_camera.transform.forward - -wallForward).magnitude)
@@ -463,7 +453,6 @@ public class PlayerMovement : NetworkBehaviour
 
         if (!(wallLeft && moveInput.x > 0) && !(wallRight && moveInput.x < 0) && wallRunTimer < 0.5f) 
             _wallRunVector += -wallNormal * wallStickForce;
-
     }
     private void StopWallRun()
     {
@@ -539,19 +528,17 @@ public class PlayerMovement : NetworkBehaviour
             _nextAllowedSlideTime = Time.time + _slideReload;
             _slidingInput = false;
         }
-        print("Started Slide");
     }
     public void Sliding(bool slideFirstInput, bool replay, Vector3 moveForces, float delta)
     {
         //First Slide Frame
         if (slideFirstInput)
-        {
             StartSliding(moveForces, replay);
-        }
+
         //Slide Update
         if (_sliding)
             Slide(replay, delta);
-        else if (!_sliding && _grounded && !_jumping) //End Sliding
+        else if (_grounded && !_jumping) //End Sliding
         {
             _slideForce = 0;
             slide.Stop();
@@ -590,6 +577,7 @@ public class PlayerMovement : NetworkBehaviour
         if (_crouching)
             moveRate = _crouchSpeed;
 
+
         bool groundedChanged = false;
         SetIsGrounded(out groundedChanged);
 
@@ -624,8 +612,7 @@ public class PlayerMovement : NetworkBehaviour
         moveForces *= moveRate;
 
         // Player Wall Running
-        //WallRunning(md.MoveInput, moveRate, delta, moveForces, state.IsReplayed(), out moveForces);
-
+       // WallRunning(md.MoveInput, moveRate, delta, moveForces, state.IsReplayed(), out moveForces);
 
         //Player Sliding
         Sliding(md.moveStates.Contains(MoveState.Sliding), state.IsReplayed(), moveForces, delta);
@@ -675,7 +662,6 @@ public class PlayerMovement : NetworkBehaviour
         if(_characterController.enabled)
             _characterController.Move(moveForces * delta);
     }
-
     [Reconcile]
     private void ReconcileState(ReconcileData rd, Channel channel = Channel.Unreliable)
     {
@@ -688,9 +674,9 @@ public class PlayerMovement : NetworkBehaviour
         _slideDirection = rd.SlideDirection;
         _wallRunning = rd.WallRunning;
         _sprinting = rd.Sprinting;
+        _jumping = rd.Jumping;
+        _wallRunVector = rd.WallRunVector;
     }
-
-
     private void SetIsGrounded(out bool changed)
     {
         //State before checking for ground.
@@ -701,5 +687,4 @@ public class PlayerMovement : NetworkBehaviour
         _slopeAngle = Mathf.Clamp(_slopeAngle, -maxSlideAngle, maxSlideAngle);
         changed = (previousGrounded != _grounded);
     }
-
 }

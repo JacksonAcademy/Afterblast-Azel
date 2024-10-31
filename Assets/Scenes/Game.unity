@@ -7983,10 +7983,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _updateOrder: 0
-  _timingType: 1
+  _timingType: 0
   _allowTickDropping: 1
   _maximumFrameTicks: 3
-  _tickRate: 40
+  _tickRate: 60
   _pingInterval: 1
   _physicsMode: 1
 --- !u!114 &192429405
@@ -8084,7 +8084,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _dropExcessiveReplicates: 1
   _maximumServerReplicates: 15
-  _stateInterpolation: 3
+  _stateInterpolation: 1
 --- !u!114 &192429410
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10442,12 +10442,12 @@ GameObject:
   - component: {fileID: 249855360}
   - component: {fileID: 249855362}
   - component: {fileID: 249855361}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_2_0_0b2030fd-4a92-47ed-839c-3fc5a72fd2d9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &249855360
 Transform:
@@ -14795,12 +14795,12 @@ GameObject:
   - component: {fileID: 332324077}
   - component: {fileID: 332324079}
   - component: {fileID: 332324078}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_1_2_4f173a36-8b9e-4874-9acd-133b5c5b4e3a
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &332324077
 Transform:
@@ -18175,12 +18175,12 @@ GameObject:
   - component: {fileID: 412971733}
   - component: {fileID: 412971735}
   - component: {fileID: 412971734}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_0_3_033fc357-0ccb-4d65-a6cb-190ea6c4387e
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &412971733
 Transform:
@@ -23638,12 +23638,12 @@ GameObject:
   - component: {fileID: 546310691}
   - component: {fileID: 546310693}
   - component: {fileID: 546310692}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_0_1_549981d3-48ff-4eb5-88e8-c30ca3003b29
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &546310691
 Transform:
@@ -41249,12 +41249,12 @@ GameObject:
   - component: {fileID: 985653910}
   - component: {fileID: 985653912}
   - component: {fileID: 985653911}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_2_2_956d7382-6161-4a1f-a115-dc4a4a044527
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &985653910
 Transform:
@@ -48059,12 +48059,12 @@ GameObject:
   - component: {fileID: 1157615278}
   - component: {fileID: 1157615280}
   - component: {fileID: 1157615279}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_0_0_e61c489e-a94a-4551-ab82-317feffd8ba7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1157615278
 Transform:
@@ -50034,12 +50034,12 @@ GameObject:
   - component: {fileID: 1214992867}
   - component: {fileID: 1214992869}
   - component: {fileID: 1214992868}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_3_3_60f8ef78-2f35-45b4-bb7f-5a5167c33432
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1214992867
 Transform:
@@ -52247,12 +52247,12 @@ GameObject:
   - component: {fileID: 1284924339}
   - component: {fileID: 1284924341}
   - component: {fileID: 1284924340}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_3_0_bc134994-1824-4d89-8bb1-4c808775b989
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1284924339
 Transform:
@@ -53070,12 +53070,12 @@ GameObject:
   - component: {fileID: 1293231560}
   - component: {fileID: 1293231562}
   - component: {fileID: 1293231561}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_3_2_4dc928e6-8f6c-43fc-9d07-c6f37f7d11a8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1293231560
 Transform:
@@ -54472,12 +54472,12 @@ GameObject:
   - component: {fileID: 1339386823}
   - component: {fileID: 1339386825}
   - component: {fileID: 1339386824}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_1_0_d5f70b36-3993-4336-acef-6a4bd7d2b08f
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1339386823
 Transform:
@@ -59392,12 +59392,12 @@ GameObject:
   - component: {fileID: 1453340648}
   - component: {fileID: 1453340650}
   - component: {fileID: 1453340649}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_1_3_3acf27c2-1ec3-44d4-897c-3e623316cee6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1453340648
 Transform:
@@ -64575,12 +64575,12 @@ GameObject:
   - component: {fileID: 1583406980}
   - component: {fileID: 1583406982}
   - component: {fileID: 1583406981}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_2_3_f2d028dd-63ef-475e-8445-2c553cb7bfea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1583406980
 Transform:
@@ -67373,12 +67373,12 @@ GameObject:
   - component: {fileID: 1652030835}
   - component: {fileID: 1652030837}
   - component: {fileID: 1652030836}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_1_1_dde9b6ff-e8b3-47c9-a59d-33f2c34ed486
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1652030835
 Transform:
@@ -75930,12 +75930,12 @@ GameObject:
   - component: {fileID: 1896880925}
   - component: {fileID: 1896880927}
   - component: {fileID: 1896880926}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_2_1_7fb7e689-5325-46a0-8358-182f2797cb69
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1896880925
 Transform:
@@ -82001,12 +82001,12 @@ GameObject:
   - component: {fileID: 2102518936}
   - component: {fileID: 2102518938}
   - component: {fileID: 2102518937}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_0_2_0f25ef15-d55a-4521-afd1-bc900bb9881b
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &2102518936
 Transform:
@@ -82211,12 +82211,12 @@ GameObject:
   - component: {fileID: 2125904453}
   - component: {fileID: 2125904455}
   - component: {fileID: 2125904454}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_3_1_a05d3ffb-cc8d-4d2f-afe2-73d97acc7087
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &2125904453
 Transform:
