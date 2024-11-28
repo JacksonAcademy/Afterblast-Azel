@@ -16,6 +16,6 @@ MonoBehaviour:
   soundClips:
   - {fileID: 8300000, guid: f605a625597ae134e9d08de2e7f76815, type: 3}
   group: {fileID: 0}
-  volume: 0.338
+  volume: 0.048
   spatialBlend: 1
   minDistance: 8

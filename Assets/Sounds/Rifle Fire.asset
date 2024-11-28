@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   soundName: Rifle Fire
   soundClips:
-  - {fileID: 8300000, guid: 1145df6d221295e4e9991c415ab2302a, type: 3}
-  - {fileID: 8300000, guid: a0ba0bf9642eda845a133540747cb025, type: 3}
+  - {fileID: 8300000, guid: b57e9b8da7373014087ee24dc435b543, type: 3}
   group: {fileID: 0}
   volume: 0.426
   spatialBlend: 1

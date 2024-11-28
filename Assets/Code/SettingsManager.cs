@@ -5,10 +5,20 @@ using UnityEngine;
 public class SettingsManager : MonoBehaviour
 {
     public CanvasGroup canvas;
+    public bool esced;
+    public GameObject settings;
+
+    private void Awake()
+    {
+        settings.SetActive(false);
+        esced = false;
+    }
     private void Update()
     {
-        canvas.interactable = Cursor.visible;
-        canvas.alpha = Cursor.visible ? 1 : 0;
+        if (Input.GetKeyDown(KeyCode.Escape))
+            esced = !esced;
 
+        canvas.interactable = esced;
+        canvas.alpha = esced ? 1 : 0;
     }
 }

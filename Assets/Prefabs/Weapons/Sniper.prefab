@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 841643109148300323}
   - component: {fileID: 8621842945015695431}
   - component: {fileID: 1484356807176663351}
+  - component: {fileID: 5400576295772662354}
   m_Layer: 8
   m_Name: Sniper
   m_TagString: Gun
@@ -57,10 +58,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1068666060687458256}
   _networkObjectCache: {fileID: 1068666060687458256}
   fpsItem: {fileID: 0}
+  sounds: {fileID: 5400576295772662354}
   damage: 200
   timeBetweenShots: 2
   shootPoint: {fileID: 6373432111937034189}
   muzzleFlash: {fileID: 0}
+  interactable: {fileID: 0}
   weapon: {fileID: 0}
 --- !u!136 &2217408356022602033
 CapsuleCollider:
@@ -123,7 +126,7 @@ MonoBehaviour:
   <SerializedRootNetworkBehaviour>k__BackingField: {fileID: 0}
   <NestedRootNetworkBehaviours>k__BackingField: []
   SerializedTransformProperties:
-    Position: {x: 5.9427457, y: 5.8330283, z: 1.7678351}
+    Position: {x: 18.622, y: 16.90266, z: -18.63385}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
     LocalScale: {x: 1, y: 1, z: 1}
   _isNetworked: 1
@@ -286,6 +289,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animatorProfile: {fileID: 11400000, guid: da05a905150c0d245b84511ac2ea133d, type: 2}
   defaultAimPoint: {fileID: 8767758646988121482}
+--- !u!114 &5400576295772662354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 806489281814580315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bc132de58efd0b48a0bdeca29f69039, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useSound: {fileID: 11400000, guid: 39f1f996340804147b3fe8a98ebdfe8f, type: 2}
+  impactSound: {fileID: 11400000, guid: 843b21b5d1419994e9371b64c36dab9d, type: 2}
 --- !u!1 &4430362095459158815
 GameObject:
   m_ObjectHideFlags: 0

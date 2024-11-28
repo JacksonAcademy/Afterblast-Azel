@@ -20,6 +20,7 @@ public class sound : ScriptableObject
     {
         if (soundClips.Count > 0)
         {
+            //AudioManager.instance.PlaySound(this, position);
             AudioManager.instance.PlaySoundLocal(this, position, parent, true, volumeMultiplier);
         }
     }

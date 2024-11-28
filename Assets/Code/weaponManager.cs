@@ -4,6 +4,7 @@ using KINEMATION.FPSAnimationFramework.Runtime.Core;
 using KINEMATION.FPSAnimationFramework.Runtime.Playables;
 using KINEMATION.KAnimationCore.Runtime.Input;
 using KINEMATION.KAnimationCore.Runtime.Rig;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class weaponManager : NetworkBehaviour
@@ -33,20 +34,20 @@ public class weaponManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void EquipWeaponServer(NetworkObject weapon)
     {
-        if(!base.IsOwner)
+        if (!base.IsOwner)
             EquipWeaponClient(weapon);
         EquipWeaponObservers(weapon);
     }
-    [ObserversRpc(BufferLast = true, ExcludeOwner = true)]
+    [ObserversRpc(ExcludeOwner = true)]
     public void EquipWeaponObservers(NetworkObject weapon)
     {
         EquipWeaponClient(weapon);
     }
     private void EquipWeaponClient(NetworkObject weaponToEquip)
     {
-        print("Picked up weapon");
         FPSItem weapon = weaponToEquip.GetComponent<FPSItem>();
         Pickup pickupWeapon = weapon.GetComponent<Pickup>();
+        print("Weapon to pickup: " + weapon.name);
 
         equippedItem = pickupWeapon;
         pickupWeapon.interactable.Pickup();
@@ -54,12 +55,17 @@ public class weaponManager : NetworkBehaviour
         _userInput.SetValue(FPSANames.StabilizationWeight, 1f);
         _userInput.SetValue(FPSANames.PlayablesWeight, 1f);
 
-        weaponToEquip.GetComponent<NetworkObject>().SetParent(weaponBone);
+        NetworkObject weaponObject = weaponToEquip.GetComponent<NetworkObject>();
+        pickupWeapon.rb.isKinematic = true;
+        weaponObject.SetParent(weaponBone);
+
         weaponToEquip.transform.localPosition = Vector3.zero;
         weaponToEquip.transform.localRotation = Quaternion.identity;
-        weaponProfile = weaponToEquip.GetComponent<FPSAnimatorEntity>().animatorProfile;
 
-        //weapon.OnEquip(animator.gameObject);
+        weaponProfile = weaponToEquip.GetComponent<FPSAnimatorEntity>().animatorProfile;
+        fpsanimator.LinkAnimatorProfile(unarmed);
+        print("Weapon profile: " + weaponProfile.name);
+        weapon.OnEquip(animator.gameObject);
     }
     public void DropWeapon(FPSItem weaponToDrop)
     {
@@ -69,9 +75,11 @@ public class weaponManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void DropWeaponServer(NetworkObject weaponToDrop)
     {
+        if(!base.IsOwner)
+            DropWeaponClient(weaponToDrop);
         DropWeaponObservers(weaponToDrop);
     }
-    [ObserversRpc(BufferLast = true, ExcludeOwner = true)]
+    [ObserversRpc(ExcludeOwner = true)]
     public void DropWeaponObservers(NetworkObject weaponToDrop)
     {
         DropWeaponClient(weaponToDrop);
@@ -80,17 +88,15 @@ public class weaponManager : NetworkBehaviour
     {
         FPSItem weapon = weaponToDrop.GetComponent<FPSItem>();
 
-        weapon.OnUnEquip();
-
         equippedItem.Drop(playerManager.mainCam.transform.forward * 10);
-        equippedItem = null;
 
-        fpsanimator.LinkAnimatorProfile(unarmed);
 
         _userInput.SetValue(FPSANames.StabilizationWeight, 0f);
         _userInput.SetValue(FPSANames.PlayablesWeight, 0f);
-
-        weaponProfile = null;
+        fpsanimator.LinkAnimatorProfile(unarmed);
+        equippedItem.fpsItem.OnUnEquip();
+        //equippedItem = null;
+        //weaponProfile = null;
     }
     public void StartSprint()
     {
@@ -111,13 +117,15 @@ public class weaponManager : NetworkBehaviour
         {
             if (equippedItem.gameObject.activeInHierarchy)
                 return;
+
             if(weaponProfile)
                 fpsanimator.LinkAnimatorProfile(weaponProfile);
+
             _userInput.SetValue(FPSANames.StabilizationWeight, 1f);
             _userInput.SetValue(FPSANames.PlayablesWeight, 1f);
+
             equippedItem.fpsItem.OnEquip(animator.gameObject);
             equippedItem.gameObject.SetActive(true);
-
         }
     }
     public void Update()

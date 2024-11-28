@@ -7,6 +7,7 @@ using UnityEngine;
 using System;
 using KINEMATION.FPSAnimationFramework.Runtime.Core;
 using KINEMATION.KAnimationCore.Runtime.Input;
+using JetBrains.Annotations;
 
 [System.Serializable]
 public class controllerScale 
@@ -278,6 +279,10 @@ public class PlayerMovement : NetworkBehaviour
 
         _slidingInput = true;
     }
+    private void FixedUpdate()
+    {
+     //   WallRunMovement();
+    }
     private void Update()
     {
         if (!canMove)
@@ -290,7 +295,7 @@ public class PlayerMovement : NetworkBehaviour
             _characterController.enabled = true;
         }
         if (base.IsOwner)
-        {           
+        {
             _ceiling = Physics.Raycast(ceilingPosition.position, Vector3.up, 1, groundLayer);
             _sprintingInput = Input.GetKey(KeyCode.LeftShift) && Input.GetAxisRaw("Vertical") > 0;
 
@@ -419,6 +424,8 @@ public class PlayerMovement : NetworkBehaviour
             return false;
         if (_jumping)
             return false;
+        if (input.x == 0 || input.y == 0)
+            return false;
 
         float nextAllowedSlideTime = (base.IsServerInitialized && !base.IsOwner) ? _nextAllowedSlideTime - 0.15f : _nextAllowedSlideTime;
         if (Time.time < nextAllowedSlideTime)
@@ -457,9 +464,7 @@ public class PlayerMovement : NetworkBehaviour
     private void StopWallRun()
     {
         wallRunTimer = 0;
-        _sliding = false;
         _wallRunning = false;
-        _slidingInput = false;
     }
     public void WallRunning(Vector3 input, float moveRate, float delta, Vector3 moveForce, bool replay, out Vector3 modifiedMoveForce)
     {
@@ -476,17 +481,12 @@ public class PlayerMovement : NetworkBehaviour
         //If ran out of wall run time
         if (wallRunTimer <= 0 && _wallRunning)
         {
-            print("Ran out of wall time");
             StopWallRun();
-            _wallRunning = false;
         }
-
         //If ran out of wall
         if (!wall && _wallRunning)
         {
-            print("Ran out of wall");
             StopWallRun();
-            _wallRunning = false;
             _wallRunVector = Vector3.zero;
         }
         //if statred wall runnning
@@ -503,7 +503,6 @@ public class PlayerMovement : NetworkBehaviour
             WallRunMovement(delta, input, moveRate);
             //Wall run gravity
             modifiedMoveForce.y = _verticalVelocity * wallGravityForce;
-            print("Sticking to wall");
         }
         //If in the air
         if (!_wallRunning && !_grounded)
@@ -611,8 +610,6 @@ public class PlayerMovement : NetworkBehaviour
         moveForces.Normalize();
         moveForces *= moveRate;
 
-        // Player Wall Running
-       // WallRunning(md.MoveInput, moveRate, delta, moveForces, state.IsReplayed(), out moveForces);
 
         //Player Sliding
         Sliding(md.moveStates.Contains(MoveState.Sliding), state.IsReplayed(), moveForces, delta);
@@ -622,6 +619,9 @@ public class PlayerMovement : NetworkBehaviour
 
 
         moveForces.y = _verticalVelocity;
+
+        // Player Wall Running
+        WallRunning(md.MoveInput, moveRate, delta, moveForces, state.IsReplayed(), out moveForces);
 
         if (_verticalVelocity < 0)
             _jumping = false;

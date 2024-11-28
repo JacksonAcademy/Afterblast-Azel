@@ -12,6 +12,9 @@ using FishNet;
 using Unity.Services.Lobbies.Models;
 using UnityEngine.EventSystems;
 using Demo.Scripts.Runtime.Item;
+using FishNet.Transporting.Tugboat;
+using FishNet.Managing.Server;
+using FishNet.Managing.Client;
 public static class PlayerExtensions
 {
     public static void WritePlayerData(this Writer writer, PlayerData value)
@@ -184,6 +187,15 @@ public class PlayerManager : NetworkBehaviour
             RemoveOwnership();
             gameManager.RemovePlayerServer(Time.time, playerData, NetworkObject, transform.position);
         }
+    }
+    public void LeaveGame()
+    {
+        if (IsServerInitialized)
+            ServerManager.StopConnection(true);
+        else
+            ClientManager.StopConnection();
+        GameMatchmaker.instance.Lobby();
+
     }
     public override void OnStopServer()
     {

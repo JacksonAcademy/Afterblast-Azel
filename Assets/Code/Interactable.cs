@@ -16,30 +16,10 @@ public class Interactable : MonoBehaviour
     }
     public void Pickup()
     {
-        gameObject.layer = defaultLayer;
+        gameObject.layer = 2;
     }
     public void Drop()
     {
         gameObject.layer = interactLayer;
     }
-
-
-
-
-
-
-
-
-
-
-
-   
-
-
-
-
-
-
-
-
 }

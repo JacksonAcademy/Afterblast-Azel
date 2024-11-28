@@ -19,8 +19,8 @@ public class PlayerAnimator : NetworkBehaviour
     public float aimTimer;
     public float aimDelay;
 
-    private Vector2 animationVelocity;
-    private Vector2 tickAnimationVelocity;
+    public Vector2 animationVelocity;
+    public Vector2 tickAnimationVelocity;
     private void Awake()
     {
         playerShoot = GetComponent<PlayerShoot>();

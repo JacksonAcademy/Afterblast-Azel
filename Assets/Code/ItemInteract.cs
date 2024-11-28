@@ -42,7 +42,6 @@ public class ItemInteract : NetworkBehaviour
                 hoveredPickup = null;
                 previousInteracted = default;
             }
-
         }
     }
     private void Update()

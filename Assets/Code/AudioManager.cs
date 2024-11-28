@@ -40,7 +40,7 @@ public class AudioManager : NetworkBehaviour
     //[ServerRpc]
     //private void PlaySoundServer(sound s, Vector3 pos)
     //{
-    //    PlaySoundObservers(s, pos); 
+    //    PlaySoundObservers(s, pos);
     //}
     //[ObserversRpc(ExcludeOwner = true)]
     //private void PlaySoundObservers(sound s, Vector3 pos)
@@ -53,6 +53,7 @@ public class AudioManager : NetworkBehaviour
         {
             if (!players[i].playing)
             {
+                print("Playing sound:: " + s.name);
                 players[i].Play(s, pos, sfxGroup, parent, volumeMultiplier);
                 break;
             }

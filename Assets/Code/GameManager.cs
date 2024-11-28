@@ -41,6 +41,12 @@ public class GameManager : NetworkBehaviour
         IsReady = true;
         SpawnPlayer(LocalConnection);
     }
+    public override void OnStartNetwork()
+    {
+        base.OnStartNetwork();
+        GameMatchmaker.instance.HideLoadingScreen();
+    }
+
     ///[ServerRpc(RequireOwnership =false)]
     public void SpawnPlayer(NetworkConnection local)
     {
@@ -150,14 +156,7 @@ public class GameManager : NetworkBehaviour
             disconnectedUI.SetActive(true);
             if(GameMatchmaker.instance)
             {
-                if (!GameMatchmaker.instance._lobby)
-                    return;
-
-                GameMatchmaker.instance._lobby.SetActive(true);
-                GameMatchmaker.instance._buttons.SetActive(true);
-                GameMatchmaker.instance.lobbyCam.enabled = true;
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                GameMatchmaker.instance.Lobby();
 
             }
         }

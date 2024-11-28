@@ -93,7 +93,7 @@ public class PlayerShoot : NetworkBehaviour
 
         if (Time.time < _nextFire)
             return;
-        if (!Input.GetMouseButtonDown(0))
+        if (!Input.GetMouseButton(0))
             return;
         if (playerManager.weaponManager.equippedItem == null)
             return;
@@ -119,7 +119,7 @@ public class PlayerShoot : NetworkBehaviour
         if (Physics.Raycast(ray, out hitPlayer, Mathf.Infinity))
         {
             shootDirection = Vector3.Normalize(hitPlayer.point - start);
-
+            print("hit: " + hitPlayer.transform.name);
             if (Physics.Raycast(start, shootDirection, out hitPlayer, Mathf.Infinity, shootLayer))
             {
                 hitPlayerObject = hitPlayer.transform.GetComponent<PlayerHitbox>().playerHealth.player.NetworkObject;
@@ -142,7 +142,6 @@ public class PlayerShoot : NetworkBehaviour
     [ServerRpc]
     public void ServerShoot(PreciseTick pt, Vector3 shootPoint, Vector3 shootDirection, float nextFire, NetworkObject whoShot)
     {
-        ShootEffect(shootPoint, shootDirection, whoShot);
         PlayerManager playerShot = whoShot.GetComponent<PlayerManager>();
         _nextFire = nextFire;
         RaycastHit hit = new RaycastHit();
@@ -150,13 +149,6 @@ public class PlayerShoot : NetworkBehaviour
             RollbackManager.Rollback(pt, RollbackPhysicsType.Physics);
         bool reconcilePlayerDamage = true;
         //Shoot a ray to see if the client shoot path is valid, if the client shot a player
-
-        AnimatorClipInfo[] animatorinfo;
-        string current_animation;
-        animatorinfo = playerShot.animator._animator.GetCurrentAnimatorClipInfo(0);
-
-        current_animation = animatorinfo[0].clip.name;
-        print("Playing current animation: " + current_animation);
 
         if (Physics.Raycast(shootPoint, shootDirection, out hit, Mathf.Infinity, shootLayer))
         {
@@ -211,7 +203,7 @@ public class PlayerShoot : NetworkBehaviour
         GameObject muzzleFlash = Instantiate(muzzleEffect, shootPoint, Quaternion.LookRotation(playerWhoShot.weaponManager.equippedItem.transform.position));
         Destroy(muzzleFlash, 1f);
         Pickup pickup = weaponManager.instance.equippedItem;
-
+        pickup.sounds.useSound.Play(shootPoint);
         if (pickup.weapon)
             pickup.weapon.OnFire();
 
@@ -241,6 +233,7 @@ public class PlayerShoot : NetworkBehaviour
                 Destroy(temp, 2);
             }
         }
+        pickup.sounds.impactSound.Play(hit.point);
         bullet.Completed += OnCompleted;
         smokeTrail.Completed += OnCompleted;
         bullet.DrawLine(shootPoint, hit.point, bulletTravelTime, 0);
@@ -263,7 +256,6 @@ public class PlayerShoot : NetworkBehaviour
         {
             Debug.DrawRay(shootPoint, direction * 100, Color.red, 5);
         }
-        print(playerManager.playerData.playerName + " position : " + transform.position + ". ");
         ShootEffect(shootPoint, direction, whoShot);
     }
     public Vector3 GetDirection()

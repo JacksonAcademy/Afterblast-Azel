@@ -20,6 +20,8 @@ using FishNet.Object;
 using FishNet.Managing.Server;
 using FishNet;
 using FishNet.Connection;
+using Unity.Services.Vivox;
+
 
 
 
@@ -38,6 +40,7 @@ public class GameMatchmaker : MonoBehaviour
     public GameObject _buttons, _lobby;
     private bool serverBuild;
 
+    public GameObject loadingScreen, failedToConnect;
     public NetworkObject player;
 
     public Camera lobbyCam, serverSpectateCamera;
@@ -50,21 +53,29 @@ public class GameMatchmaker : MonoBehaviour
     public bool spawnPlayer = true;
 
     public string defaultIP = "18.191.185.25";
+    public float loadingWaitTime = 5;
     private void Awake()
     {
         instance = this;
 
-        _lobby.SetActive(true);
 
-        lobbyCam.enabled = true;
-        serverSpectateCamera.enabled = false;
-
-        _buttons.SetActive(true);
+        Lobby();
 
         if (Application.isBatchMode && !Application.isEditor)
             serverBuild = true;
         else
             serverBuild = false;
+    }
+
+    public void Lobby()
+    {
+        _lobby.SetActive(true);
+        _buttons.SetActive(true);
+
+        lobbyCam.enabled = true;
+        serverSpectateCamera.enabled = false;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
     private void Start()
     {
@@ -74,6 +85,19 @@ public class GameMatchmaker : MonoBehaviour
         }
         SetIPAddress(defaultIP);
         clientIPAddress.SetTextWithoutNotify(defaultIP);
+        InitializeAsync();
+
+    }
+    public async void InitializeAsync()
+    {
+        var options = new InitializationOptions();
+#if UNITY_EDITOR 
+        options.SetProfile(ClonesManager.IsClone() ? ClonesManager.GetArgument() : "Primary");
+#endif
+        await UnityServices.InitializeAsync(options);
+        await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        await VivoxService.Instance.InitializeAsync();
+        print("Initialized Vivox");
     }
     public void SetIPAddress(string ip)
     {
@@ -96,13 +120,10 @@ public class GameMatchmaker : MonoBehaviour
 
         _buttons.SetActive(false);
         _lobby.SetActive(false);
-
-       // GameManager.instance.StartServer();
-
     }
-
     public void Play()
     {
+        StartCoroutine("StartLoading");
         spawnPlayer = true;
         GameManager.instance.gameObject.SetActive(true);
         if (_playerName.text == "server")
@@ -110,15 +131,31 @@ public class GameMatchmaker : MonoBehaviour
             tugboat.SetClientAddress("localhost");
             tugboat.StartConnection(true);
         }
+        else if(_playerName.text == "client")
+        {
+            tugboat.SetClientAddress("localhost");
+        }
 
         tugboat.StartConnection(false);
 
+    }
+    public IEnumerator StartLoading()
+    {
+        loadingScreen.SetActive(true);
+        yield return new WaitForSeconds(loadingWaitTime);
+        loadingScreen.SetActive(false);
+        failedToConnect.SetActive(true);
+        _buttons.SetActive(true);
+        _lobby.SetActive(true);
+        lobbyCam.enabled = true;
 
-
+    }
+    public void HideLoadingScreen()
+    {
+        lobbyCam.enabled = false;
+        StopCoroutine("StartLoading");
+        loadingScreen.SetActive(false);
         _buttons.SetActive(false);
         _lobby.SetActive(false);
-
-        lobbyCam.enabled = false;
-        serverSpectateCamera.enabled = false;
     }
 }

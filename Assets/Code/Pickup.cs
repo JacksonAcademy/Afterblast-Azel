@@ -8,14 +8,14 @@ using UnityEngine;
 public class Pickup : NetworkBehaviour
 {
     [HideInInspector] public FPSItem fpsItem;
-
+    public weaponSounds sounds;
     public float damage, timeBetweenShots;
     public Transform shootPoint;
 
     [Header("Item Properties")]
     public GameObject muzzleFlash;
 
-    private Rigidbody rb;
+    [HideInInspector]public Rigidbody rb;
 
     [HideInInspector] public Interactable interactable;
     [HideInInspector] public Weapon weapon;
@@ -32,6 +32,8 @@ public class Pickup : NetworkBehaviour
     public void PickupItem(NetworkObject playerObject)
     {
         weaponManager.instance.EquipWeapon(fpsItem);
+        rb.isKinematic = true;
+        print("picked up weapon: " + gameObject.name);
     }
     public void Drop(Vector3 force)
     {

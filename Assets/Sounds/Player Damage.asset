@@ -19,6 +19,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 1baf837dc5bf54943a7c75fad984d626, type: 3}
   - {fileID: 8300000, guid: bcba8a168fe6e5a4da95981e88705a6b, type: 3}
   group: {fileID: 0}
-  volume: 1
+  volume: 0.482
   spatialBlend: 1
   minDistance: 8

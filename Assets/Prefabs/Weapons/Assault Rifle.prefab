@@ -43,15 +43,16 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2656973888761942184}
+  - component: {fileID: 6215816238814695349}
+  - component: {fileID: 162114407998838778}
   - component: {fileID: 1761830105180260641}
-  - component: {fileID: 7471528134165504119}
+  - component: {fileID: 8065662387695852563}
   - component: {fileID: 4190832408197453866}
+  - component: {fileID: 7471528134165504119}
   - component: {fileID: 6369409117924588696}
   - component: {fileID: 7055879045269743427}
   - component: {fileID: 1455467208724150977}
   - component: {fileID: 3581265429293749695}
-  - component: {fileID: 6215816238814695349}
-  - component: {fileID: 162114407998838778}
   m_Layer: 8
   m_Name: Assault Rifle
   m_TagString: Gun
@@ -75,6 +76,53 @@ Transform:
   - {fileID: 6791460425255885372}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6215816238814695349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3422964238113032274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a38f36b54b84df3873b796d6728c637, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animatorProfile: {fileID: 11400000, guid: 49452d198240a2a4697823ebc779e18a, type: 2}
+  defaultAimPoint: {fileID: 5561477604359854514}
+--- !u!114 &162114407998838778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3422964238113032274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd79974665c90734d9bd7ff5a68cba63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  overrideController: {fileID: 9100000, guid: 7b6c5e09358890c4985759f57322c534, type: 2}
+  equipMotion: {fileID: 11400000, guid: b11b46638e8719941a429aa33657277d, type: 2}
+  unEquipMotion: {fileID: 11400000, guid: 6e3ba419dec1a754b9c447a8fc1f9b1f, type: 2}
+  fieldOfView: 90
+  reloadClip: {fileID: 0}
+  cameraReloadAnimation: {fileID: 0}
+  grenadeClip: {fileID: 0}
+  cameraGrenadeAnimation: {fileID: 0}
+  fireClip: {fileID: 0}
+  recoilData: {fileID: 0}
+  recoilPatternSettings: {fileID: 0}
+  cameraShake: {fileID: 0}
+  fireRate: 0
+  supportsAuto: 0
+  supportsBurst: 0
+  burstLength: 0
+  barrelAttachments:
+    attachments: []
+  gripAttachments:
+    attachments: []
+  scopeGroups: []
 --- !u!114 &1761830105180260641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -91,12 +139,45 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6369409117924588696}
   _networkObjectCache: {fileID: 6369409117924588696}
   fpsItem: {fileID: 0}
+  sounds: {fileID: 8065662387695852563}
   damage: 25
   timeBetweenShots: 0.3
   shootPoint: {fileID: 2997649016354993295}
   muzzleFlash: {fileID: 0}
+  rb: {fileID: 0}
   interactable: {fileID: 0}
   weapon: {fileID: 0}
+--- !u!114 &8065662387695852563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3422964238113032274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bc132de58efd0b48a0bdeca29f69039, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useSound: {fileID: 11400000, guid: 597708aaebacf55498b1f5b7cbd882ce, type: 2}
+  impactSound: {fileID: 11400000, guid: 843b21b5d1419994e9371b64c36dab9d, type: 2}
+--- !u!114 &4190832408197453866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3422964238113032274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e53ff752419ff6246a2d463091563942, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemName: AK47 Rifle
+  rarity: Uncommon
+  amount: 1
+  interactLayer: 8
+  defaultLayer: 0
 --- !u!136 &7471528134165504119
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -120,23 +201,6 @@ CapsuleCollider:
   m_Height: 1.01
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4190832408197453866
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3422964238113032274}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e53ff752419ff6246a2d463091563942, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemName: AK47 Rifle
-  rarity: Uncommon
-  amount: 1
-  interactLayer: 8
-  defaultLayer: 0
 --- !u!114 &6369409117924588696
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,7 +222,7 @@ MonoBehaviour:
   <SerializedRootNetworkBehaviour>k__BackingField: {fileID: 0}
   <NestedRootNetworkBehaviours>k__BackingField: []
   SerializedTransformProperties:
-    Position: {x: 6.70727, y: 6.059, z: 3.3858602}
+    Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 1}
     LocalScale: {x: 1, y: 1, z: 1}
   _isNetworked: 1
@@ -272,55 +336,6 @@ MonoBehaviour:
     X: 0
     Y: 0
     Z: 0
---- !u!114 &6215816238814695349
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3422964238113032274}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a38f36b54b84df3873b796d6728c637, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animatorProfile: {fileID: 11400000, guid: 49452d198240a2a4697823ebc779e18a, type: 2}
-  defaultAimPoint: {fileID: 5561477604359854514}
---- !u!114 &162114407998838778
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3422964238113032274}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd79974665c90734d9bd7ff5a68cba63, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  overrideController: {fileID: 9100000, guid: 7b6c5e09358890c4985759f57322c534, type: 2}
-  equipMotion: {fileID: 11400000, guid: b11b46638e8719941a429aa33657277d, type: 2}
-  unEquipMotion: {fileID: 11400000, guid: 6e3ba419dec1a754b9c447a8fc1f9b1f, type: 2}
-  fieldOfView: 90
-  reloadClip: {fileID: 11400000, guid: af1a453c3fd68ea41896bf9a9f14d86e, type: 2}
-  cameraReloadAnimation: {fileID: 11400000, guid: d0e6b89193ed03948a4786754f2dc107,
-    type: 2}
-  grenadeClip: {fileID: 0}
-  cameraGrenadeAnimation: {fileID: 0}
-  fireClip: {fileID: 0}
-  recoilData: {fileID: 11400000, guid: 242b4114f86718f41a72a9bb8ebd19d0, type: 2}
-  recoilPatternSettings: {fileID: 11400000, guid: be2be2c72d4648d4d9c1626c6fae08bc,
-    type: 2}
-  cameraShake: {fileID: 11400000, guid: 5563e5a81879bf3488e215990ceb8724, type: 2}
-  fireRate: 30
-  supportsAuto: 1
-  supportsBurst: 0
-  burstLength: 0
-  barrelAttachments:
-    attachments: []
-  gripAttachments:
-    attachments: []
-  scopeGroups: []
 --- !u!1 &4299933623340860478
 GameObject:
   m_ObjectHideFlags: 0
