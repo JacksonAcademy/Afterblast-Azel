@@ -1009,7 +1009,7 @@ ModelImporter:
     - name: B-hips
       parentName: root
       position: {x: -0.005594491, y: -0.0070150527, z: 0.85369545}
-      rotation: {x: -0.05853147, y: 0.6894488, z: 0.04802032, w: 0.7203669}
+      rotation: {x: -0.058531467, y: 0.6894488, z: 0.048020314, w: 0.7203669}
       scale: {x: 1, y: 1, z: 1}
     - name: B-spine
       parentName: B-hips
@@ -1109,7 +1109,7 @@ ModelImporter:
     - name: B-f_middle_02.L
       parentName: B-f_middle_01.L
       position: {x: -0.044799518, y: 0, z: 0.000000007152557}
-      rotation: {x: 0.0003317172, y: 0.037380915, z: 0.00001158348, w: 0.9993011}
+      rotation: {x: 0.00033171716, y: 0.03738091, z: 0.000011583479, w: 0.999301}
       scale: {x: 1, y: 1, z: 1}
     - name: B-f_middle_03.L
       parentName: B-f_middle_02.L
@@ -1144,12 +1144,12 @@ ModelImporter:
     - name: B-f_pinky_01.L
       parentName: B-palm_04.L
       position: {x: -0.059851326, y: -0.0000000047683715, z: 0.0000000333786}
-      rotation: {x: -0.16196084, y: 0.027384266, z: -0.15843143, w: 0.973611}
+      rotation: {x: -0.16196084, y: 0.027384264, z: -0.15843143, w: 0.97361094}
       scale: {x: 1, y: 1, z: 1}
     - name: B-f_pinky_02.L
       parentName: B-f_pinky_01.L
       position: {x: -0.03277802, y: -0.000000002682209, z: -2.9802322e-10}
-      rotation: {x: -0.000021442766, y: 0.037380792, z: 0.00000060349686, w: 0.99930114}
+      rotation: {x: -0.000021442764, y: 0.03738079, z: 0.0000006034968, w: 0.9993011}
       scale: {x: 1, y: 1, z: 1}
     - name: B-f_pinky_03.L
       parentName: B-f_pinky_02.L

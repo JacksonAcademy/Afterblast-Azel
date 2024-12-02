@@ -24,22 +24,22 @@ public class VoiceChatManager : NetworkBehaviour
     public async void LoginToVivoxAsync()
     {
         joined = false;
-        print("Trying to log into vivox");
+       // print("Trying to log into vivox");
         LoginOptions options = new LoginOptions();
         options.DisplayName = GameMatchmaker.instance._playerName.text;
         options.EnableTTS = true;
         await VivoxService.Instance.LoginAsync(options);
-        print("Logged into Vivox");
+       //print("Logged into Vivox");
         string channelToJoin = "Game";
 
         Channel3DProperties coptions = new Channel3DProperties((int)audibleDistance, (int)conversationalDistance, audioFadeIntensityByDistanceAudio, AudioFadeModel.ExponentialByDistance);
         await VivoxService.Instance.JoinPositionalChannelAsync(channelToJoin, ChatCapability.TextAndAudio, channel3DProperties);
-        print("Joined voice chat");
+        //print("Joined voice chat");
         joined = true;
     }
     public override void OnStopClient()
     {
-        print("Logging out of Vivox");
+       // print("Logging out of Vivox");
         base.OnStopClient();
         //LeaveVoiceChat();
         //LogoutOfVivoxAsync();

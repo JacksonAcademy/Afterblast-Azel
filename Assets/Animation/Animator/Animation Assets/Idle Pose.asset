@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59f5fc06806945df8a985b4b99c57863, type: 3}
   m_Name: Idle Pose
   m_EditorClassIdentifier: 
-  rigAsset: {fileID: 11400000, guid: f65c6e778ea7b6d4db5261fb4b95c17e, type: 2}
+  rigAsset: {fileID: 11400000, guid: af9deecd3e1b1a349a179e765c77d37b, type: 2}
   clip: {fileID: 7400000, guid: 4f9b2cc802bffcd468bf59be5599a8d1, type: 3}
   mask: {fileID: 0}
   overrideMask: {fileID: 0}

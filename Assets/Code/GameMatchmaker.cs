@@ -41,7 +41,7 @@ public class GameMatchmaker : MonoBehaviour
     private bool serverBuild;
 
     public GameObject loadingScreen, failedToConnect;
-    public NetworkObject player;
+    //public NetworkObject player;
 
     public Camera lobbyCam, serverSpectateCamera;
     public TextMeshProUGUI _debugText;

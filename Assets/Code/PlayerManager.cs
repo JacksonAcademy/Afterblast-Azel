@@ -50,6 +50,17 @@ public struct PlayerData
     {
         return !c1.Equals(c2);
     }
+    public override bool Equals(object o)
+    {
+        if (o == null)
+            return false;
+        return true;
+    }
+
+    public override int GetHashCode()
+    {
+        return 0;
+    }
 
 }
 
@@ -67,9 +78,14 @@ public class PlayerManager : NetworkBehaviour
     public TextMeshProUGUI serverPlayerCountText;
     public TextMeshProUGUI eliminationsText;
 
+    public bool hideHeadPartsLocalClient;
+    public List<SkinnedMeshRenderer> headParts;
+
     public weaponManager weaponManager;
 
     public EmptyParentBehaviour weaponBone;
+
+     
 
     public List<FPSItem> weapons = new List<FPSItem>();
 
@@ -116,7 +132,8 @@ public class PlayerManager : NetworkBehaviour
     private void Start()
     {
 
-        nameText.gameObject.SetActive(!Owner.IsLocalClient);
+        if(nameText)
+            nameText.gameObject.SetActive(!Owner.IsLocalClient);
         gameUI.gameObject.SetActive(Owner.IsLocalClient);
         mainCam.gameObject.tag = (Owner.IsLocalClient ? "MainCamera" : "Untagged");
         Initialize();
@@ -130,7 +147,8 @@ public class PlayerManager : NetworkBehaviour
     {
         //SEt the player data for other clients
         playerData = player;
-        nameText.text = player.playerName.ToString();
+        if(nameText)
+            nameText.text = player.playerName.ToString();
         gameObject.name = player.playerName.ToString();
 
 
@@ -172,6 +190,7 @@ public class PlayerManager : NetworkBehaviour
     public void Die()
     {
         DropWeapons();
+        animator._animator.SetTrigger("Death");
         death.Play(transform.position);
     }
 
@@ -256,6 +275,16 @@ public class PlayerManager : NetworkBehaviour
     }
     private void Update()
     {
+        if(base.IsOwner && hideHeadPartsLocalClient)
+        {
+            for (int i = 0; i < headParts.Count; i++)
+                headParts[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+        }
+        else
+        {
+            for (int i = 0; i < headParts.Count; i++)
+                headParts[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        }
         if (!base.IsOwner)
             return;
 
@@ -277,6 +306,7 @@ public class PlayerManager : NetworkBehaviour
     public IEnumerator RespawnCoroutine(Vector3 position)
     {
         HideModel();
+        animator._animator.SetTrigger("Spawn");
         transform.position = position + gameManager.spawnOffset;
         GameObject effect = Instantiate(spawnEffect, transform.position, Quaternion.identity);
         Destroy(effect, 10);
@@ -295,7 +325,8 @@ public class PlayerManager : NetworkBehaviour
         playerShoot.enabled = false;
         if(base.Owner.IsLocalClient)
             gameUI.SetActive(false);
-        nameText.gameObject.SetActive(false);
+        if(nameText)
+            nameText.gameObject.SetActive(false);
         model.SetActive(false);
     }
     public void ShowModel()
@@ -304,7 +335,8 @@ public class PlayerManager : NetworkBehaviour
         if (base.Owner.IsLocalClient)
             gameUI.SetActive(true);
         playerMovement.canMove = true;
-        nameText.gameObject.SetActive(!Owner.IsLocalClient);
+        if(nameText)
+            nameText.gameObject.SetActive(!Owner.IsLocalClient);
         playerShoot.enabled = true;
     }
     public void DropItem()

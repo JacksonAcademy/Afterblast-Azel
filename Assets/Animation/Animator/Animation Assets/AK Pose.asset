@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59f5fc06806945df8a985b4b99c57863, type: 3}
   m_Name: AK Pose
   m_EditorClassIdentifier: 
-  rigAsset: {fileID: 11400000, guid: f65c6e778ea7b6d4db5261fb4b95c17e, type: 2}
-  clip: {fileID: -203655887218126122, guid: ea71336e155a59442affdcb6716277b6, type: 3}
+  rigAsset: {fileID: 11400000, guid: af9deecd3e1b1a349a179e765c77d37b, type: 2}
+  clip: {fileID: -203655887218126122, guid: 8230767c9bcb5484e8ba4420c3a9e7ae, type: 3}
   mask: {fileID: 0}
   overrideMask: {fileID: 0}
   isAdditive: 0

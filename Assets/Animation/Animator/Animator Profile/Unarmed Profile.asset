@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d53fe4b640f941ee8b893e5d6620b994, type: 3}
   m_Name: Unarmed Profile
   m_EditorClassIdentifier: 
-  rigAsset: {fileID: 11400000, guid: f65c6e778ea7b6d4db5261fb4b95c17e, type: 2}
+  rigAsset: {fileID: 11400000, guid: af9deecd3e1b1a349a179e765c77d37b, type: 2}
   blendInTime: 0.1
   blendOutTime: 0.1
   easeMode:
@@ -38,7 +38,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 423666032fed41d5935519fc922acb88, type: 3}
   m_Name: PoseSamplerLayerSettings
   m_EditorClassIdentifier: 
-  rigAsset: {fileID: 11400000, guid: f65c6e778ea7b6d4db5261fb4b95c17e, type: 2}
+  rigAsset: {fileID: 11400000, guid: af9deecd3e1b1a349a179e765c77d37b, type: 2}
   alpha: 1
   curveBlending: []
   linkDynamically: 0
@@ -53,46 +53,46 @@ MonoBehaviour:
     rotation: {x: 0, y: 0, z: 0, w: 1}
     scale: {x: 1, y: 1, z: 1}
   overwriteRoot: 0
-  overwriteWeaponBone: 1
+  overwriteWeaponBone: 0
   ikWeaponBone:
     name: IK WeaponBone
-    index: 53
+    index: 52
     isVirtual: 0
   ikHandRight:
     name: IK RightHand
-    index: 54
+    index: 53
     isVirtual: 0
   ikHandLeft:
     name: IK LeftHand
-    index: 55
+    index: 54
     isVirtual: 0
   ikHandRightHint:
     name: IK RightElbow
-    index: 56
+    index: 55
     isVirtual: 0
   ikHandLeftHint:
     name: IK LeftElbow
-    index: 57
+    index: 56
     isVirtual: 0
   weaponBoneRight:
     name: IK WeaponBoneRight
-    index: 90
+    index: 136
     isVirtual: 0
   weaponBoneLeft:
     name: IK WeaponBoneLeft
-    index: 48
+    index: 47
     isVirtual: 0
   weaponBone:
     name: WeaponBone
-    index: 91
+    index: 137
     isVirtual: 0
   pelvis:
     name: mixamorig:Hips
-    index: 1
+    index: 2
     isVirtual: 0
   spineRoot:
     name: mixamorig:Spine
-    index: 16
+    index: 15
     isVirtual: 0
   stabilizationWeight: StabilizationWeight
   weaponBoneWeight: WeaponBoneWeight
@@ -108,7 +108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b80ecb68a9ad4fccb78b8c9a53183567, type: 3}
   m_Name: LookLayerSettings
   m_EditorClassIdentifier: 
-  rigAsset: {fileID: 11400000, guid: f65c6e778ea7b6d4db5261fb4b95c17e, type: 2}
+  rigAsset: {fileID: 11400000, guid: af9deecd3e1b1a349a179e765c77d37b, type: 2}
   alpha: 1
   curveBlending: []
   linkDynamically: 0
@@ -120,26 +120,26 @@ MonoBehaviour:
   pitchOffsetElements:
   - rigElement:
       name: mixamorig:Neck
-      index: 49
+      index: 48
       isVirtual: 0
     clampedAngle: {x: 15, y: 15}
     cachedClampedAngle: {x: 15, y: 15}
   - rigElement:
       name: mixamorig:Head
-      index: 50
+      index: 49
       isVirtual: 0
     clampedAngle: {x: 75, y: 75}
     cachedClampedAngle: {x: 75, y: 75}
   yawOffsetElements:
   - rigElement:
       name: mixamorig:Neck
-      index: 49
+      index: 48
       isVirtual: 0
     clampedAngle: {x: 15, y: 15}
     cachedClampedAngle: {x: 15, y: 15}
   - rigElement:
       name: mixamorig:Head
-      index: 50
+      index: 49
       isVirtual: 0
     clampedAngle: {x: 75, y: 75}
     cachedClampedAngle: {x: 75, y: 75}

@@ -21,7 +21,7 @@ public class GameManager : NetworkBehaviour
     public List<Transform> spawnPositions;
     public GameMatchmaker matchmaker;
     public static GameManager instance;
-    public GameObject playerToSpawn;
+    //public GameObject playerToSpawn;
     public GameObject disconnectedUI;
     private KillfeedManager killfeedManager;
     public NetworkManager networkManager;

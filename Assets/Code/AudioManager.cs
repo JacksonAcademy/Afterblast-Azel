@@ -53,7 +53,6 @@ public class AudioManager : NetworkBehaviour
         {
             if (!players[i].playing)
             {
-                print("Playing sound:: " + s.name);
                 players[i].Play(s, pos, sfxGroup, parent, volumeMultiplier);
                 break;
             }

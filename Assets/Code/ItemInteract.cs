@@ -11,7 +11,6 @@ public class ItemInteract : NetworkBehaviour
 
     [HideInInspector] public RaycastHit previousInteracted;
 
-    [HideInInspector] public Pickup hoveredPickup;
     public PlayerManager playerManager;
     [HideInInspector] public Interactable hoveredInteractable;
     public InteractionManager interactionManager;
@@ -29,7 +28,7 @@ public class ItemInteract : NetworkBehaviour
                 previousInteracted = hit;
                 hoveredInteractable = hit.transform.GetComponent<Interactable>();
                 interactionManager.AddInteract(hoveredInteractable.itemName, hoveredInteractable.rarity, hoveredInteractable.amount, hit.transform);
-                hoveredPickup = hoveredInteractable.GetComponent<Pickup>();
+                hoveredInteractable.Highlight();
             }
 
         }
@@ -38,23 +37,21 @@ public class ItemInteract : NetworkBehaviour
             if (previousInteracted.transform != null)
             {
                 interactionManager.RemoveInteract(hoveredInteractable.transform);
+                hoveredInteractable.UnHighlight();
                 hoveredInteractable = null;
-                hoveredPickup = null;
                 previousInteracted = default;
             }
         }
     }
     private void Update()
     {
-        if (hoveredPickup)
+        if (hoveredInteractable)
         {
             if (Input.GetKeyDown(KeyCode.E))
             {
-                hoveredPickup.PickupItem(playerManager.NetworkObject);
-
+                hoveredInteractable.PickupItem();
                 interactionManager.RemoveInteract(hoveredInteractable.transform);
                 hoveredInteractable = null;
-                hoveredPickup = null;
                 previousInteracted = default;
 
             }

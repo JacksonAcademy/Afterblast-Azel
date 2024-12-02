@@ -201,12 +201,8 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 956772919200888293}
   _networkObjectCache: {fileID: 956772919200888293}
   weaponsToSpawn:
-  - {fileID: 6369409117924588696, guid: 61b048b833da4d64090bd9591671980a, type: 3}
-  - {fileID: 320104069314394514, guid: ad5645d334c4a9843be297b0b428db97, type: 3}
-  - {fileID: 5863945074909639267, guid: f03a866e93b8ad94ea8768b2a5beb694, type: 3}
-  - {fileID: 669690032078879638, guid: 1ab076630b3673942aa40e51aac3245f, type: 3}
-  - {fileID: 1068666060687458256, guid: 8810608958a2c7b4e8d3d03012b3e5b0, type: 3}
-  - {fileID: 6499700756334620099, guid: 78eeb7cd6f4162949a14f2aa7c3b67cb, type: 3}
+  - {fileID: 869072817656696681, guid: 05e1a1fcd05ad1d44852ef221076851a, type: 3}
+  - {fileID: 8942377069306384324, guid: 77bcabab5fcf29d4fac77d0c11623c4c, type: 3}
   spawnPoint: {fileID: 4138519786562184105}
 --- !u!114 &5830961843976741226
 MonoBehaviour:
