@@ -179,4 +179,4 @@ MonoBehaviour:
   yaw: {x: -1, y: -0.5, z: 0.5, w: 1}
   roll: {x: -3, y: -2, z: 2, w: 3}
   smoothSpeed: 15
-  playRate: 3
+  playRate: 5

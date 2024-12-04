@@ -207,6 +207,7 @@ public class PlayerMovement : NetworkBehaviour
     private void Jump(bool replaying)
     {
         _jumping = true;
+
         if (_sliding)
         {
             StopSlide(replaying, false);
@@ -232,8 +233,10 @@ public class PlayerMovement : NetworkBehaviour
         }
         if (!replaying)
         {
+            previousGrounded = false;
             jump.Play(transform.position);
             jumpParticles.Play();
+            PlayerEffects.instance.Jump();
             _nextAllowedJumpTime = Time.time + _jumpReload;
             _jumpInput = false;
             _crouching = false;
@@ -557,8 +560,9 @@ public class PlayerMovement : NetworkBehaviour
         {
             Jump(replay);
         }
-        if (_grounded && !previousGrounded && Time.time > _nextAllowedLandTime && !replay)
+        if (_grounded && _verticalVelocity < -1 && !replay && !previousGrounded)
         {
+            _animator._animator.SetTrigger("HitGround");
             _nextAllowedLandTime = Time.time + .2f;
             land.Play(transform.position);
             previousGrounded = true;
@@ -639,9 +643,6 @@ public class PlayerMovement : NetworkBehaviour
             _userInput.SetValue(FPSANames.MouseDeltaInput, new Vector4(mouseDelta.x / _mouseSensivity, mouseDelta.y / _mouseSensivity));
             //_camera.transform.localEulerAngles = new Vector3(md.RotInput.y, 0, 0);
         }
-
-        if (_aiming)
-            playerAnimator.ResetAim();
 
         if(_grounded && (Mathf.Abs(md.MoveInput.y) > 0||Mathf.Abs(md.MoveInput.x)>0))
             runParticles.Play();

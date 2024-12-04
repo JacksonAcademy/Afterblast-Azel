@@ -1,5 +1,72 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-1299305096474155218
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40d029240c6ad3a418c71ce490095bed, type: 3}
+  m_Name: TurnLayerSettings
+  m_EditorClassIdentifier: 
+  rigAsset: {fileID: 11400000, guid: af9deecd3e1b1a349a179e765c77d37b, type: 2}
+  alpha: 1
+  curveBlending:
+  - name: XVelocity
+    mode: 1
+    clampMin: 0
+    source: 0
+  - name: YVelocity
+    mode: 1
+    clampMin: 0
+    source: 0
+  - name: Gravity
+    mode: 1
+    clampMin: 0
+    source: 0
+  linkDynamically: 0
+  isStandalone: 0
+  characterRootBone:
+    name: Armature
+    index: 0
+    isVirtual: 0
+  characterHipBone:
+    name: mixamorig:Hips
+    index: 1
+    isVirtual: 0
+  angleThreshold: 90
+  turnCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  turnSpeed: 1
+  mouseDeltaInputProperty: MouseDeltaInput
+  turnInputProperty: TurnOffset
+  animatorTurnRightTrigger: TurnRight
+  animatorTurnLeftTrigger: TurnLeft
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26,6 +93,7 @@ MonoBehaviour:
   settings:
   - {fileID: 2023833122405849076}
   - {fileID: 8743995380705494588}
+  - {fileID: -1299305096474155218}
 --- !u!114 &2023833122405849076
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -56,43 +124,43 @@ MonoBehaviour:
   overwriteWeaponBone: 0
   ikWeaponBone:
     name: IK WeaponBone
-    index: 52
+    index: 51
     isVirtual: 0
   ikHandRight:
     name: IK RightHand
-    index: 53
+    index: 52
     isVirtual: 0
   ikHandLeft:
     name: IK LeftHand
-    index: 54
+    index: 53
     isVirtual: 0
   ikHandRightHint:
     name: IK RightElbow
-    index: 55
+    index: 54
     isVirtual: 0
   ikHandLeftHint:
     name: IK LeftElbow
-    index: 56
+    index: 55
     isVirtual: 0
   weaponBoneRight:
     name: IK WeaponBoneRight
-    index: 136
+    index: 86
     isVirtual: 0
   weaponBoneLeft:
     name: IK WeaponBoneLeft
-    index: 47
+    index: 46
     isVirtual: 0
   weaponBone:
     name: WeaponBone
-    index: 137
+    index: 87
     isVirtual: 0
   pelvis:
     name: mixamorig:Hips
-    index: 2
+    index: 1
     isVirtual: 0
   spineRoot:
     name: mixamorig:Spine
-    index: 15
+    index: 14
     isVirtual: 0
   stabilizationWeight: StabilizationWeight
   weaponBoneWeight: WeaponBoneWeight
@@ -120,26 +188,26 @@ MonoBehaviour:
   pitchOffsetElements:
   - rigElement:
       name: mixamorig:Neck
-      index: 48
+      index: 47
       isVirtual: 0
     clampedAngle: {x: 15, y: 15}
     cachedClampedAngle: {x: 15, y: 15}
   - rigElement:
       name: mixamorig:Head
-      index: 49
+      index: 48
       isVirtual: 0
     clampedAngle: {x: 75, y: 75}
     cachedClampedAngle: {x: 75, y: 75}
   yawOffsetElements:
   - rigElement:
       name: mixamorig:Neck
-      index: 48
+      index: 47
       isVirtual: 0
     clampedAngle: {x: 15, y: 15}
     cachedClampedAngle: {x: 15, y: 15}
   - rigElement:
       name: mixamorig:Head
-      index: 49
+      index: 48
       isVirtual: 0
     clampedAngle: {x: 75, y: 75}
     cachedClampedAngle: {x: 75, y: 75}

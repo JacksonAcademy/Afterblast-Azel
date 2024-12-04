@@ -1,7 +1,10 @@
 
 using FishNet.Object;
+using KINEMATION.FPSAnimationFramework.Runtime.Core;
+using KINEMATION.KAnimationCore.Runtime.Input;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -15,9 +18,9 @@ public class PlayerAnimator : NetworkBehaviour
 
     public Animator _animator;
     public PlayerManager playerManager;
-    private bool previousGrounded;
-    public float aimTimer;
-    public float aimDelay;
+
+    public UserInputController _userInput;
+    public FPSAnimator fpsAnimator;
 
     public Vector2 animationVelocity;
     public Vector2 tickAnimationVelocity;
@@ -28,7 +31,7 @@ public class PlayerAnimator : NetworkBehaviour
     }
     private void Start()
     {
-        
+
     }
     public void Hit()
     {
@@ -41,10 +44,8 @@ public class PlayerAnimator : NetworkBehaviour
         _animator.SetFloat("YVelocity", animationVelocity.y);
         float velocity = animationVelocity.SqrMagnitude();
         _animator.SetFloat("Velocity", velocity);
-    }
-    public void ResetAim()
-    {
-        aimTimer = aimDelay;
+        if(base.IsOwner)
+            _userInput.SetValue(FPSANames.IsAiming, Input.GetMouseButton(1));
     }
     public void UpdateAnimator(Vector2 velocity, float gravity, bool grounded, bool aim, bool crouching, bool sliding, bool sprinting, bool wallRunning, float wallRunSide, float delta)
     {
@@ -56,24 +57,5 @@ public class PlayerAnimator : NetworkBehaviour
         _animator.SetBool("Sliding", sliding);
         _animator.SetBool("WallRun", wallRunning);
         _animator.SetFloat("WallRunSide", wallRunSide);
-        if (grounded && !previousGrounded)
-        {
-            previousGrounded = true;
-           // _animator.SetTrigger("HitGround");
-        }
-        if (!grounded)
-            previousGrounded = false;
-
-        if (!sprinting)
-        {
-            aimTimer -= delta;
-        }
-        else
-        {
-            aimTimer = 0;
-        }
-
-        aimTimer = Mathf.Clamp(aimTimer, 0, 1000);
-
     }
 }

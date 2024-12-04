@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2035f9c45b0d4bc2ba0f13d0624fa523, type: 3}
   m_Name: IKMotion_Crouch
   m_EditorClassIdentifier: 
-  rigAsset: {fileID: 11400000, guid: f65c6e778ea7b6d4db5261fb4b95c17e, type: 2}
+  rigAsset: {fileID: 11400000, guid: af9deecd3e1b1a349a179e765c77d37b, type: 2}
   alpha: 1
   curveBlending: []
   linkDynamically: 0
   isStandalone: 1
   boneToAnimate:
     name: IK WeaponBone
-    index: 53
+    index: 51
     isVirtual: 0
   rotationCurves:
     x:

@@ -2,7 +2,6 @@
 
 using KINEMATION.FPSAnimationFramework.Runtime.Core;
 using KINEMATION.KAnimationCore.Runtime.Core;
-using KINEMATION.KAnimationCore.Runtime.Rig;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
@@ -159,7 +158,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Layers.PoseSamplerLayer
             _spineRootHandle = jobData.animator.BindStreamTransform(spineRoot);
             _hipHandle = jobData.animator.BindStreamTransform(pelvis);
             
-            if(_hasValidRoot) _hipParentHandle = jobData.animator.BindStreamTransform(root);
+            if(_settings.overwriteRoot && _hasValidRoot) _hipParentHandle = jobData.animator.BindStreamTransform(root);
 
             _weaponBone = jobData.animator.BindStreamTransform(_weaponBoneTransform);
             _weaponBoneRight = jobData.animator.BindStreamTransform(weaponBoneRight);

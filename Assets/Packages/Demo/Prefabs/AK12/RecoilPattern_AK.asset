@@ -16,4 +16,4 @@ MonoBehaviour:
   verticalRecoil: {x: -3, y: -4}
   horizontalSmoothing: 12
   verticalSmoothing: 15
-  damping: 5
+  damping: 1

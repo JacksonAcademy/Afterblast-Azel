@@ -22,6 +22,9 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Core
         [NonSerialized] protected FPSCameraController _cameraController;
 
         protected bool _isInitialized;
+
+        private bool _wasAnimatorEnabled;
+        private Animator _animator;
         
         protected virtual void Start()
         {
@@ -30,6 +33,13 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Core
 
         protected virtual void Update()
         {
+            if (_animator.isActiveAndEnabled != _wasAnimatorEnabled && !_wasAnimatorEnabled)
+            {
+                RebuildPlayables();
+            }
+            
+            _wasAnimatorEnabled = _animator.isActiveAndEnabled;
+            
             if (_boneController == null) return;
             _boneController.UpdateController();
         }
@@ -46,9 +56,18 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Core
             _boneController.Dispose();
         }
 
+        public void RebuildPlayables()
+        {
+            playablesController.RebuildPlayables();
+            _boneController.RebuildPlayables();
+        }
+
         public void Initialize()
         {
             if (_isInitialized) return;
+
+            _animator = GetComponent<Animator>();
+            _wasAnimatorEnabled = _animator.isActiveAndEnabled;
             
             _boneController = GetComponent<FPSBoneController>();
             _inputController = GetComponent<UserInputController>();

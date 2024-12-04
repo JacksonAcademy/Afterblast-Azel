@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4741344707264360235}
   m_Layer: 0
-  m_Name: Charge
+  m_Name: PistolCharge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41,7 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 600624802467790019}
   m_Layer: 0
-  m_Name: Safety
+  m_Name: PistolSafety
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -72,7 +72,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3368353327716669127}
   m_Layer: 0
-  m_Name: Cartridge
+  m_Name: PistolCartridge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -103,7 +103,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4387729696807465627}
   m_Layer: 0
-  m_Name: Colibri
+  m_Name: Pistol Transform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -136,7 +136,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4560273707295883311}
   m_Layer: 0
-  m_Name: Mag
+  m_Name: PistolMag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -168,7 +168,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6436462206265202167}
   m_Layer: 8
-  m_Name: Model
+  m_Name: PistolModel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -201,7 +201,7 @@ GameObject:
   m_Component:
   - component: {fileID: 691315453311934981}
   m_Layer: 8
-  m_Name: Shoot Point
+  m_Name: PistolShoot Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -528,7 +528,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6491125153483768737}
   m_Layer: 0
-  m_Name: Root
+  m_Name: PistolRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -655,7 +655,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8803831170958974404}
   m_Layer: 8
-  m_Name: Aim Point
+  m_Name: PistolAim Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -686,7 +686,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8975068449063579041}
   m_Layer: 0
-  m_Name: Trigger
+  m_Name: PistolTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

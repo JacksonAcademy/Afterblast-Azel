@@ -9,6 +9,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Layers.TurnLayer
     {
         private TurnLayerSettings _settings;
 
+        private Transform _modelRoot;
         private TransformStreamHandle _modelRootHandle;
         
         private int _turnInputProperty;
@@ -28,6 +29,9 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Layers.TurnLayer
         private LayerJobData _jobData;
 
         private bool _offsetRootBone;
+        private bool _wasAnimatorEnabled;
+
+        private Quaternion _baseRootRotation;
 
         public void ProcessAnimation(AnimationStream stream)
         {
@@ -54,11 +58,12 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Layers.TurnLayer
             _turnInputProperty = jobData.inputController.GetPropertyIndex(_settings.turnInputProperty);
             _mouseDeltaProperty = jobData.inputController.GetPropertyIndex(_settings.mouseDeltaInputProperty);
             
-            var rootBone = jobData.rigComponent.GetRigTransform(_settings.characterRootBone);
+            _modelRoot = jobData.rigComponent.GetRigTransform(_settings.characterRootBone);
+            _baseRootRotation = _modelRoot.localRotation;
             var pelvis = jobData.rigComponent.GetRigTransform(_settings.characterHipBone);
 
-            _modelRootHandle = jobData.animator.BindStreamTransform(rootBone);
-            _offsetRootBone = rootBone != pelvis;
+            _modelRootHandle = jobData.animator.BindStreamTransform(_modelRoot);
+            _offsetRootBone = _modelRoot != pelvis;
             
             _turnRightHash = Animator.StringToHash(_settings.animatorTurnRightTrigger);
             _turnLeftHash = Animator.StringToHash(_settings.animatorTurnLeftTrigger);
@@ -87,6 +92,14 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Layers.TurnLayer
         
         public void OnPreGameThreadUpdate()
         {
+            // Reset the turn angle manually when Animator is re-enabled.
+            if (_jobData.animator.isActiveAndEnabled && !_wasAnimatorEnabled)
+            {
+                _modelRoot.localRotation = _baseRootRotation;
+            }
+
+            _wasAnimatorEnabled = _jobData.animator.isActiveAndEnabled;
+            
             float mouseDelta = _jobData.inputController.GetValue<Vector4>(_mouseDeltaProperty).x;
             _turnAngle -= mouseDelta;
 

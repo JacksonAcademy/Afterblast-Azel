@@ -24,8 +24,9 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Layers.PoseOffsetLayer
             int count = _offsetBones.Length;
             for (int i = 0; i < count; i++)
             {
+                var poseOffset = _settings.poseOffsets[i];
                 AnimLayerJobUtility.ModifyTransform(stream, _jobData.rootHandle, _offsetBones[i], 
-                    _settings.poseOffsets[i].pose, _jobData.weight);
+                    poseOffset.pose, _jobData.weight);
             }
         }
 

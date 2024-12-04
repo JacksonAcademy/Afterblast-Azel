@@ -47,7 +47,7 @@ public class GameManager : NetworkBehaviour
         GameMatchmaker.instance.HideLoadingScreen();
     }
 
-    ///[ServerRpc(RequireOwnership =false)]
+    //[ServerRpc(RequireOwnership =false)]
     public void SpawnPlayer(NetworkConnection local)
     {
         if (!GameMatchmaker.instance.spawnPlayer)

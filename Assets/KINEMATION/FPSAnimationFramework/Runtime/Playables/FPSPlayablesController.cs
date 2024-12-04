@@ -4,21 +4,19 @@ using KINEMATION.FPSAnimationFramework.Runtime.Core;
 using KINEMATION.KAnimationCore.Runtime.Attributes;
 using KINEMATION.KAnimationCore.Runtime.Input;
 
-using UnityEditor;
 using UnityEngine;
 
 using UnityEngine.Animations;
-using UnityEngine.Experimental.Animations;
 using UnityEngine.Playables;
+
+//todo: DO NOT SHIP.
+using UnityEditor;
 
 namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
 {
     [HelpURL("https://kinemation.gitbook.io/scriptable-animation-system/workflow/components")]
     public class FPSPlayablesController : MonoBehaviour, IPlayablesController
     {
-        public PlayableGraph playableGraph;
-        public Animator Animator => _animator;
-        
         [Header("General Settings")] 
         [HideInInspector] public AvatarMask upperBodyMask;
 
@@ -44,8 +42,20 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
         
         protected UserInputController _inputController;
         protected float _controllerWeight = 1f;
-
         protected int _playablesWeightPropertyIndex;
+        
+        private PlayableGraph _playableGraph;
+        private AnimationPlayableOutput _playableOutput;
+
+        public Animator GetAnimator()
+        {
+            return _animator;
+        }
+
+        public PlayableGraph GetPlayableGraph()
+        {
+            return _playableGraph;
+        }
 
         protected virtual void Update()
         {
@@ -66,45 +76,69 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
 
         private void OnDestroy()
         {
-            if (!playableGraph.IsValid())
+            if (!_playableGraph.IsValid())
             {
                 return;
             }
 
-            playableGraph.Stop();
-            playableGraph.Destroy();
+            _playableGraph.Stop();
+            _playableGraph.Destroy();
+        }
+
+        private void RebuildMasterMixer()
+        {
+            _masterMixer.DisconnectInput(0);
+            var animatorOutput = _playableGraph.GetOutput(0);
+            _masterMixer.ConnectInput(0, animatorOutput.GetSourcePlayable(), 0, 1f);
+        }
+
+        private void BuildOutput()
+        {
+            if (_playableOutput.IsOutputValid())
+            {
+                _playableGraph.DestroyOutput(_playableOutput);
+            }
+            
+            _playableOutput = AnimationPlayableOutput.Create(_playableGraph, "FPSAnimatorGraph", _animator);
+            _playableOutput.SetSourcePlayable(_masterMixer);
+        }
+
+        public void RebuildPlayables()
+        {
+            RebuildMasterMixer();
+            BuildOutput();
         }
 
         public virtual bool InitializeController()
         {
-            if (playableGraph.IsValid())
+            if (_playableGraph.IsValid())
             {
-                playableGraph.Destroy();
+                _playableGraph.Destroy();
             }
             
             _animator = GetComponent<Animator>();
-            playableGraph = _animator.playableGraph;
+            _playableGraph = _animator.playableGraph;
 
-            if (!playableGraph.IsValid())
+            if (!_playableGraph.IsValid())
             {
                 Debug.LogWarning(gameObject.name + " Animator Controller is not valid!");
                 return false;
             }
             
-            playableGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
+            _playableGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
             
-            _masterMixer = AnimationLayerMixerPlayable.Create(playableGraph, 2);
-            _dynamicAnimationMixer = AnimationLayerMixerPlayable.Create(playableGraph, 2);
+            _masterMixer = AnimationLayerMixerPlayable.Create(_playableGraph, 2);
+            _dynamicAnimationMixer = AnimationLayerMixerPlayable.Create(_playableGraph, 2);
             
-            _overlayPoseMixer = new FPSAnimatorMixer(playableGraph, _maxPoseCount, 0);
-            _slotMixer = new FPSAnimatorMixer(playableGraph, _maxAnimCount, 1);
-            _overrideMixer = new FPSAnimatorMixer(playableGraph, _maxAnimCount, 1);
+            _overlayPoseMixer = new FPSAnimatorMixer(_playableGraph, _maxPoseCount, 0);
+            _slotMixer = new FPSAnimatorMixer(_playableGraph, _maxAnimCount, 1);
+            _overrideMixer = new FPSAnimatorMixer(_playableGraph, _maxAnimCount, 1);
             
             _slotMixer.mixer.ConnectInput(0, _overlayPoseMixer.mixer, 0, 1f);
             _overrideMixer.mixer.ConnectInput(0, _slotMixer.mixer, 0, 1f);
             _dynamicAnimationMixer.ConnectInput(0, _overrideMixer.mixer, 0, 1f);
 
-            var animatorOutput = playableGraph.GetOutput(0);
+            var animatorOutput = _playableGraph.GetOutput(0);
             
             _masterMixer.ConnectInput(0, animatorOutput.GetSourcePlayable(), 0, 1f);
             _masterMixer.ConnectInput(1, _dynamicAnimationMixer, 0, 1f);
@@ -112,11 +146,9 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
             _masterMixer.SetLayerMaskFromAvatarMask(0, new AvatarMask());
             _masterMixer.SetLayerMaskFromAvatarMask(1, upperBodyMask);
             
-            var output = AnimationPlayableOutput.Create(playableGraph, "FPSAnimatorGraph", _animator);
-            output.SetSourcePlayable(_masterMixer);
-            //output.SetSortingOrder(910);
+            BuildOutput();
                       
-            playableGraph.Play();
+            _playableGraph.Play();
             _inputController = GetComponent<UserInputController>();
 
             if (_inputController == null) return true;
@@ -137,7 +169,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
         
         public void SetControllerWeight(float weight)
         {
-            if (!playableGraph.IsValid() || !_masterMixer.IsValid())
+            if (!_playableGraph.IsValid() || !_masterMixer.IsValid())
             {
                 return;
             }
@@ -152,7 +184,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
                 return false;
             }
             
-            FPSAnimatorPlayable animPlayable = new FPSAnimatorPlayable(playableGraph, asset.clip, null)
+            FPSAnimatorPlayable animPlayable = new FPSAnimatorPlayable(_playableGraph, asset.clip, null)
             {
                 blendTime = asset.blendTime,
                 autoBlendOut = false
@@ -175,7 +207,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
             BlendTime blendTime = asset.blendTime;
             blendTime.startTime = startTime;
 
-            FPSAnimatorPlayable animPlayable = new FPSAnimatorPlayable(playableGraph, asset.clip, 
+            FPSAnimatorPlayable animPlayable = new FPSAnimatorPlayable(_playableGraph, asset.clip, 
                 asset.curves.ToArray())
             {
                 blendTime = blendTime,
@@ -187,7 +219,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
 
             _slotMixer.Play(animPlayable, asset.mask == null ? upperBodyMask : asset.mask, asset.isAdditive);
             
-            FPSAnimatorPlayable overridePlayable = new FPSAnimatorPlayable(playableGraph, asset.clip, null)
+            FPSAnimatorPlayable overridePlayable = new FPSAnimatorPlayable(_playableGraph, asset.clip, null)
             {
                 blendTime = blendTime,
                 autoBlendOut = true
@@ -212,7 +244,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
 
         public bool IsPlaying()
         {
-            return playableGraph.IsValid() && playableGraph.IsPlaying();
+            return _playableGraph.IsValid() && _playableGraph.IsPlaying();
         }
 
         public virtual float GetCurveValue(string curveName, bool isAnimator = false)
@@ -231,9 +263,9 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
                 return false;
             }
 
-            if (playableGraph.IsValid())
+            if (_playableGraph.IsValid())
             {
-                playableGraph.Destroy();
+                _playableGraph.Destroy();
             }
 
             if (_masterMixer.IsValid())
@@ -241,10 +273,10 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
                 _masterMixer.Destroy();
             }
             
-            playableGraph = PlayableGraph.Create();
-            _masterMixer = AnimationLayerMixerPlayable.Create(playableGraph, 1);
+            _playableGraph = PlayableGraph.Create();
+            _masterMixer = AnimationLayerMixerPlayable.Create(_playableGraph, 1);
             
-            var output = AnimationPlayableOutput.Create(playableGraph, "FPSAnimatorEditorGraph", _animator);
+            var output = AnimationPlayableOutput.Create(_playableGraph, "FPSAnimatorEditorGraph", _animator);
             output.SetSourcePlayable(_masterMixer);
             
             return true;
@@ -259,7 +291,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
 
             if (animationToPreview != null)
             {
-                var previewPlayable = AnimationClipPlayable.Create(playableGraph, animationToPreview);
+                var previewPlayable = AnimationClipPlayable.Create(_playableGraph, animationToPreview);
                 previewPlayable.SetTime(0f);
                 previewPlayable.SetSpeed(1f);
 
@@ -273,25 +305,25 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
             }
             else
             {
-                var controllerPlayable = AnimatorControllerPlayable.Create(playableGraph,
+                var controllerPlayable = AnimatorControllerPlayable.Create(_playableGraph,
                     _animator.runtimeAnimatorController);
                 
                 _masterMixer.ConnectInput(0, controllerPlayable, 0, 1f);
             }
 
-            playableGraph.Play();
+            _playableGraph.Play();
             
             EditorApplication.QueuePlayerLoopUpdate();
         }
 
         public virtual void LoopEditorPreview()
         {
-            if (!playableGraph.IsPlaying())
+            if (!_playableGraph.IsPlaying())
             {
                 EditorApplication.update -= LoopEditorPreview;
             }
             
-            if (loopPreview && playableGraph.IsValid() 
+            if (loopPreview && _playableGraph.IsValid() 
                             && _masterMixer.GetInput(0).GetTime() >= animationToPreview.length)
             {
                 _masterMixer.GetInput(0).SetTime(0f);
@@ -300,11 +332,11 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Playables
 
         public virtual void StopEditorPreview()
         {
-            if (!playableGraph.IsValid()) return;
+            if (!_playableGraph.IsValid()) return;
             
             _masterMixer.DisconnectInput(0);
-            playableGraph.Stop();
-            playableGraph.Destroy();
+            _playableGraph.Stop();
+            _playableGraph.Destroy();
             
             EditorApplication.update -= LoopEditorPreview;
 

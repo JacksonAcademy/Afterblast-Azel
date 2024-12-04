@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4244407884550572345}
   m_Layer: 8
-  m_Name: Graphics
+  m_Name: AR Graphics
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,7 +44,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8777103677610537174}
   m_Layer: 8
-  m_Name: Shoot Point
+  m_Name: AKShoot Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -370,7 +370,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3071301978403712456}
   m_Layer: 8
-  m_Name: AimPoint
+  m_Name: AKAimPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -452,7 +452,32 @@ PrefabInstance:
     - target: {fileID: 581710809230335302, guid: 629bf3b752904bc4992ac168cd0a7bb8,
         type: 3}
       propertyPath: m_Name
-      value: AK12
+      value: AK12 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 735410964211613480, guid: 629bf3b752904bc4992ac168cd0a7bb8,
+        type: 3}
+      propertyPath: m_Name
+      value: AKCharge
+      objectReference: {fileID: 0}
+    - target: {fileID: 753403816971403631, guid: 629bf3b752904bc4992ac168cd0a7bb8,
+        type: 3}
+      propertyPath: m_Name
+      value: AKSafety
+      objectReference: {fileID: 0}
+    - target: {fileID: 4039309608527984165, guid: 629bf3b752904bc4992ac168cd0a7bb8,
+        type: 3}
+      propertyPath: m_Name
+      value: AKMag
+      objectReference: {fileID: 0}
+    - target: {fileID: 5274508474106654555, guid: 629bf3b752904bc4992ac168cd0a7bb8,
+        type: 3}
+      propertyPath: m_Name
+      value: AKRoot
+      objectReference: {fileID: 0}
+    - target: {fileID: 8339229515510322763, guid: 629bf3b752904bc4992ac168cd0a7bb8,
+        type: 3}
+      propertyPath: m_Name
+      value: AK12 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

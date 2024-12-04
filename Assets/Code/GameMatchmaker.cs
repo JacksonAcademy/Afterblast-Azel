@@ -96,8 +96,6 @@ public class GameMatchmaker : MonoBehaviour
 #endif
         await UnityServices.InitializeAsync(options);
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        await VivoxService.Instance.InitializeAsync();
-        print("Initialized Vivox");
     }
     public void SetIPAddress(string ip)
     {

@@ -306,11 +306,17 @@ public class PlayerManager : NetworkBehaviour
     public IEnumerator RespawnCoroutine(Vector3 position)
     {
         HideModel();
-        animator._animator.SetTrigger("Spawn");
+
         transform.position = position + gameManager.spawnOffset;
         GameObject effect = Instantiate(spawnEffect, transform.position, Quaternion.identity);
         Destroy(effect, 10);
         yield return new WaitForSeconds(spawnInDelay);
+        model.SetActive(true);
+        animator.fpsAnimator.RebuildPlayables();
+        if (base.Owner.IsLocalClient)
+            gameUI.SetActive(true);
+        animator._animator.SetTrigger("Spawn");
+        yield return new WaitForSeconds(2);
         ShowModel();
     }
     public void Hide(bool serverHide)
@@ -332,6 +338,9 @@ public class PlayerManager : NetworkBehaviour
     public void ShowModel()
     {
         model.SetActive(true);
+        animator.fpsAnimator.Initialize();
+        animator.fpsAnimator.RebuildPlayables();
+ 
         if (base.Owner.IsLocalClient)
             gameUI.SetActive(true);
         playerMovement.canMove = true;

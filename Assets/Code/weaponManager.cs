@@ -25,6 +25,8 @@ public class weaponManager : NetworkBehaviour
 
     private FPSAnimatorProfile weaponProfile;
     public List<GameObject> weapons;
+    public List<GameObject> weaponsToSpawn;
+    public Transform weaponBone;
     private void Awake()
     {
         instance = this;
@@ -41,6 +43,28 @@ public class weaponManager : NetworkBehaviour
             EquipWeaponClient(weapon);
         EquipWeaponObservers(weapon);
     }
+    private void Start()
+    {
+        fpsanimator.Initialize();
+
+        _userInput.SetValue(FPSANames.StabilizationWeight, 0f);
+        _userInput.SetValue(FPSANames.PlayablesWeight, 0f);
+        foreach (var prefab in weaponsToSpawn)
+        {
+            var weapon = Instantiate(prefab, transform.position, Quaternion.identity);
+
+            var weaponTransform = weapon.transform;
+
+            weaponTransform.parent = weaponBone;
+            weaponTransform.localPosition = Vector3.zero;
+            weaponTransform.localRotation = Quaternion.identity;
+
+            weapons.Add(weapon);
+            weapon.gameObject.SetActive(false);
+        }
+
+    }
+
     [ObserversRpc(ExcludeOwner = true)]
     public void EquipWeaponObservers(NetworkObject weapon)
     {
@@ -66,12 +90,14 @@ public class weaponManager : NetworkBehaviour
         _userInput.SetValue(FPSANames.StabilizationWeight, 1f);
         _userInput.SetValue(FPSANames.PlayablesWeight, 1f);
         weaponProfile = weaponEquipped.GetComponent<FPSAnimatorEntity>().animatorProfile;
-        fpsanimator.LinkAnimatorProfile(unarmed);
+        //fpsanimator.LinkAnimatorProfile(unarmed);
 
         weaponEquipped.fpsItem.OnEquip(animator.gameObject);
         weapon.SetParent(NetworkObject);
-        weapon.GiveOwnership(LocalConnection);
+        if(base.IsServerInitialized)
+            weapon.GiveOwnership(LocalConnection);
         weapon.gameObject.SetActive(false);
+        //fpsanimator.Initialize();
     }
     public void DropWeapon(NetworkObject weapon)
     {
@@ -109,6 +135,7 @@ public class weaponManager : NetworkBehaviour
 
         weaponPickup = null;
         weaponEquipped = null;
+        fpsanimator.Initialize();
     }
     public void StartSprint()
     {

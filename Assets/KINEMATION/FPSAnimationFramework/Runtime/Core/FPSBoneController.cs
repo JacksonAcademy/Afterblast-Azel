@@ -135,7 +135,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Core
     public class FPSBoneController : MonoBehaviour
     {
         protected KRigComponent _rigComponent;
-        protected FPSPlayablesController _playablesController;
+        protected IPlayablesController _playablesController;
         protected UserInputController _inputController;
         protected FPSAnimatorProfile _activeProfile;
 
@@ -184,7 +184,7 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Core
                 job.Initialize(_layerJobData, setting);
                 job.UpdateEntity(_entity);
                 
-                var playable = job.CreatePlayable(_playablesController.playableGraph);
+                var playable = job.CreatePlayable(_playablesController.GetPlayableGraph());
                 
                 _animationLayers.Add(new AnimationLayer()
                 {
@@ -233,6 +233,24 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Core
             // Finally scale the result by the global settings alpha.
             return Mathf.Clamp01(weight * settings.alpha);
         }
+        
+        protected void BuildPlayableOutput()
+        {
+            if (_proceduralOutput.IsOutputValid())
+            {
+                _playablesController.GetPlayableGraph().DestroyOutput(_proceduralOutput);
+            }
+            
+            _proceduralOutput = AnimationPlayableOutput.Create(_playablesController.GetPlayableGraph(), 
+                "ProceduralAnimationOutput", _playablesController.GetAnimator());
+            _proceduralOutput.SetAnimationStreamSource(AnimationStreamSource.PreviousInputs);
+        }
+
+        public void RebuildPlayables()
+        {
+            BuildPlayableOutput();
+            _proceduralOutput.SetSourcePlayable(_blendingPlayable);
+        }
 
         public void Initialize()
         {
@@ -243,26 +261,24 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Core
             _inputController = GetComponent<UserInputController>();
 
             _animationLayers = new List<AnimationLayer>();
-            
-            _proceduralOutput = AnimationPlayableOutput.Create(_playablesController.playableGraph, 
-                "ProceduralAnimationOutput", _playablesController.Animator);
-            _proceduralOutput.SetAnimationStreamSource(AnimationStreamSource.PreviousInputs);
+
+            BuildPlayableOutput();
 
             _blendingJob = new AnimationBlendingJob();
-            _blendingJob.Setup(_playablesController.Animator, _rigComponent);
+            _blendingJob.Setup(_playablesController.GetAnimator(), _rigComponent);
             
-            _blendingPlayable = AnimationScriptPlayable.Create(_playablesController.playableGraph, _blendingJob, 1);
+            _blendingPlayable = AnimationScriptPlayable.Create(_playablesController.GetPlayableGraph(), _blendingJob, 1);
             
             _virtualElementJob = new VirtualElementJob();
-            _virtualElementJob.Setup(_playablesController.Animator, gameObject);
+            _virtualElementJob.Setup(_playablesController.GetAnimator(), gameObject);
             
             _virtualElementPlayable =
-                AnimationScriptPlayable.Create(_playablesController.playableGraph, _virtualElementJob);
+                AnimationScriptPlayable.Create(_playablesController.GetPlayableGraph(), _virtualElementJob);
             
             _layerJobData = new LayerJobData()
             {
-                animator = _playablesController.Animator,
-                rootHandle = _playablesController.Animator.BindSceneTransform(transform),
+                animator = _playablesController.GetAnimator(),
+                rootHandle = _playablesController.GetAnimator().BindSceneTransform(transform),
                 rigComponent = _rigComponent,
                 inputController = _inputController,
                 playablesController = _playablesController
@@ -286,10 +302,10 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Core
                 {
                     LinkAnimationLayers();
                 }
-                
+
                 _linkLayers = false;
             }
-            
+
             int count = _animationLayers.Count;
 
             for (int i = 0; i < count; i++)
@@ -312,7 +328,6 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Core
             {
                 _linkLayers = true;
                 _blendingJob.cachePose = false;
-                
                 return;
             }
             
