@@ -33,6 +33,8 @@ public class VoiceChat : NetworkBehaviour
     private float[] sampleData;
     private float[] micDataBuffer;
     public GameObject noMicAssigned, speaking;
+
+    public bool MuteSelf = false;
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -55,10 +57,10 @@ public class VoiceChat : NetworkBehaviour
 
     void Update()
     {
-        if (!Activated || !IsOwner)
+        if (!Activated || !IsOwner || !MicrophoneManager.instance)
             return;
 
-        string selectedDevice = MicrophoneManager.Instance.GetCurrentDeviceName();
+        string selectedDevice = MicrophoneManager.instance.GetCurrentDeviceName();
 
         if (selectedDevice != deviceName)
         {
@@ -234,8 +236,12 @@ public class VoiceChat : NetworkBehaviour
     private void TransmitAudioObserversRpc(float[] audioData, int senderClientId)
     {
         // Ensure we do not play our own voice
-        if (senderClientId == NetworkManager.ClientManager.Connection.ClientId)
-            return;
+        if(MuteSelf)
+        {
+            if (senderClientId == NetworkManager.ClientManager.Connection.ClientId)
+                return;
+        }
+
 
         PlayReceivedAudio(audioData, senderClientId);
     }

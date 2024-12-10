@@ -20,7 +20,6 @@ using FishNet.Object;
 using FishNet.Managing.Server;
 using FishNet;
 using FishNet.Connection;
-using Unity.Services.Vivox;
 
 
 
@@ -124,6 +123,7 @@ public class GameMatchmaker : MonoBehaviour
         StartCoroutine("StartLoading");
         spawnPlayer = true;
         GameManager.instance.gameObject.SetActive(true);
+
         if (_playerName.text == "server")
         {
             tugboat.SetClientAddress("localhost");
@@ -135,8 +135,7 @@ public class GameMatchmaker : MonoBehaviour
         }
 
         tugboat.StartConnection(false);
-
-    }
+    }    
     public IEnumerator StartLoading()
     {
         loadingScreen.SetActive(true);

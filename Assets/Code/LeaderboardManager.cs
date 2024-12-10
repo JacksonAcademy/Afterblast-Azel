@@ -11,8 +11,6 @@ public class LeaderboardManager : MonoBehaviour
     public List<LeaderboardItem> items;
 
     private GameManager gameManager;
-    private int previousCount;
-    private float lastChange;
     
     public void Awake()
     {
@@ -22,33 +20,29 @@ public class LeaderboardManager : MonoBehaviour
     {
         gameManager = GameManager.instance;
     }
-
-    private void Update()
-    {
-        if(gameManager.players.Count !=  previousCount)
-        {
-            UpdateLeaderboard();
-            previousCount = items.Count;
-        }
-        else
-        { //UPdate leaderboard every second
-            if (Time.time > lastChange)
-            {
-                lastChange = Time.time + 1;
-                UpdateLeaderboard();
-            }
-        }
-
-    }
     public void UpdatePlayer(PlayerData playerData)
     {
-        LeaderboardItem leaderboardItem = null;
-        leaderboardItem = Instantiate(item.gameObject, spawnTransform).GetComponent<LeaderboardItem>();
-        leaderboardItem.playerData = playerData;
-        leaderboardItem.text.text = playerData.playerName.ToString() + " - " + playerData.playerKills.ToString();
-        items.Add(leaderboardItem);
+        bool playerExists = false;
+        for(int i =0; i < items.Count; i++) 
+        {
+            if (items[i].playerData.playerClientID == playerData.playerClientID)
+            {
+                items[i].playerData = playerData;
+                items[i].text.text = "<b> " + playerData.playerName + " </b> " + playerData.playerKills + " kills - " + playerData.playerDeaths + " deaths";
+                playerExists = true;
+                break;
+            }
+        }
+        if (!playerExists)
+        {
+            LeaderboardItem leaderboardItem = null;
+            leaderboardItem = Instantiate(item.gameObject, spawnTransform).GetComponent<LeaderboardItem>();
+            leaderboardItem.playerData = playerData;
+            leaderboardItem.text.text = "<b> " + playerData.playerName + " </b> " + playerData.playerKills + " kills - " + playerData.playerDeaths + " deaths";
+            items.Add(leaderboardItem);
+        }
     }
-    public void DeleteLeaderboards()
+    public void RemovePlayer(PlayerData playerData)
     {
         LeaderboardItem temp = null;
         int count = items.Count;
@@ -57,14 +51,6 @@ public class LeaderboardManager : MonoBehaviour
             temp = items[0];
             items.Remove(items[0]);
             Destroy(temp.gameObject);
-        }
-    }
-    public void UpdateLeaderboard()
-    {
-        DeleteLeaderboards();
-        for(int i = 0; i < gameManager.players.Count; i++)
-        {
-            UpdatePlayer(gameManager.players[i]);
         }
     }
 }

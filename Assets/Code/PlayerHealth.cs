@@ -10,10 +10,11 @@ public class PlayerHealth : NetworkBehaviour
 
     public int startingHealth;
     [HideInInspector] public PlayerAnimator animator;
-    public Slider healthSlider;
+    public Slider healthSlider, healthRed;
     public TextMeshProUGUI healthText;
     public GameObject deathParticle;
     public PlayerManager player;
+    public float redSmoothness;
     public override void OnStartNetwork()
     {
         base.OnStartNetwork();
@@ -32,6 +33,15 @@ public class PlayerHealth : NetworkBehaviour
         healthText.text = amount.ToString();
         healthSlider.value = amount;
         healthSlider.maxValue = startingHealth;
+        healthRed.maxValue = startingHealth;
+        healthRed.value = startingHealth;
+    }
+    private void FixedUpdate()
+    {
+        if(base.IsOwner)
+        {
+            healthRed.value = Mathf.Lerp(healthRed.value, healthSlider.value, redSmoothness * Time.deltaTime);
+        }
     }
     [ObserversRpc]
     public void ObserversDieEffects(NetworkObject whoKilledMe)
@@ -47,7 +57,7 @@ public class PlayerHealth : NetworkBehaviour
     {
         animator._animator.SetTrigger("Death");
         yield return new WaitForSeconds(3);
-        player.Hide(false);
+        player.HideModel();
     }
     public void DieEffects(NetworkObject whoKilledMe)
     {

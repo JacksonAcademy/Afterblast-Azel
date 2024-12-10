@@ -15,6 +15,11 @@ using Demo.Scripts.Runtime.Item;
 using FishNet.Transporting.Tugboat;
 using FishNet.Managing.Server;
 using FishNet.Managing.Client;
+using FishNet.Demo.AdditiveScenes;
+using FishNet.Transporting;
+using KINEMATION.FPSAnimationFramework.Runtime.Camera;
+using FishNet.Object.Synchronizing;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 public static class PlayerExtensions
 {
     public static void WritePlayerData(this Writer writer, PlayerData value)
@@ -41,6 +46,8 @@ public struct PlayerData
     public int playerKills;
     public int playerDeaths;
     public int playerClientID;
+
+    public NetworkObject player;
     public static bool operator ==(PlayerData c1, PlayerData c2)
     {
         return c1.Equals(c2);
@@ -70,6 +77,7 @@ public class PlayerManager : NetworkBehaviour
     public GameObject playerUI;
     public GameObject eliminatedScreen, eliminationScreen;
     public GameObject model;
+
     [Header("Eliminated Screen")]
     public TextMeshProUGUI secondsLeftText;
     public TextMeshProUGUI eliminatedByText;
@@ -82,10 +90,6 @@ public class PlayerManager : NetworkBehaviour
     public List<SkinnedMeshRenderer> headParts;
 
     public weaponManager weaponManager;
-
-    public EmptyParentBehaviour weaponBone;
-
-     
 
     public List<FPSItem> weapons = new List<FPSItem>();
 
@@ -102,7 +106,7 @@ public class PlayerManager : NetworkBehaviour
     public List<Renderer> renderers;
     public Color playerColor;
     public Camera mainCam;
-
+    public FPSCameraController fpsCamera;
 
     public PlayerAnimator animator;
     public PlayerHealth playerHealth;
@@ -114,81 +118,141 @@ public class PlayerManager : NetworkBehaviour
     public TextMeshProUGUI nameText;
     public NetworkObject playerObject;
     private bool isPaused = false;
-
     private void Awake()
     {
         mainCam.enabled = false;
+        fpsCamera.enabled = false;
         gameManager = GameManager.instance;
-        Hide(false);
-        //Initialize();
-        //print("Player joined: " + playerData.playerName);
-
+        HideModel();
+    }
+    private void OnRemoteConnectionState(NetworkConnection connection, RemoteConnectionStateArgs args)
+    {
+        if(args.ConnectionState != RemoteConnectionState.Started)
+            RemovePlayer(connection.FirstObject.GetComponent<PlayerManager>().playerData, connection.FirstObject.transform);
     }
     public override void OnStartClient()
     {
         base.OnStartClient();
-        NetworkManager.SceneManager.AddOwnerToDefaultScene(NetworkObject);
-    }
-    private void Start()
-    {
 
-        if(nameText)
-            nameText.gameObject.SetActive(!Owner.IsLocalClient);
-        gameUI.gameObject.SetActive(Owner.IsLocalClient);
-        mainCam.gameObject.tag = (Owner.IsLocalClient ? "MainCamera" : "Untagged");
-        Initialize();
-    }
-    public override void OnStartServer()
-    {
-        base.OnStartServer(); 
-        ServerManager.Objects.OnPreDestroyClientObjects += OnPreDestroyClientObjects;
-    }
-    public void ClientSync(PlayerData player, Color playerColore)
-    {
-        //SEt the player data for other clients
-        playerData = player;
-        if(nameText)
-            nameText.text = player.playerName.ToString();
-        gameObject.name = player.playerName.ToString();
+        ServerManager.OnRemoteConnectionState += OnRemoteConnectionState;
 
-
-        playerColor = playerColore;
-        for (int i = 0; i < renderers.Count; i++)
-        {
-            renderers[i].material.color = playerColor;
-        }
-    }
-    public void Initialize()
-    {
-
-        //Set Player Data
         playerData.playerClientID = Owner.ClientId;
         playerData.playerKills = 0;
         playerData.playerDeaths = 0;
-        //If the player didn't input a name, choose a default name "player 1"
-        if (gameManager.matchmaker._playerName.text == string.Empty)
-            playerData.playerName = "Player " + (gameManager.players.Count + 1);
-        else
-            playerData.playerName = gameManager.matchmaker._playerName.text;
 
-        //SEnd Player Data to SErver
-        if(Owner.IsLocalClient)
+
+        if (base.IsOwner)
         {
-            gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
-            Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
-           // print("Sending player data to server");
+            playerData.player = NetworkObject;
+            Vector3 spawnPosition = GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position;
+            Respawn(spawnPosition);
+
+            if (gameManager.matchmaker._playerName.text == string.Empty)
+                playerData.playerName = "Player " + (ServerManager.Clients.Count + 1);
+            else
+                playerData.playerName = gameManager.matchmaker._playerName.text;
+
+            ServerAddPlayer(playerData);
+            GetUpdatedPlayers(LocalConnection);
+        }
+        
+    }
+    [ServerRpc]
+    public void GetUpdatedPlayers(NetworkConnection sendTo)
+    {
+        print("Server received request. Player Count: " + gameManager.players.Count);
+        GetUpdated(sendTo, gameManager.players);
+    }
+    [TargetRpc]
+    public void GetUpdated(NetworkConnection conn, List<PlayerData> updatedPlayers)
+    {
+        for(int i = 0; i < updatedPlayers.Count; i++)
+        {
+            AddPlayer(updatedPlayers[i]);
+        }
+    }
+    public void ChangePlayerName(string playerName)
+    {
+        playerData.playerName = playerName;
+        SetPlayerData(playerData);
+    }
+    public void SetPlayerData(PlayerData playerData)
+    {
+        ServerAddPlayer(playerData);
+    }
+
+    [ServerRpc]
+    public void ServerAddPlayer(PlayerData playerDataa)
+    {
+        AddPlayer(playerDataa);
+        ObserverAddPlayer(playerDataa);
+    }
+    public void AddPlayer(PlayerData newPlayer)
+    {
+        NetworkConnection playerConnection = null;
+
+        if(IsServerInitialized)
+            ServerManager.Clients.TryGetValue(newPlayer.playerClientID, out playerConnection);
+        else
+            InstanceFinder.ClientManager.Clients.TryGetValue(newPlayer.playerClientID, out playerConnection);
+
+        if(playerConnection != null)
+        {
+            PlayerManager playe = playerConnection.FirstObject.GetComponent<PlayerManager>();
+            playe.gameObject.name = newPlayer.playerName;
+            playe.playerData = newPlayer;
+            playe.nameText.text = newPlayer.playerName;
+
+            newPlayer.player = playerConnection.FirstObject;
+        }
+        else
+        {
+            print("Couldn't find player on Client list: " + newPlayer.playerName);
         }
 
-        Show(false);
+        bool foundPlayer = false;
+        for (int i = 0; i < gameManager.players.Count; i++)
+        {
+            if (gameManager.players[i].playerClientID == newPlayer.playerClientID)
+            {
+                print("Updated player: " + newPlayer.playerName);
+                gameManager.players[i] = newPlayer;
+                foundPlayer = true;
+                break;
+            }
+        }
+        if(!foundPlayer)
+        {
+            print("Added player: " + newPlayer.playerName);
+            gameManager.players.Add(newPlayer);
+        }
 
-        mainCam.enabled = Owner.IsLocalClient;
-        listener.enabled = Owner.IsLocalClient;
-        name = playerData.playerName;
-        playerUI.SetActive(Owner.IsLocalClient);
-        respawn.Play(transform.position);
+        leaderboardManager.UpdatePlayer(newPlayer);
+    }
+    [ObserversRpc]
+    public void ObserverAddPlayer(PlayerData player)
+    {
+        AddPlayer(player);
+       
+    }
+    
+    private void Start()
+    {
+        nameText.gameObject.SetActive(false);
+        gameUI.gameObject.SetActive(false);
+        mainCam.gameObject.tag = (Owner.IsLocalClient ? "MainCamera" : "Untagged");
+        listener.enabled = false;
+        playerUI.SetActive(false);
+    }
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+        ServerManager.Objects.OnPreDestroyClientObjects += OnPreDestroyClientObjects;
+
     }
     public void Die()
     {
+        playerMovement.canMove = false;
         DropWeapons();
         animator._animator.SetTrigger("Death");
         death.Play(transform.position);
@@ -196,30 +260,34 @@ public class PlayerManager : NetworkBehaviour
 
     public void DropWeapons()
     {
-        print("DRopped Weapons for player: " + playerData.playerName);
+        weaponManager.DropWeapon(weaponManager.weaponPickup.NetworkObject);
     }
     private void OnPreDestroyClientObjects(NetworkConnection conn)
     {
         if(conn == Owner)
         {
-            DropWeapons();
             RemoveOwnership();
-            gameManager.RemovePlayerServer(Time.time, playerData, NetworkObject, transform.position);
         }
     }
-    public void LeaveGame()
+    
+    public void RemovePlayer(PlayerData player, Transform playerObject)
     {
-        if (IsServerInitialized)
-            ServerManager.StopConnection(true);
-        else
-            ClientManager.StopConnection();
-        GameMatchmaker.instance.Lobby();
+        gameManager.killfeedManager.AddItem(player.playerName + " left the game!");
+        gameManager.players.Remove(player);
 
+        GameObject effect = Instantiate(gameManager.playerDespawnEffect, playerObject.transform.position, Quaternion.identity);
+        Destroy(effect, 2);
+
+        Destroy(playerObject.gameObject);
     }
     public override void OnStopServer()
     {
-        if (ServerManager != null)
-            ServerManager.Objects.OnPreDestroyClientObjects -= OnPreDestroyClientObjects;
+        ServerManager.Objects.OnPreDestroyClientObjects -= OnPreDestroyClientObjects;
+        ServerManager.OnRemoteConnectionState -= OnRemoteConnectionState;
+    }
+    public override void OnStopClient()
+    {
+        base.OnStopClient();
     }
     [ObserversRpc]
     public void DamagePlayerObservers(int damage, NetworkObject whoGotShot)
@@ -239,6 +307,7 @@ public class PlayerManager : NetworkBehaviour
     }
     private IEnumerator DieScreenCoroutine(PlayerManager whoKilledMe)
     {
+        playerMovement.canMove = false;
         eliminatedScreen.SetActive(true);
         eliminatedByText.text = "Eliminated by <size=150%><color=red> " + whoKilledMe.playerData.playerName;
         float seconds = 5;
@@ -249,7 +318,6 @@ public class PlayerManager : NetworkBehaviour
             yield return null;
         }
         eliminatedScreen.SetActive(false);
-        Show(true);
         Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
     }
     [TargetRpc]
@@ -260,7 +328,7 @@ public class PlayerManager : NetworkBehaviour
         print("Eliminated + " + playerWhoIKilled.playerData.playerName);
 
         playerData.playerKills++;
-        gameManager.UpdatePlayer(Time.time, playerData, NetworkObject);
+        SetPlayerData(playerData);
         gameManager.Elimination(playerData.playerName + " eliminated " + playerWhoIKilled.playerData.playerName);
         StartCoroutine (KillCoroutine(playerWhoIKilled));
     }
@@ -287,11 +355,17 @@ public class PlayerManager : NetworkBehaviour
         }
         if (!base.IsOwner)
             return;
+        if (base.IsOwner && Input.GetKeyDown(KeyCode.Space))
+        {
 
-        if(Input.GetKeyDown(KeyCode.R))
+            SetPlayerData(playerData);
+            GetUpdatedPlayers(LocalConnection);
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
         {
             Respawn(GameManager.instance.spawnPositions[UnityEngine.Random.Range(0, GameManager.instance.spawnPositions.Count)].position);
-        }
+        } 
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -305,25 +379,37 @@ public class PlayerManager : NetworkBehaviour
     }
     public IEnumerator RespawnCoroutine(Vector3 position)
     {
-        HideModel();
-
+        mainCam.enabled = false;
+        HideModel();     
         transform.position = position + gameManager.spawnOffset;
+       // UpdatePlayer(Time.time, playerData, NetworkObject);
         GameObject effect = Instantiate(spawnEffect, transform.position, Quaternion.identity);
-        Destroy(effect, 10);
+        Destroy(effect, 3);
+
         yield return new WaitForSeconds(spawnInDelay);
+
         model.SetActive(true);
-        animator.fpsAnimator.RebuildPlayables();
+
+
         if (base.Owner.IsLocalClient)
+        {
+            mainCam.enabled = true;
+            fpsCamera.enabled = true;
+            fpsCamera.Initialize();
             gameUI.SetActive(true);
+            playerUI.SetActive(true);
+            listener.enabled = true;
+            respawn.Play(transform.position);
+
+        }
+
         animator._animator.SetTrigger("Spawn");
-        yield return new WaitForSeconds(2);
         ShowModel();
-    }
-    public void Hide(bool serverHide)
-    {
-        HideModel();
-        if(serverHide)
-            CMDHideModel();
+        playerMovement.canMove = false;
+        animator.fpsAnimator.Initialize();
+        animator.fpsAnimator.RebuildPlayables();
+        yield return new WaitForSeconds(2);
+        playerMovement.canMove = true;
     }
     public void HideModel()
     {
@@ -348,23 +434,20 @@ public class PlayerManager : NetworkBehaviour
             nameText.gameObject.SetActive(!Owner.IsLocalClient);
         playerShoot.enabled = true;
     }
-    public void DropItem()
-    {
-
-    }
-    public void Show(bool serverShow)
-    {
-        ShowModel();
-        if(serverShow)
-            CMDShowModel();
-    }
     public void PauseGame()
     {
         isPaused = true;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-
+    public void LeaveGame()
+    {
+        if (IsServerInitialized)
+            ServerManager.StopConnection(true);
+        else
+            ClientManager.StopConnection();
+        GameMatchmaker.instance.Lobby();
+    }
     public void ResumeGame()
     {
         isPaused = false;
@@ -383,7 +466,7 @@ public class PlayerManager : NetworkBehaviour
         StartCoroutine(RespawnCoroutine(position));
         ObserversRespawn(position);
     }
-    [ObserversRpc]
+    [ObserversRpc(BufferLast =true)]
     public void ObserversRespawn(Vector3 position)
     {
         StartCoroutine(RespawnCoroutine(position));
@@ -401,20 +484,6 @@ public class PlayerManager : NetworkBehaviour
         if (base.IsOwner || base.IsServerInitialized)
             return;
         ShowModel();
-    }
-    [ServerRpc]
-    public void CMDHideModel()
-    {
-        if (!base.IsOwner)
-            HideModel();
-        ObserversHideModel();
-    }
-    [ServerRpc]
-    public void CMDShowModel()
-    {
-        if (!base.IsOwner)
-            ShowModel();
-        ObserversShowModel();
     }
     public float GetHealth(PlayerManager whoRequested)
     {

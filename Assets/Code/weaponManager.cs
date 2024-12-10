@@ -76,7 +76,6 @@ public class weaponManager : NetworkBehaviour
         {
             if (weapons[i].name.Contains(weapon.gameObject.name))
             {
-                print("Found weapon: " + weapons[i].name);
                 weaponEquipped = weapons[i].GetComponent<Item>();
                 weaponEquipped.gameObject.SetActive(true);
                 break;
@@ -120,8 +119,6 @@ public class weaponManager : NetworkBehaviour
     {
         weaponPickup.Drop();
 
-        print("Dropping wewapon: " + weapon.gameObject.name);
-        print("Dropping equipped weapon: " + weaponEquipped.gameObject.name);
         _userInput.SetValue(FPSANames.StabilizationWeight, 0f);
         _userInput.SetValue(FPSANames.PlayablesWeight, 0f);
 

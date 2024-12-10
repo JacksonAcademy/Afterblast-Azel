@@ -24,6 +24,8 @@ public class PlayerAnimator : NetworkBehaviour
 
     public Vector2 animationVelocity;
     public Vector2 tickAnimationVelocity;
+
+    public bool aiming;
     private void Awake()
     {
         playerShoot = GetComponent<PlayerShoot>();
@@ -44,8 +46,7 @@ public class PlayerAnimator : NetworkBehaviour
         _animator.SetFloat("YVelocity", animationVelocity.y);
         float velocity = animationVelocity.SqrMagnitude();
         _animator.SetFloat("Velocity", velocity);
-        if(base.IsOwner)
-            _userInput.SetValue(FPSANames.IsAiming, Input.GetMouseButton(1));
+            _userInput.SetValue(FPSANames.IsAiming, aiming);
     }
     public void UpdateAnimator(Vector2 velocity, float gravity, bool grounded, bool aim, bool crouching, bool sliding, bool sprinting, bool wallRunning, float wallRunSide, float delta)
     {

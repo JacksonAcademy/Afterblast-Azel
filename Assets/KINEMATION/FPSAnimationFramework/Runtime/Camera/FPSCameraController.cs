@@ -133,6 +133,9 @@ namespace KINEMATION.FPSAnimationFramework.Runtime.Camera
 
         public virtual void UpdateCamera()
         {
+            if (!_inputController)
+                return;
+
             Vector4 input = _inputController.GetValue<Vector4>(_mouseInputPropertyIndex);
             
             // Stabilize the camera by overriding the rotation.

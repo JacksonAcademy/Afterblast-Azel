@@ -288,6 +288,12 @@ public class PlayerMovement : NetworkBehaviour
     }
     private void Update()
     {
+        if(base.IsOwner)
+        {
+            Look();
+
+        }
+
         if (!canMove)
         {
             _characterController.enabled = false;
@@ -322,7 +328,6 @@ public class PlayerMovement : NetworkBehaviour
             if (_crouching)
                 _slidePressed = false;
 
-            Look();
 
             if (Input.GetKeyDown(KeyCode.LeftControl) && input.x == 0 && input.y == 0)
                 _crouchingInput = !_crouchingInput;
@@ -597,6 +602,7 @@ public class PlayerMovement : NetworkBehaviour
 
         if (ceilinged)
             _verticalVelocity = -5;
+        playerAnimator.aiming = _aiming;
 
         //SPrinting
         if (_sprinting)
